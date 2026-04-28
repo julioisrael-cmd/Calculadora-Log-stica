@@ -107,14 +107,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
   <div id="view-alertas" class="view"></div>
 </div>
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxsyTaAJIv4TSbGIxR09m0kzm-PGTyArsiwXVpurhlqWQATseJqGY-js7WZ_BMsvkZ03A/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwDfC5RZsVWw83KwiqXm6OBSKUyodlHvMt1Z610lfsgr5PoRPLTQsC10c8myhv_pXsKZg/exec";
 let datos = null;
 let tabActiva = "adq";
 
-function cargarDatos() {
+async function cargarDatos() {
   mostrarLoading();
   try {
-    const res = await fetch(API_URL, {mode:"cors"});
+    const res  = await fetch(API_URL);
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || "Error desconocido");
     datos = json.data;
