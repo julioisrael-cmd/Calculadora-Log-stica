@@ -111,17 +111,23 @@ const API_URL = "https://script.google.com/macros/s/AKfycbwDfC5RZsVWw83KwiqXm6OB
 let datos = null;
 let tabActiva = "adq";
 
-async function cargarDatos() {
+function cargarDatos() {
   mostrarLoading();
-  try {
-    const res  = await fetch(API_URL);
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || "Error desconocido");
-    datos = json.data;
-    renderizarTodo();
-    document.getElementById("sync-info").textContent =
-      "Actualizado " + new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"});
-  } catch(e) { mostrarError(e.message); }
+  const old = document.getElementById("jsonp-script");
+  if (old) old.remove();
+  const script = document.createElement("script");
+  script.id = "jsonp-script";
+  script.src = API_URL + "?callback=handleResponse&t=" + Date.now();
+  script.onerror = function() { mostrarError("No se pudo conectar"); };
+  document.body.appendChild(script);
+}
+
+function handleResponse(json) {
+  if (!json.ok) { mostrarError(json.error || "Error desconocido"); return; }
+  datos = json.data;
+  renderizarTodo();
+  document.getElementById("sync-info").textContent =
+    "Actualizado " + new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"});
 }
 
 function mostrarLoading() {
