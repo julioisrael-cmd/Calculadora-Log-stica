@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Operacional SCC</title>
+<style>
+:root {
+  --bg:#f5f4f0; --surface:#fff; --border:rgba(0,0,0,.10); --border-md:rgba(0,0,0,.18);
+  --txt:#1a1a18; --txt-2:#5f5e5a; --txt-3:#8f8e8a;
+  --blue:#185FA5; --blue-bg:#E6F1FB; --blue-txt:#0C447C;
+  --teal:#0F6E56; --teal-bg:#E1F5EE; --teal-txt:#085041;
+  --amber:#854F0B; --amber-bg:#FAEEDA; --amber-txt:#633806;
+  --red:#A32D2D; --red-bg:#FCEBEB; --red-txt:#791F1F;
+  --green:#3B6D11; --green-bg:#EAF3DE; --green-txt:#27500A;
+  --gray-bg:#f1efe8; --gray-txt:#5f5e5a;
+  --r-sm:6px; --r-md:10px; --r-lg:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1a1a18;--surface:#242420;--border:rgba(255,255,255,.10);--border-md:rgba(255,255,255,.18);
+  --txt:#f0efe9;--txt-2:#a8a79f;--txt-3:#6e6d67;
+  --blue-bg:#0c3a6b;--blue-txt:#85b7eb;--teal-bg:#073d2f;--teal-txt:#5dcaa5;
+  --amber-bg:#4a2800;--amber-txt:#fac775;--red-bg:#4a1515;--red-txt:#f09595;
+  --green-bg:#1a3308;--green-txt:#97c459;--gray-bg:#2c2c2a;--gray-txt:#a8a79f;
+}}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--txt);font-size:14px;min-height:100vh;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:12px;height:52px;position:sticky;top:0;z-index:10;}
+.logo{font-size:15px;font-weight:600;}.logo span{color:var(--blue);}
+.sync-info{font-size:12px;color:var(--txt-3);margin-left:auto;}
+.sync-btn{font-size:12px;background:none;border:1px solid var(--border-md);border-radius:var(--r-sm);padding:4px 10px;cursor:pointer;color:var(--txt-2);}
+.sync-btn:hover{background:var(--gray-bg);}
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);padding:0 20px;}
+.tab{padding:12px 16px;font-size:13px;cursor:pointer;border:none;background:none;color:var(--txt-2);border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:6px;}
+.tab.active{color:var(--txt);border-bottom-color:var(--blue);font-weight:500;}
+.tab-count{font-size:11px;padding:1px 6px;border-radius:10px;background:var(--gray-bg);color:var(--txt-3);}
+.tab.active .tab-count{background:var(--blue-bg);color:var(--blue-txt);}
+.tab-count.red{background:var(--red-bg);color:var(--red-txt);}
+.main{padding:16px 20px;max-width:1100px;margin:0 auto;}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 14px;}
+.metric-label{font-size:11px;color:var(--txt-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;}
+.metric-value{font-size:24px;font-weight:500;color:var(--txt);}
+.metric-value.red{color:var(--red);}.metric-value.amber{color:var(--amber);}.metric-value.blue{color:var(--blue);}
+.kpi-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:16px;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:10px 14px;display:flex;align-items:center;gap:10px;}
+.kpi-icon{font-size:20px;}
+.kpi-label{font-size:11px;color:var(--txt-3);}
+.kpi-value{font-size:16px;font-weight:500;color:var(--txt);}
+.section-label{font-size:11px;font-weight:500;color:var(--txt-3);text-transform:uppercase;letter-spacing:.06em;padding:4px 2px 8px;margin-top:16px;}
+.oc-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);margin-bottom:6px;overflow:hidden;border-left-width:3px;}
+.oc-card.urgent{border-left-color:var(--red);}
+.oc-card.express{border-left-color:var(--teal);}
+.oc-card.warn{border-left-color:var(--amber);}
+.oc-card.normal{border-left-color:var(--border);}
+.oc-header{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;}
+.oc-header:hover{background:var(--gray-bg);}
+.oc-id{font-size:13px;font-weight:500;min-width:120px;flex-shrink:0;}
+.oc-cliente{font-size:13px;color:var(--txt-2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.oc-meta{display:flex;align-items:center;gap:5px;flex-shrink:0;flex-wrap:wrap;}
+.oc-progress{font-size:11px;color:var(--txt-3);flex-shrink:0;}
+.chevron{font-size:10px;color:var(--txt-3);margin-left:4px;transition:transform .15s;}
+.oc-card.open .chevron{transform:rotate(90deg);}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:500;white-space:nowrap;}
+.b-red{background:var(--red-bg);color:var(--red-txt);}
+.b-amber{background:var(--amber-bg);color:var(--amber-txt);}
+.b-blue{background:var(--blue-bg);color:var(--blue-txt);}
+.b-teal{background:var(--teal-bg);color:var(--teal-txt);}
+.b-green{background:var(--green-bg);color:var(--green-txt);}
+.b-gray{background:var(--gray-bg);color:var(--gray-txt);}
+.oc-lines{display:none;border-top:1px solid var(--border);}
+.oc-card.open .oc-lines{display:block;}
+.lines-table{width:100%;border-collapse:collapse;font-size:12px;}
+.lines-table th{padding:6px 12px;text-align:left;color:var(--txt-3);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.04em;background:var(--bg);}
+.lines-table td{padding:7px 12px;border-top:1px solid var(--border);color:var(--txt);vertical-align:top;}
+.lines-table td.muted{color:var(--txt-2);}
+.lines-table tr:first-child td{border-top:none;}
+.estado{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:500;}
+.e-cotizado{background:var(--gray-bg);color:var(--gray-txt);}
+.e-comprado{background:var(--blue-bg);color:var(--blue-txt);}
+.e-recepcionado{background:var(--teal-bg);color:var(--teal-txt);}
+.e-parcial{background:var(--amber-bg);color:var(--amber-txt);}
+.e-anulado{background:var(--red-bg);color:var(--red-txt);}
+.loading{text-align:center;padding:3rem;color:var(--txt-3);}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:8px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.error-box{background:var(--red-bg);border:1px solid var(--red-txt);border-radius:var(--r-md);padding:16px;color:var(--red-txt);margin:1rem 0;font-size:13px;}
+.empty{text-align:center;padding:2.5rem;color:var(--txt-3);font-size:13px;}
+.alert-banner{background:var(--red-bg);border:1px solid var(--red-txt);border-radius:var(--r-md);padding:10px 14px;margin-bottom:8px;font-size:12px;color:var(--red-txt);}
+.view{display:none;}.view.active{display:block;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">SCC <span>Hub</span> Operacional</div>
+  <button class="sync-btn" onclick="cargarDatos()">↻ Actualizar</button>
+  <span class="sync-info" id="sync-info">—</span>
+</div>
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('adq')" id="tab-adq">Adquisiciones <span class="tab-count" id="cnt-adq">—</span></button>
+  <button class="tab" onclick="switchTab('bodega')" id="tab-bodega">Bodega <span class="tab-count" id="cnt-bodega">—</span></button>
+  <button class="tab" onclick="switchTab('alertas')" id="tab-alertas">Alertas <span class="tab-count red" id="cnt-alertas">—</span></button>
+</div>
+<div class="main">
+  <div id="view-adq" class="view active"></div>
+  <div id="view-bodega" class="view"></div>
+  <div id="view-alertas" class="view"></div>
+</div>
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxsyTaAJIv4TSbGIxR09m0kzm-PGTyArsiwXVpurhlqWQATseJqGY-js7WZ_BMsvkZ03A/exec";
+let datos = null;
+let tabActiva = "adq";
+
+async function cargarDatos() {
+  mostrarLoading();
+  try {
+    const res  = await fetch(API_URL);
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || "Error desconocido");
+    datos = json.data;
+    renderizarTodo();
+    document.getElementById("sync-info").textContent =
+      "Actualizado " + new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"});
+  } catch(e) { mostrarError(e.message); }
+}
+
+function mostrarLoading() {
+  ["adq","bodega","alertas"].forEach(v => {
+    document.getElementById("view-"+v).innerHTML =
+      '<div class="loading"><div class="spinner"></div><br>Cargando datos...</div>';
+  });
+}
+function mostrarError(msg) {
+  document.getElementById("view-"+tabActiva).innerHTML =
+    '<div class="error-box">Error al cargar datos: '+msg+'</div>';
+}
+
+function renderizarTodo() {
+  if (!datos) return;
+  const m = datos.metricas;
+  document.getElementById("cnt-adq").textContent    = m.adq.total;
+  document.getElementById("cnt-bodega").textContent  = m.bodega.total;
+  document.getElementById("cnt-alertas").textContent = m.alertas.vencidas + m.alertas.sinEncargado;
+  renderizarAdq();
+  renderizarBodega();
+  renderizarAlertas();
+}
+
+// ── ADQUISICIONES ─────────────────────────────────────────────
+function renderizarAdq() {
+  const m   = datos.metricas.adq;
+  const ocs = datos.adquisiciones;
+  let html  = metricas([
+    {label:"Pendientes",    value:m.total,        cls:""},
+    {label:"Atrasadas",     value:m.atrasadas,    cls:m.atrasadas>0?"red":""},
+    {label:"Express",       value:m.express,      cls:m.express>0?"amber":""},
+    {label:"Sin encargado", value:m.sinEncargado, cls:m.sinEncargado>0?"red":""},
+  ]);
+  if (ocs.length===0){html+='<div class="empty">Sin órdenes pendientes</div>';
+    document.getElementById("view-adq").innerHTML=html;return;}
+
+  const atrasadas = ocs.filter(o=>o.adqAtrasada);
+  const express   = ocs.filter(o=>!o.adqAtrasada&&o.esExpress);
+  const normales  = ocs.filter(o=>!o.adqAtrasada&&!o.esExpress);
+
+  if(atrasadas.length>0){html+='<div class="section-label">Prioridad 1 — atrasadas (&gt;24h hábiles)</div>';
+    atrasadas.forEach(o=>{html+=cardAdq(o,"urgent");});}
+  if(express.length>0){html+='<div class="section-label">Prioridad 2 — express</div>';
+    express.forEach(o=>{html+=cardAdq(o,"express");});}
+  if(normales.length>0){html+='<div class="section-label">Pendientes normales</div>';
+    normales.forEach(o=>{html+=cardAdq(o,"normal");});}
+  document.getElementById("view-adq").innerHTML=html;
+}
+
+function cardAdq(o, tipo) {
+  const badgeT = o.adqAtrasada ? badge(o.horasHabiles+"h","b-red")
+    : o.esExpress ? badge("Express","b-teal") : badge(o.horasHabiles+"h","b-blue");
+  const badgeE = o.sinEncargado ? badge("Sin asignar","b-red") : badge(o.encargado,"b-gray");
+  const badgeA = o.alertaAnuladoRecepcionado ? badge("⛔ Dev. pendiente","b-red") : "";
+  const progreso = `<span class="oc-progress">${o.lineas.length}/${o.totalLineas} líneas</span>`;
+
+  let filas = o.lineas.map(l=>`<tr>
+    <td>${l.producto||"—"}</td>
+    <td class="muted" style="text-align:center">${l.cantidad||"—"}</td>
+    <td class="muted">${l.proveedor||"—"}</td>
+    <td class="muted"><span class="estado ${estadoCls(l.estado)}">${l.estado}</span></td>
+    <td class="muted">${l.obsCompras||"—"}</td>
+  </tr>`).join("");
+
+  return `<div class="oc-card ${tipo}" onclick="toggleCard(this)">
+    <div class="oc-header">
+      <span class="oc-id">${o.idOC}</span>
+      <span class="oc-cliente">${o.cliente}</span>
+      <div class="oc-meta">${badgeT}${badgeE}${badgeA}${progreso}</div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="oc-lines"><table class="lines-table">
+      <thead><tr><th>Producto</th><th>Cant.</th><th>Proveedor</th><th>Estado</th><th>Obs.</th></tr></thead>
+      <tbody>${filas}</tbody>
+    </table></div>
+  </div>`;
+}
+
+// ── BODEGA ────────────────────────────────────────────────────
+function renderizarBodega() {
+  const m   = datos.metricas.bodega;
+  const ocs = datos.bodega;
+  let html  = metricas([
+    {label:"Por recepcionar", value:m.total,      cls:""},
+    {label:"Parciales",       value:m.parciales,  cls:m.parciales>0?"amber":""},
+    {label:"Más antiguo (d)", value:m.masAntiguo, cls:m.masAntiguo>=3?"red":""},
+    {label:"Llegaron hoy",    value:m.hoy,        cls:"blue"},
+  ]);
+
+  // KPI bar
+  html += `<div class="kpi-bar">
+    <div class="kpi"><span class="kpi-icon">⏱</span><div>
+      <div class="kpi-label">Prom. solicitud → compra</div>
+      <div class="kpi-value">${kpiPromedio(ocs,"horasHabiles")}h hábiles</div>
+    </div></div>
+    <div class="kpi"><span class="kpi-icon">📦</span><div>
+      <div class="kpi-label">Prom. compra → recepción</div>
+      <div class="kpi-value">${kpiPromedio(ocs,"diasComprado")}d</div>
+    </div></div>
+    <div class="kpi"><span class="kpi-icon">🚚</span><div>
+      <div class="kpi-label">Más antigua sin recepcionar</div>
+      <div class="kpi-value">${m.masAntiguo} días</div>
+    </div></div>
+  </div>`;
+
+  if(ocs.length===0){html+='<div class="empty">Sin pedidos pendientes en bodega</div>';
+    document.getElementById("view-bodega").innerHTML=html;return;}
+
+  html+='<div class="section-label">Ordenado de más antiguo a más reciente</div>';
+  ocs.forEach(o=>{
+    const d    = o.diasComprado||0;
+    const tipo = d>=3?"urgent":d>=1?"warn":"normal";
+    const badgeD = d===0?badge("Llegó hoy","b-blue"):d===1?badge("Hace 1 día","b-amber"):badge("Hace "+d+"d","b-red");
+    const badgeP = o.tienePartiales?badge("Parcial","b-amber"):"";
+    const badgeA = o.alertaAnuladoRecepcionado?badge("⛔ Dev. pendiente","b-red"):"";
+    const progreso = `<span class="oc-progress">${o.lineasRecepcionadas}/${o.totalLineas} recep.</span>`;
+
+    let filas = o.lineas.map(l=>`<tr>
+      <td>${l.producto||"—"}</td>
+      <td class="muted" style="text-align:center">${l.cantidad||"—"}</td>
+      <td class="muted">${l.proveedor||"—"}</td>
+      <td class="muted"><span class="estado ${estadoCls(l.estado)}">${l.estado}</span></td>
+      <td class="muted">${l.obsLogistica||"—"}</td>
+    </tr>`).join("");
+
+    html+=`<div class="oc-card ${tipo}" onclick="toggleCard(this)">
+      <div class="oc-header">
+        <span class="oc-id">${o.idOC}</span>
+        <span class="oc-cliente">${o.cliente}</span>
+        <div class="oc-meta">${badgeD}${badgeP}${badgeA}${badge(o.ejecutivo,"b-gray")}${progreso}</div>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="oc-lines"><table class="lines-table">
+        <thead><tr><th>Producto</th><th>Cant.</th><th>Proveedor</th><th>Estado</th><th>Obs. logística</th></tr></thead>
+        <tbody>${filas}</tbody>
+      </table></div>
+    </div>`;
+  });
+  document.getElementById("view-bodega").innerHTML=html;
+}
+
+// ── ALERTAS ───────────────────────────────────────────────────
+function renderizarAlertas() {
+  const m   = datos.metricas.alertas;
+  const ocs = datos.alertas;
+  let html  = metricas([
+    {label:"OCs vencidas",    value:m.vencidas,     cls:m.vencidas>0?"red":""},
+    {label:"Sin encargado",   value:m.sinEncargado, cls:m.sinEncargado>0?"red":""},
+    {label:">5d hábiles",     value:m.criticas,     cls:m.criticas>0?"red":""},
+    {label:"Adq. >48h",       value:m.adqMasde48,   cls:m.adqMasde48>0?"amber":""},
+  ]);
+
+  if(ocs.length===0){html+='<div class="empty">Sin alertas activas ✅</div>';
+    document.getElementById("view-alertas").innerHTML=html;return;}
+
+  const criticas = ocs.filter(o=>o.critico);
+  const resto    = ocs.filter(o=>!o.critico);
+
+  if(criticas.length>0){html+='<div class="section-label">Críticas</div>';
+    criticas.forEach(o=>{html+=cardAlerta(o,"urgent");});}
+  if(resto.length>0){html+='<div class="section-label">Otras alertas</div>';
+    resto.forEach(o=>{html+=cardAlerta(o,o.sinEncargado?"express":"warn");});}
+  document.getElementById("view-alertas").innerHTML=html;
+}
+
+function cardAlerta(o, tipo) {
+  const badges = [];
+  if(o.diasAtrasoEntrega>0) badges.push(badge(o.diasAtrasoEntrega+"d vencida",o.critico?"b-red":"b-amber"));
+  if(o.sinEncargado)        badges.push(badge("Sin asignar","b-red"));
+  if(o.horasHabiles>48)     badges.push(badge("Adq. "+o.horasHabiles+"h","b-amber"));
+  if(o.alertaAnuladoRecepcionado) badges.push(badge("⛔ Dev. pendiente","b-red"));
+  badges.push(badge(o.ejecutivo||"—","b-gray"));
+
+  let filas = o.lineas.map(l=>`<tr>
+    <td>${l.producto||"—"}</td>
+    <td class="muted" style="text-align:center">${l.cantidad||"—"}</td>
+    <td><span class="estado ${estadoCls(l.estado)}">${l.estado}</span></td>
+    <td class="muted">${l.proveedor||"—"}</td>
+  </tr>`).join("");
+
+  return `<div class="oc-card ${tipo}" onclick="toggleCard(this)">
+    <div class="oc-header">
+      <span class="oc-id">${o.idOC}</span>
+      <span class="oc-cliente">${o.cliente}</span>
+      <div class="oc-meta">${badges.join("")}</div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="oc-lines"><table class="lines-table">
+      <thead><tr><th>Producto</th><th>Cant.</th><th>Estado</th><th>Proveedor</th></tr></thead>
+      <tbody>${filas}</tbody>
+    </table></div>
+  </div>`;
+}
+
+// ── UTILS ─────────────────────────────────────────────────────
+function estadoCls(e) {
+  if(!e) return "e-cotizado";
+  if(e==="Comprado") return "e-comprado";
+  if(e==="Recepcionado") return "e-recepcionado";
+  if(e==="Recepcion parcial") return "e-parcial";
+  if(e==="Anulado") return "e-anulado";
+  return "e-cotizado";
+}
+function metricas(items) {
+  return '<div class="metrics">'+items.map(i=>
+    `<div class="metric"><div class="metric-label">${i.label}</div>
+     <div class="metric-value ${i.cls}">${i.value}</div></div>`
+  ).join("")+'</div>';
+}
+function badge(txt,cls){return `<span class="badge ${cls}">${txt}</span>`;}
+function kpiPromedio(ocs, campo) {
+  if(!ocs||ocs.length===0) return "—";
+  const vals = ocs.map(o=>o[campo]||0).filter(v=>v>0);
+  if(vals.length===0) return "—";
+  return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+}
+function switchTab(name) {
+  ["adq","bodega","alertas"].forEach(n=>{
+    document.getElementById("tab-"+n).classList.toggle("active",n===name);
+    document.getElementById("view-"+n).classList.toggle("active",n===name);
+  });
+  tabActiva=name;
+}
+function toggleCard(card){card.classList.toggle("open");}
+
+cargarDatos();
+setInterval(cargarDatos, 10*60*1000);
+</script>
+</body>
+</html>
