@@ -107,7 +107,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
   <div id="view-alertas" class="view"></div>
 </div>
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwDfC5RZsVWw83KwiqXm6OBSKUyodlHvMt1Z610lfsgr5PoRPLTQsC10c8myhv_pXsKZg/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxsyTaAJIv4TSbGIxR09m0kzm-PGTyArsiwXVpurhlqWQATseJqGY-js7WZ_BMsvkZ03A/exec";
 let datos = null;
 let tabActiva = "adq";
 
@@ -121,13 +121,23 @@ function cargarDatos() {
   script.onerror = function() { mostrarError("No se pudo conectar"); };
   document.body.appendChild(script);
 }
-
 function handleResponse(json) {
   if (!json.ok) { mostrarError(json.error || "Error desconocido"); return; }
   datos = json.data;
   renderizarTodo();
-  document.getElementById("sync-info").textContent =
-    "Actualizado " + new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"});
+  document.getElementById("sync-info").textContent = "Actualizado " + new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"});
+}
+function cargarDatos_OLD() {
+  mostrarLoading();
+  try {
+    const res  = await fetch(API_URL);
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || "Error desconocido");
+    datos = json.data;
+    renderizarTodo();
+    document.getElementById("sync-info").textContent =
+      "Actualizado " + new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"});
+  } catch(e) { mostrarError(e.message); }
 }
 
 function mostrarLoading() {
