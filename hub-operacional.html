@@ -107,7 +107,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
   <div id="view-alertas" class="view"></div>
 </div>
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzwgkQUoJtc4Kw-LB2NS2FjL_WvOjLkkv0DgI_iLr78fG8jVbyV2JpAsuAgKfoFk4jTVA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxsyTaAJIv4TSbGIxR09m0kzm-PGTyArsiwXVpurhlqWQATseJqGY-js7WZ_BMsvkZ03A/exec";
 let datos = null;
 let tabActiva = "adq";
 
@@ -245,7 +245,7 @@ function renderizarBodega() {
       <td class="muted" style="text-align:center">${l.cantidad||"—"}</td>
       <td class="muted">${l.proveedor||"—"}</td>
       <td class="muted"><span class="estado ${estadoCls(l.estado)}">${l.estado}</span></td>
-      <td class="muted">${l.obsLogistica||"—"}</td>
+      <td class="muted">${l.obsCompras||"—"}</td><td class="muted">${l.obsLogistica||"—"}</td>
     </tr>`).join("");
 
     html+=`<div class="oc-card ${tipo}" onclick="toggleCard(this)">
@@ -256,7 +256,7 @@ function renderizarBodega() {
         <span class="chevron">▶</span>
       </div>
       <div class="oc-lines"><table class="lines-table">
-        <thead><tr><th>Producto</th><th>Cant.</th><th>Proveedor</th><th>Estado</th><th>Obs. logística</th></tr></thead>
+        <thead><tr><th>Producto</th><th>Cant.</th><th>Proveedor</th><th>Estado</th><th>Obs. compras</th><th>Obs. logística</th></tr></thead>
         <tbody>${filas}</tbody>
       </table></div>
     </div>`;
