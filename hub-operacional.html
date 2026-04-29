@@ -162,10 +162,13 @@ function renderizarAdq() {
   if (ocs.length===0){html+='<div class="empty">Sin órdenes pendientes</div>';
     document.getElementById("view-adq").innerHTML=html;return;}
 
-  const atrasadas = ocs.filter(o=>o.adqAtrasada);
-  const express   = ocs.filter(o=>!o.adqAtrasada&&o.esExpress);
-  const normales  = ocs.filter(o=>!o.adqAtrasada&&!o.esExpress);
+  const sinAsignar = ocs.filter(o=>o.sinEncargado);
+  const atrasadas = ocs.filter(o=>o.adqAtrasada && !o.sinEncargado);
+  const express   = ocs.filter(o=>!o.adqAtrasada&&o.esExpress&&!o.sinEncargado);
+  const normales  = ocs.filter(o=>!o.adqAtrasada&&!o.esExpress&&!o.sinEncargado);
 
+  if(sinAsignar.length>0){html+='<div class="section-label">Sin encargado asignado</div>';
+    sinAsignar.forEach(o=>{html+=cardAdq(o,"urgent");});}
   if(atrasadas.length>0){html+='<div class="section-label">Prioridad 1 — atrasadas (&gt;24h hábiles)</div>';
     atrasadas.forEach(o=>{html+=cardAdq(o,"urgent");});}
   if(express.length>0){html+='<div class="section-label">Prioridad 2 — express</div>';
