@@ -100,11 +100,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
   <button class="tab active" onclick="switchTab('adq')" id="tab-adq">Adquisiciones <span class="tab-count" id="cnt-adq">—</span></button>
   <button class="tab" onclick="switchTab('bodega')" id="tab-bodega">Bodega <span class="tab-count" id="cnt-bodega">—</span></button>
   <button class="tab" onclick="switchTab('alertas')" id="tab-alertas">Alertas <span class="tab-count red" id="cnt-alertas">—</span></button>
+  <button class="tab" onclick="switchTab('retiros')" id="tab-retiros">Retiros <span class="tab-count red" id="cnt-retiros">—</span></button>
 </div>
 <div class="main">
   <div id="view-adq" class="view active"></div>
   <div id="view-bodega" class="view"></div>
   <div id="view-alertas" class="view"></div>
+  <div id="view-retiros" class="view"></div>
 </div>
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzwgkQUoJtc4Kw-LB2NS2FjL_WvOjLkkv0DgI_iLr78fG8jVbyV2JpAsuAgKfoFk4jTVA/exec";
@@ -144,6 +146,7 @@ function renderizarTodo() {
   renderizarAdq();
   renderizarBodega();
   renderizarAlertas();
+  if (datos.retiros) renderizarRetiros();
 }
 
 // ── ADQUISICIONES ─────────────────────────────────────────────
@@ -245,7 +248,7 @@ function renderizarBodega() {
       <td class="muted" style="text-align:center">${l.cantidad||"—"}</td>
       <td class="muted">${l.proveedor||"—"}</td>
       <td class="muted"><span class="estado ${estadoCls(l.estado)}">${l.estado}</span></td>
-      <td class="muted">${l.obsCompras||"—"}</td><td class="muted">${l.obsLogistica||"—"}</td>
+      <td class="muted">${l.obsLogistica||"—"}</td>
     </tr>`).join("");
 
     html+=`<div class="oc-card ${tipo}" onclick="toggleCard(this)">
@@ -256,7 +259,7 @@ function renderizarBodega() {
         <span class="chevron">▶</span>
       </div>
       <div class="oc-lines"><table class="lines-table">
-        <thead><tr><th>Producto</th><th>Cant.</th><th>Proveedor</th><th>Estado</th><th>Obs. compras</th><th>Obs. logística</th></tr></thead>
+        <thead><tr><th>Producto</th><th>Cant.</th><th>Proveedor</th><th>Estado</th><th>Obs. logística</th></tr></thead>
         <tbody>${filas}</tbody>
       </table></div>
     </div>`;
@@ -340,13 +343,112 @@ function kpiPromedio(ocs, campo) {
   return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
 }
 function switchTab(name) {
-  ["adq","bodega","alertas"].forEach(n=>{
+  ["adq","bodega","alertas","retiros"].forEach(n=>{
     document.getElementById("tab-"+n).classList.toggle("active",n===name);
     document.getElementById("view-"+n).classList.toggle("active",n===name);
   });
   tabActiva=name;
 }
 function toggleCard(card){card.classList.toggle("open");}
+
+
+// ── RETIROS ───────────────────────────────────────────────────
+function renderizarRetiros() {
+  const r = datos.retiros;
+  const m = r.metricas || {};
+  document.getElementById("cnt-retiros").textContent =
+    (m.totalRetiros||0) + (m.despachosRM||0);
+
+  let html = metricas([
+    {label:"Retiros pendientes", value:m.totalRetiros||0,  cls:(m.totalRetiros||0)>0?"amber":""},
+    {label:"Completan OC",       value:m.completanOC||0,   cls:(m.completanOC||0)>0?"red":""},
+    {label:"Despachos RM",       value:m.despachosRM||0,   cls:(m.despachosRM||0)>0?"red":""},
+    {label:"Atrasados",          value:m.atrasados||0,     cls:(m.atrasados||0)>0?"red":""},
+  ]);
+
+  const despachos = r.despachos || [];
+  const retiros   = r.retiros   || [];
+
+  if (despachos.length===0 && retiros.length===0) {
+    html += '<div class="empty">Sin retiros ni despachos pendientes ✅</div>';
+    document.getElementById("view-retiros").innerHTML = html;
+    return;
+  }
+
+  if (despachos.length > 0) {
+    html += '<div class="section-label">🚚 Prioridad 1 — Despachos RM Daniel</div>';
+    despachos.forEach(o => {
+      const badgeD = o.diasAtraso > 0
+        ? badge(o.diasAtraso+"d vencido","b-red")
+        : badge("En plazo","b-teal");
+      let filas = o.lineas.map(l => `<tr>
+        <td>${l.producto||"—"}</td>
+        <td class="muted" style="text-align:center">${l.cantidad||"—"}</td>
+        <td class="muted">${l.proveedor||"—"}</td>
+        <td class="muted">${l.obsLogistica||"—"}</td>
+      </tr>`).join("");
+      html += `<div class="oc-card ${o.diasAtraso>0?"urgent":"normal"}" onclick="toggleCard(this)">
+        <div class="oc-header">
+          <span class="oc-id">${o.idOC}</span>
+          <span class="oc-cliente">${o.cliente}</span>
+          <div class="oc-meta">${badgeD}${badge("RM","b-blue")}${badge(o.ejecutivo,"b-gray")}</div>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="oc-lines"><table class="lines-table">
+          <thead><tr><th>Producto</th><th>Cant.</th><th>Proveedor</th><th>Obs.</th></tr></thead>
+          <tbody>${filas}</tbody>
+        </table>
+        <div style="padding:8px 12px;font-size:12px;color:var(--txt-2)">
+          📍 ${o.dir} · ${o.region}
+        </div></div>
+      </div>`;
+    });
+  }
+
+  const completanOC = retiros.filter(o => o.completaOC);
+  const resto       = retiros.filter(o => !o.completaOC);
+
+  if (completanOC.length > 0) {
+    html += '<div class="section-label">🔴 Prioridad 2 — Retiros que completan OC</div>';
+    completanOC.forEach(o => { html += cardRetiro(o, "urgent"); });
+  }
+  if (resto.length > 0) {
+    html += '<div class="section-label">🟡 Otros retiros</div>';
+    resto.forEach(o => { html += cardRetiro(o, "warn"); });
+  }
+
+  document.getElementById("view-retiros").innerHTML = html;
+}
+
+function cardRetiro(o, tipo) {
+  const badgeC = o.completaOC ? badge("Completa OC","b-red") : badge("Parcial","b-amber");
+  const badgeD = o.diasAtrasoEntrega > 0
+    ? badge(o.diasAtrasoEntrega+"d vencida","b-red")
+    : badge("En plazo","b-teal");
+
+  let filas = o.lineas.map(l => `<tr>
+    <td>${l.producto||"—"}</td>
+    <td class="muted" style="text-align:center">${l.cantidad||"—"}</td>
+    <td class="muted">${l.proveedor||"—"}</td>
+    <td class="muted">${l.obsCompras||"—"}</td>
+  </tr>`).join("");
+
+  return `<div class="oc-card ${tipo}" onclick="toggleCard(this)">
+    <div class="oc-header">
+      <span class="oc-id">${o.idOC}</span>
+      <span class="oc-cliente">${o.cliente}</span>
+      <div class="oc-meta">${badgeC}${badgeD}${badge(o.ejecutivo,"b-gray")}</div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="oc-lines"><table class="lines-table">
+      <thead><tr><th>Producto</th><th>Cant.</th><th>Proveedor</th><th>Obs. compras</th></tr></thead>
+      <tbody>${filas}</tbody>
+    </table>
+    <div style="padding:8px 12px;font-size:12px;color:var(--txt-2)">
+      📍 ${o.dir} · ${o.region} &nbsp;|&nbsp; ${o.lineasListas}/${o.totalLineas} líneas listas
+    </div></div>
+  </div>`;
+}
 
 cargarDatos();
 setInterval(cargarDatos, 10*60*1000);
