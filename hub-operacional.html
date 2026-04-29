@@ -422,6 +422,7 @@ function renderizarRetiros() {
 
 function cardRetiro(o, tipo) {
   const badgeC = o.completaOC ? badge("Completa OC","b-red") : badge("Parcial","b-amber");
+  const badgeL = o.listo ? badge("✅ Listo retirar","b-teal") : badge("⏳ Pte. confirmar","b-amber");
   const badgeD = o.diasAtrasoEntrega > 0
     ? badge(o.diasAtrasoEntrega+"d vencida","b-red")
     : badge("En plazo","b-teal");
@@ -437,7 +438,7 @@ function cardRetiro(o, tipo) {
     <div class="oc-header">
       <span class="oc-id">${o.idOC}</span>
       <span class="oc-cliente">${o.cliente}</span>
-      <div class="oc-meta">${badgeC}${badgeD}${badge(o.ejecutivo,"b-gray")}</div>
+      <div class="oc-meta">${badgeC}${badgeL}${badgeD}${badge(o.ejecutivo,"b-gray")}</div>
       <span class="chevron">▶</span>
     </div>
     <div class="oc-lines"><table class="lines-table">
