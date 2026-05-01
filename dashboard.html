@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCC — Dashboard Operacional</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #0a0e1a;
+  --surface:   #111827;
+  --surface2:  #1a2235;
+  --border:    rgba(255,255,255,0.07);
+  --blue:      #3b82f6;
+  --blue-dim:  rgba(59,130,246,0.12);
+  --teal:      #14b8a6;
+  --teal-dim:  rgba(20,184,166,0.12);
+  --amber:     #f59e0b;
+  --amber-dim: rgba(245,158,11,0.12);
+  --red:       #ef4444;
+  --red-dim:   rgba(239,68,68,0.12);
+  --green:     #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --txt:       #f1f5f9;
+  --txt-2:     #94a3b8;
+  --txt-3:     #475569;
+  --mono:      'DM Mono', monospace;
+  --display:   'Syne', sans-serif;
+  --body:      'DM Sans', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--body);
+  background: var(--bg);
+  color: var(--txt);
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Grid de fondo */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+/* Glow ambiental */
+body::after {
+  content: '';
+  position: fixed;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(59,130,246,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ── LAYOUT ── */
+.dashboard {
+  display: grid;
+  grid-template-rows: 52px 1fr 1fr;
+  grid-template-columns: 1fr;
+  height: 100vh;
+  padding: 12px;
+  gap: 10px;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 4px;
+}
+
+.logo {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--txt);
+  letter-spacing: -0.5px;
+}
+.logo span { color: var(--blue); }
+
+.tagline {
+  font-size: 12px;
+  color: var(--txt-3);
+  font-family: var(--mono);
+  letter-spacing: 0.05em;
+}
+
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.sync-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--txt-3);
+  font-family: var(--mono);
+}
+
+.sync-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.clock {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--txt);
+  letter-spacing: 0.05em;
+}
+
+/* ── FILA MÉTRICAS ── */
+.row-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.metric-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.metric-card.blue::before   { background: var(--blue); }
+.metric-card.teal::before   { background: var(--teal); }
+.metric-card.amber::before  { background: var(--amber); }
+.metric-card.red::before    { background: var(--red); }
+.metric-card.green::before  { background: var(--green); }
+
+.metric-label {
+  font-size: 11px;
+  color: var(--txt-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: var(--mono);
+}
+
+.metric-value {
+  font-family: var(--display);
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1;
+  margin: 8px 0 4px;
+}
+.metric-value.blue  { color: var(--blue); }
+.metric-value.teal  { color: var(--teal); }
+.metric-value.amber { color: var(--amber); }
+.metric-value.red   { color: var(--red); }
+.metric-value.green { color: var(--green); }
+
+.metric-sub {
+  font-size: 11px;
+  color: var(--txt-3);
+  font-family: var(--mono);
+}
+
+.metric-icon {
+  position: absolute;
+  bottom: 12px;
+  right: 16px;
+  font-size: 32px;
+  opacity: 0.08;
+}
+
+/* ── FILA TABLAS ── */
+.row-tables {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  gap: 10px;
+}
+
+.table-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.table-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--txt-2);
+  font-family: var(--mono);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table-title .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.table-body {
+  flex: 1;
+  overflow: hidden;
+  padding: 6px 0;
+}
+
+/* Filas de tabla */
+.t-row {
+  display: flex;
+  align-items: center;
+  padding: 7px 16px;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+  animation: fadeIn 0.3s ease;
+}
+.t-row:last-child { border-bottom: none; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.t-rank {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--txt-3);
+  min-width: 20px;
+}
+
+.t-oc {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--blue);
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.t-name {
+  font-size: 12px;
+  color: var(--txt);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.t-sub {
+  font-size: 11px;
+  color: var(--txt-3);
+  font-family: var(--mono);
+}
+
+.t-badge {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.badge-red    { background: var(--red-dim);   color: var(--red); }
+.badge-amber  { background: var(--amber-dim); color: var(--amber); }
+.badge-blue   { background: var(--blue-dim);  color: var(--blue); }
+.badge-green  { background: var(--green-dim); color: var(--green); }
+.badge-teal   { background: var(--teal-dim);  color: var(--teal); }
+
+.t-monto {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--teal);
+  min-width: 80px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.t-margen {
+  font-family: var(--mono);
+  font-size: 11px;
+  min-width: 50px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Barra de progreso margen */
+.margen-bar {
+  width: 60px;
+  height: 4px;
+  background: var(--surface2);
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.margen-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--green);
+  transition: width 0.5s ease;
+}
+
+/* Empty state */
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--txt-3);
+  font-size: 12px;
+  font-family: var(--mono);
+}
+
+/* Loading */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 100;
+  transition: opacity 0.5s;
+}
+.loading-overlay.hidden { opacity: 0; pointer-events: none; }
+
+.loader {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--border);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--txt-3);
+}
+
+/* Error */
+.error-msg {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--red-dim);
+  border: 1px solid var(--red);
+  color: var(--red);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-family: var(--mono);
+  display: none;
+}
+.error-msg.visible { display: block; }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loader">
+  <div class="loader"></div>
+  <div class="loading-text">Conectando con el gestor...</div>
+</div>
+
+<div class="error-msg" id="error-msg"></div>
+
+<div class="dashboard">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo">SCC <span>Hub</span></div>
+    <div class="tagline">Dashboard Operacional · Grupo SCC</div>
+    <div class="topbar-right">
+      <div class="sync-badge">
+        <div class="sync-dot"></div>
+        <span id="sync-info">Sincronizando...</span>
+      </div>
+      <div class="clock" id="clock">--:--:--</div>
+    </div>
+  </div>
+
+  <!-- FILA 1: MÉTRICAS -->
+  <div class="row-metrics">
+    <div class="metric-card blue">
+      <div class="metric-label">OCs en gestión</div>
+      <div class="metric-value blue" id="m-gestion">—</div>
+      <div class="metric-sub" id="m-gestion-sub">—</div>
+      <div class="metric-icon">📋</div>
+    </div>
+    <div class="metric-card teal">
+      <div class="metric-label">Monto comprometido</div>
+      <div class="metric-value teal" id="m-monto" style="font-size:28px">—</div>
+      <div class="metric-sub" id="m-utilidad">— utilidad estimada</div>
+      <div class="metric-icon">💰</div>
+    </div>
+    <div class="metric-card amber">
+      <div class="metric-label">Listos para despachar</div>
+      <div class="metric-value amber" id="m-despacho">—</div>
+      <div class="metric-sub" id="m-despacho-sub">—</div>
+      <div class="metric-icon">🚚</div>
+    </div>
+    <div class="metric-card red">
+      <div class="metric-label">OCs atrasadas</div>
+      <div class="metric-value red" id="m-atrasadas">—</div>
+      <div class="metric-sub" id="m-atrasadas-sub">—</div>
+      <div class="metric-icon">⚠️</div>
+    </div>
+  </div>
+
+  <!-- FILA 2: TABLAS -->
+  <div class="row-tables">
+
+    <!-- OCs más urgentes -->
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-title">
+          <div class="dot" style="background:var(--red)"></div>
+          OCs más urgentes
+        </div>
+      </div>
+      <div class="table-body" id="tabla-urgentes">
+        <div class="empty">Cargando...</div>
+      </div>
+    </div>
+
+    <!-- Top por margen -->
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-title">
+          <div class="dot" style="background:var(--green)"></div>
+          Mejores márgenes activos
+        </div>
+      </div>
+      <div class="table-body" id="tabla-margenes">
+        <div class="empty">Cargando...</div>
+      </div>
+    </div>
+
+    <!-- Ranking ejecutivos -->
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-title">
+          <div class="dot" style="background:var(--blue)"></div>
+          Ranking ejecutivos
+        </div>
+      </div>
+      <div class="table-body" id="tabla-ejecutivos">
+        <div class="empty">Cargando...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzwgkQUoJtc4Kw-LB2NS2FjL_WvOjLkkv0DgI_iLr78fG8jVbyV2JpAsuAgKfoFk4jTVA/exec";
+
+// ── RELOJ ────────────────────────────────────────────────────
+function actualizarReloj() {
+  const now = new Date();
+  document.getElementById("clock").textContent =
+    now.toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+setInterval(actualizarReloj, 1000);
+actualizarReloj();
+
+// ── FORMATO ──────────────────────────────────────────────────
+function fmtMonto(n) {
+  if (!n || isNaN(n)) return "$0";
+  if (Math.abs(n) >= 1000000) return "$" + (n / 1000000).toFixed(1) + "M";
+  if (Math.abs(n) >= 1000)    return "$" + (n / 1000).toFixed(0) + "K";
+  return "$" + n.toFixed(0);
+}
+
+function fmtPct(n) {
+  if (!n || isNaN(n)) return "—";
+  return (n * 100).toFixed(1) + "%";
+}
+
+function colorMargen(pct) {
+  if (pct >= 0.25) return "var(--green)";
+  if (pct >= 0.18) return "var(--teal)";
+  if (pct >= 0.10) return "var(--amber)";
+  return "var(--red)";
+}
+
+// ── CARGA DE DATOS ────────────────────────────────────────────
+function cargarDatos() {
+  const script = document.createElement("script");
+  script.src = API_URL + "?callback=handleResponse&t=" + Date.now();
+  script.onerror = () => mostrarError("Error de conexión con el servidor");
+  document.body.appendChild(script);
+  setTimeout(() => { if (script.parentNode) script.remove(); }, 30000);
+}
+
+function handleResponse(json) {
+  document.getElementById("loader").classList.add("hidden");
+  if (!json.ok) { mostrarError(json.error || "Error desconocido"); return; }
+  renderizar(json.data);
+  document.getElementById("sync-info").textContent =
+    "Actualizado " + new Date().toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" });
+}
+
+function mostrarError(msg) {
+  const el = document.getElementById("error-msg");
+  el.textContent = "⚠ " + msg;
+  el.classList.add("visible");
+  setTimeout(() => el.classList.remove("visible"), 5000);
+}
+
+// ── RENDER PRINCIPAL ──────────────────────────────────────────
+function renderizar(data) {
+  const adq      = data.adquisiciones || [];
+  const bodega   = data.bodega        || [];
+  const alertas  = data.alertas       || [];
+  const despacho = data.despacho      || [];
+  const retiros  = data.retiros       ? (data.retiros.retiros || []) : [];
+  const m        = data.metricas      || {};
+
+  // ── Calcular métricas financieras ──
+  // Todas las OCs activas (adq + bodega + despacho)
+  const todasOCs = [...adq, ...bodega, ...despacho];
+  
+  let montoTotal   = 0;
+  let utilidadTotal = 0;
+  let ocsProcesadas = new Set();
+
+  // Calcular desde las lineas de cada OC
+  todasOCs.forEach(oc => {
+    if (ocsProcesadas.has(oc.idOC)) return;
+    ocsProcesadas.add(oc.idOC);
+    (oc.lineas || []).forEach(l => {
+      montoTotal    += Number(l.valorTotal    || 0);
+      utilidadTotal += Number(l.utilidad      || 0);
+    });
+  });
+
+  // ── MÉTRICAS ──
+  const totalGestion = (m.adq?.total || 0) + (m.bodega?.total || 0);
+  document.getElementById("m-gestion").textContent     = totalGestion;
+  document.getElementById("m-gestion-sub").textContent =
+    `${m.adq?.atrasadas || 0} atrasadas · ${m.adq?.express || 0} express`;
+
+  document.getElementById("m-monto").textContent    = fmtMonto(montoTotal) || "—";
+  document.getElementById("m-utilidad").textContent =
+    fmtMonto(utilidadTotal) + " utilidad est.";
+
+  document.getElementById("m-despacho").textContent     = m.despacho?.total || 0;
+  document.getElementById("m-despacho-sub").textContent =
+    `${m.despacho?.urgentes || 0} urgentes · ${(m.despacho?.total || 0) - (m.despacho?.atrasadas || 0)} en plazo`;
+
+  const totalAtrasadas = (m.alertas?.vencidas || 0);
+  document.getElementById("m-atrasadas").textContent     = totalAtrasadas;
+  document.getElementById("m-atrasadas-sub").textContent =
+    `${m.alertas?.criticas || 0} críticas · ${m.alertas?.sinEncargado || 0} sin encargado`;
+
+  // ── TABLA URGENTES ──
+  const urgentes = [...alertas]
+    .filter(o => o.diasAtrasoEntrega > 0)
+    .sort((a,b) => (b.diasAtrasoEntrega||0) - (a.diasAtrasoEntrega||0))
+    .slice(0, 6);
+
+  if (urgentes.length === 0) {
+    document.getElementById("tabla-urgentes").innerHTML =
+      '<div class="empty">✅ Sin OCs atrasadas</div>';
+  } else {
+    document.getElementById("tabla-urgentes").innerHTML = urgentes.map((o,i) => `
+      <div class="t-row">
+        <span class="t-rank">${i+1}</span>
+        <span class="t-oc">${o.idOC}</span>
+        <span class="t-name">${o.cliente}</span>
+        <span class="t-sub">${o.ejecutivo?.split(" ")[0] || "—"}</span>
+        <span class="t-badge ${o.diasAtrasoEntrega >= 5 ? "badge-red" : "badge-amber"}">
+          ${o.diasAtrasoEntrega}d
+        </span>
+      </div>`).join("");
+  }
+
+  // ── TABLA MARGENES ──
+  // Calcular margen por OC desde lineas disponibles
+  const ocsConMargen = [];
+  const todasConLineas = [...adq, ...bodega, ...despacho];
+  const vistas = new Set();
+
+  todasConLineas.forEach(oc => {
+    if (vistas.has(oc.idOC)) return;
+    vistas.add(oc.idOC);
+    let vt = 0, cr = 0;
+    (oc.lineas || []).forEach(l => {
+      vt += Number(l.valorTotal    || 0);
+      cr += Number(l.costoRealTotal || 0);
+    });
+    if (vt > 0 && cr > 0) {
+      const utilidad = vt - cr;
+      const margen   = utilidad / vt;
+      if (margen > 0) {
+        ocsConMargen.push({
+          idOC: oc.idOC,
+          cliente: oc.cliente,
+          ejecutivo: oc.ejecutivo,
+          valorTotal: vt,
+          utilidad,
+          margen,
+        });
+      }
+    }
+  });
+
+  const topMargenes = ocsConMargen
+    .sort((a,b) => b.margen - a.margen)
+    .slice(0, 6);
+
+  if (topMargenes.length === 0) {
+    document.getElementById("tabla-margenes").innerHTML =
+      '<div class="empty">Sin datos de margen disponibles</div>';
+  } else {
+    document.getElementById("tabla-margenes").innerHTML = topMargenes.map((o,i) => `
+      <div class="t-row">
+        <span class="t-rank">${i+1}</span>
+        <span class="t-oc">${o.idOC}</span>
+        <span class="t-name">${o.cliente}</span>
+        <div class="margen-bar">
+          <div class="margen-fill" style="width:${Math.min(100, o.margen*100*3)}%;background:${colorMargen(o.margen)}"></div>
+        </div>
+        <span class="t-margen" style="color:${colorMargen(o.margen)}">${fmtPct(o.margen)}</span>
+        <span class="t-monto">${fmtMonto(o.utilidad)}</span>
+      </div>`).join("");
+  }
+
+  // ── TABLA EJECUTIVOS ──
+  const execMap = {};
+  todasConLineas.forEach(oc => {
+    const ejec = oc.ejecutivo || "Sin asignar";
+    if (!execMap[ejec]) execMap[ejec] = { ocs: new Set(), monto: 0, utilidad: 0 };
+    execMap[ejec].ocs.add(oc.idOC);
+    (oc.lineas || []).forEach(l => {
+      execMap[ejec].monto    += Number(l.valorTotal     || 0);
+      execMap[ejec].utilidad += Number(l.costoRealTotal || 0);
+    });
+  });
+
+  const ranking = Object.entries(execMap)
+    .map(([nombre, d]) => ({
+      nombre,
+      ocs:      d.ocs.size,
+      monto:    d.monto,
+      utilidad: d.monto - d.utilidad,
+      margen:   d.monto > 0 ? (d.monto - d.utilidad) / d.monto : 0,
+    }))
+    .filter(e => e.monto > 0)
+    .sort((a,b) => b.monto - a.monto)
+    .slice(0, 8);
+
+  if (ranking.length === 0) {
+    document.getElementById("tabla-ejecutivos").innerHTML =
+      '<div class="empty">Sin datos disponibles</div>';
+  } else {
+    document.getElementById("tabla-ejecutivos").innerHTML = ranking.map((e,i) => {
+      const medals = ["🥇","🥈","🥉"];
+      const prefix = medals[i] || `${i+1}`;
+      return `
+      <div class="t-row">
+        <span class="t-rank">${prefix}</span>
+        <span class="t-name">${e.nombre.split(" ")[0]}</span>
+        <span class="t-badge badge-blue">${e.ocs} OC${e.ocs !== 1 ? "s" : ""}</span>
+        <span class="t-monto">${fmtMonto(e.monto)}</span>
+        <div class="margen-bar">
+          <div class="margen-fill" style="width:${Math.min(100, e.margen*100*3)}%;background:${colorMargen(e.margen)}"></div>
+        </div>
+        <span class="t-margen" style="color:${colorMargen(e.margen)}">${fmtPct(e.margen)}</span>
+      </div>`;
+    }).join("");
+  }
+}
+
+// ── INICIO ────────────────────────────────────────────────────
+cargarDatos();
+setInterval(cargarDatos, 5 * 60 * 1000); // cada 5 minutos
+</script>
+</body>
+</html>
