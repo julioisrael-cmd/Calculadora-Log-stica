@@ -228,6 +228,9 @@ function cardAdq(o, tipo) {
     : o.adqAtrasada ? badge("🟡 "+o.horasHabiles+"h","b-amber")
     : o.esExpress ? badge("⚡ Express","b-teal") : badge(o.horasHabiles+"h","b-blue");
   const badgeE = o.sinEncargado ? badge("Sin asignar","b-red") : badge(o.encargado,"b-gray");
+  const badgeMora = o.mora && o.mora.diasMax > 30
+    ? badge("⚠️ Mora " + o.mora.diasMax + "d","b-red")
+    : "";
   const badgeA = o.alertaAnuladoRecepcionado ? badge("⛔ Dev. pendiente","b-red") : "";
   const progreso = `<span class="oc-progress">${o.lineas.length}/${o.totalLineas} líneas</span>`;
 
@@ -243,7 +246,7 @@ function cardAdq(o, tipo) {
     <div class="oc-header">
       <span class="oc-id">${o.idOC}</span>
       <span class="oc-cliente">${o.cliente}</span>
-      <div class="oc-meta">${badgeT}${badgeE}${badgeA}${progreso}</div>
+      <div class="oc-meta">${badgeT}${badgeE}${badgeA}${badgeMora}${progreso}</div>
       <span class="chevron">▶</span>
     </div>
     <div class="oc-lines"><table class="lines-table">
