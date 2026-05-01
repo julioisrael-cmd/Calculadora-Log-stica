@@ -421,6 +421,8 @@ function renderizarRetiros() {
   const despachos = r.despachos || [];
   const retiros   = r.retiros   || [];
 
+  if(despachos.length>0||retiros.filter(o=>o.listo).length>0){
+    html+='<div style="margin-bottom:12px"><button onclick="generarRuta()" style="background:#0F6E56;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:500;cursor:pointer;width:100%">Generar ruta del dia en Google Maps</button></div>';}
   if (despachos.length===0 && retiros.length===0) {
     html += '<div class="empty">Sin retiros ni despachos pendientes ✅</div>';
     document.getElementById("view-retiros").innerHTML = html;
@@ -570,6 +572,51 @@ function cardDespacho(o, tipo) {
       </div>
     </div>
   </div>`;
+}
+
+
+function generarRuta() {
+  const d = datosFiltrados || datos;
+  if (!d || !d.retiros) return;
+
+  const despachos = d.retiros.despachos || [];
+  const retiros   = d.retiros.retiros   || [];
+
+  // Combinar paradas en orden de prioridad
+  const paradas = [];
+
+  // 1. Despachos RM primero
+  despachos.forEach(o => {
+    if (o.dir && o.dir.trim()) paradas.push(o.dir + ", " + o.region + ", Chile");
+  });
+
+  // 2. Retiros que completan OC
+  retiros.filter(o => o.completaOC && o.listo).forEach(o => {
+    if (o.dir && o.dir.trim()) paradas.push(o.dir + ", Chile");
+  });
+
+  // 3. Resto de retiros listos
+  retiros.filter(o => !o.completaOC && o.listo).forEach(o => {
+    if (o.dir && o.dir.trim()) paradas.push(o.dir + ", Chile");
+  });
+
+  if (paradas.length === 0) {
+    alert("No hay paradas con dirección registrada para generar la ruta.");
+    return;
+  }
+
+  // Generar URL de Google Maps con waypoints
+  const origen = "Eliodoro Yanez 2745, Providencia, Santiago, Chile";
+  const destino = paradas[paradas.length - 1];
+  const waypoints = paradas.slice(0, -1).join("|");
+
+  let url = "https://www.google.com/maps/dir/?api=1";
+  url += "&origin=" + encodeURIComponent(origen);
+  url += "&destination=" + encodeURIComponent(destino);
+  if (waypoints) url += "&waypoints=" + encodeURIComponent(waypoints);
+  url += "&travelmode=driving";
+
+  window.open(url, "_blank");
 }
 
 cargarDatos();
