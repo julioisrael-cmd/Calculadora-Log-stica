@@ -94,6 +94,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 <div class="topbar">
   <div class="logo">SCC <span>Hub</span> Operacional</div>
   <button class="sync-btn" onclick="cargarDatos()">↻ Actualizar</button>
+  <select id="filtro-ejecutivo" onchange="aplicarFiltro()" style="font-size:12px;border:1px solid var(--border-md);border-radius:6px;padding:4px 10px;background:var(--surface);color:var(--txt);cursor:pointer;">
+    <option value="">Todos los ejecutivos</option>
+    <option value="Wendy Munera">Wendy Munera</option>
+    <option value="Gari Saez">Gari Saez</option>
+    <option value="Giorgina Vivas">Giorgina Vivas</option>
+    <option value="Enrique Cabas">Enrique Cabas</option>
+    <option value="Karla Nuñez">Karla Nuñez</option>
+    <option value="Belen Sazo">Belen Sazo</option>
+    <option value="Manuel Sifontes">Manuel Sifontes</option>
+    <option value="Zulay Ramires">Zulay Ramires</option>
+    <option value="Pamela Ramos">Pamela Ramos</option>
+    <option value="Esteban Yalpi">Esteban Yalpi</option>
+  </select>
   <span class="sync-info" id="sync-info">—</span>
 </div>
 <div class="tabs">
@@ -113,7 +126,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzwgkQUoJtc4Kw-LB2NS2FjL_WvOjLkkv0DgI_iLr78fG8jVbyV2JpAsuAgKfoFk4jTVA/exec";
 let datos = null;
+let datosFiltrados = null;
 let tabActiva = "adq";
+let filtroEjecutivo = "";
+
+function aplicarFiltro() {
+  filtroEjecutivo = document.getElementById("filtro-ejecutivo").value;
+  if (!datos) return;
+  if (!filtroEjecutivo) {
+    datosFiltrados = datos;
+  } else {
+    datosFiltrados = {
+      ...datos,
+      adquisiciones: datos.adquisiciones.filter(o => o.ejecutivo === filtroEjecutivo),
+      bodega:        datos.bodega.filter(o => o.ejecutivo === filtroEjecutivo),
+      alertas:       datos.alertas.filter(o => o.ejecutivo === filtroEjecutivo),
+      despacho:      datos.despacho ? datos.despacho.filter(o => o.ejecutivo === filtroEjecutivo) : [],
+      retiros:       datos.retiros ? {
+        ...datos.retiros,
+        retiros:   datos.retiros.retiros.filter(o => o.ejecutivo === filtroEjecutivo),
+        despachos: datos.retiros.despachos.filter(o => o.ejecutivo === filtroEjecutivo),
+      } : datos.retiros,
+    };
+  }
+  renderizarTodo();
+}
 
 async function cargarDatos() {
   mostrarLoading();
@@ -141,6 +178,7 @@ function mostrarError(msg) {
 
 function renderizarTodo() {
   if (!datos) return;
+  datosFiltrados = filtroEjecutivo ? datosFiltrados : datos;
   const m = datos.metricas;
   document.getElementById("cnt-adq").textContent    = m.adq.total;
   document.getElementById("cnt-bodega").textContent  = m.bodega.total;
@@ -154,8 +192,9 @@ function renderizarTodo() {
 
 // ── ADQUISICIONES ─────────────────────────────────────────────
 function renderizarAdq() {
+  const d = datosFiltrados || datos;
   const m   = datos.metricas.adq;
-  const ocs = datos.adquisiciones;
+  const ocs = d.adquisiciones;
   let html  = metricas([
     {label:"Pendientes",    value:m.total,        cls:""},
     {label:"Atrasadas",     value:m.atrasadas,    cls:m.atrasadas>0?"red":""},
@@ -212,8 +251,9 @@ function cardAdq(o, tipo) {
 
 // ── BODEGA ────────────────────────────────────────────────────
 function renderizarBodega() {
+  const d = datosFiltrados || datos;
   const m   = datos.metricas.bodega;
-  const ocs = datos.bodega;
+  const ocs = d.bodega;
   let html  = metricas([
     {label:"Por recepcionar", value:m.total,      cls:""},
     {label:"Parciales",       value:m.parciales,  cls:m.parciales>0?"amber":""},
@@ -275,8 +315,9 @@ function renderizarBodega() {
 
 // ── ALERTAS ───────────────────────────────────────────────────
 function renderizarAlertas() {
+  const d = datosFiltrados || datos;
   const m   = datos.metricas.alertas;
-  const ocs = datos.alertas;
+  const ocs = d.alertas;
   let html  = metricas([
     {label:"OCs vencidas",    value:m.vencidas,     cls:m.vencidas>0?"red":""},
     {label:"Sin encargado",   value:m.sinEncargado, cls:m.sinEncargado>0?"red":""},
@@ -461,7 +502,8 @@ function cardRetiro(o, tipo) {
 
 // ── DESPACHO ──────────────────────────────────────────────────
 function renderizarDespacho() {
-  const ocs = datos.despacho || [];
+  const d = datosFiltrados || datos;
+  const ocs = d.despacho || [];
   const m   = datos.metricas.despacho || {};
 
   let html = metricas([
