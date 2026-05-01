@@ -205,24 +205,28 @@ function renderizarAdq() {
     document.getElementById("view-adq").innerHTML=html;return;}
 
   const sinAsignar = ocs.filter(o=>o.sinEncargado);
-  const atrasadas = ocs.filter(o=>o.adqAtrasada && !o.sinEncargado);
-  const express   = ocs.filter(o=>!o.adqAtrasada&&o.esExpress&&!o.sinEncargado);
-  const normales  = ocs.filter(o=>!o.adqAtrasada&&!o.esExpress&&!o.sinEncargado);
+  const muyAtrasadas = ocs.filter(o=>o.adqMuyAtrasada && !o.sinEncargado);
+  const atrasadas    = ocs.filter(o=>o.adqAtrasada && !o.adqMuyAtrasada && !o.sinEncargado);
+  const express      = ocs.filter(o=>!o.adqAtrasada&&o.esExpress&&!o.sinEncargado);
+  const normales     = ocs.filter(o=>!o.adqAtrasada&&!o.esExpress&&!o.sinEncargado);
 
   if(sinAsignar.length>0){html+='<div class="section-label">Sin encargado asignado</div>';
     sinAsignar.forEach(o=>{html+=cardAdq(o,"urgent");});}
-  if(atrasadas.length>0){html+='<div class="section-label">Prioridad 1 — atrasadas (&gt;24h hábiles)</div>';
-    atrasadas.forEach(o=>{html+=cardAdq(o,"urgent");});}
-  if(express.length>0){html+='<div class="section-label">Prioridad 2 — express</div>';
+  if(muyAtrasadas.length>0){html+='<div class="section-label">🔴 Alerta máxima — más de 48h sin comprar</div>';
+    muyAtrasadas.forEach(o=>{html+=cardAdq(o,"urgent");});}
+  if(atrasadas.length>0){html+='<div class="section-label">🟡 Atrasadas — más de 24h sin comprar</div>';
+    atrasadas.forEach(o=>{html+=cardAdq(o,"warn");});}
+  if(express.length>0){html+='<div class="section-label">⚡ Express — cotización lista</div>';
     express.forEach(o=>{html+=cardAdq(o,"express");});}
-  if(normales.length>0){html+='<div class="section-label">Pendientes normales</div>';
+  if(normales.length>0){html+='<div class="section-label">En gestión normal</div>';
     normales.forEach(o=>{html+=cardAdq(o,"normal");});}
   document.getElementById("view-adq").innerHTML=html;
 }
 
 function cardAdq(o, tipo) {
-  const badgeT = o.adqAtrasada ? badge(o.horasHabiles+"h","b-red")
-    : o.esExpress ? badge("Express","b-teal") : badge(o.horasHabiles+"h","b-blue");
+  const badgeT = o.adqMuyAtrasada ? badge("🔴 "+o.horasHabiles+"h","b-red")
+    : o.adqAtrasada ? badge("🟡 "+o.horasHabiles+"h","b-amber")
+    : o.esExpress ? badge("⚡ Express","b-teal") : badge(o.horasHabiles+"h","b-blue");
   const badgeE = o.sinEncargado ? badge("Sin asignar","b-red") : badge(o.encargado,"b-gray");
   const badgeA = o.alertaAnuladoRecepcionado ? badge("⛔ Dev. pendiente","b-red") : "";
   const progreso = `<span class="oc-progress">${o.lineas.length}/${o.totalLineas} líneas</span>`;
