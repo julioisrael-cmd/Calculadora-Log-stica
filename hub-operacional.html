@@ -486,6 +486,7 @@ function cardRetiro(o, tipo) {
     <td class="muted" style="text-align:center">${l.cantidad||"—"}</td>
     <td class="muted">${l.proveedor||"—"}</td>
     <td class="muted">${l.obsCompras||"—"}</td>
+    <td class="muted" style="color:var(--teal-txt)">${l.obsLogistica||"Sin direccion proveedor"}</td>
   </tr>`).join("");
 
   return `<div class="oc-card ${tipo}" onclick="toggleCard(this)">
