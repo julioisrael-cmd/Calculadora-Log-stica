@@ -592,12 +592,21 @@ function generarRuta() {
 
   // 2. Retiros que completan OC
   retiros.filter(o => o.completaOC && o.listo).forEach(o => {
-    if (o.dir && o.dir.trim()) paradas.push(o.dir + ", Chile");
+    // Usar dirección de obs. logística si existe, si no usar dir. despacho
+    const dirRetiro = o.lineas
+      .filter(l => l.estado === "Retiro" && l.obsLogistica && l.obsLogistica.trim())
+      .map(l => l.obsLogistica.trim())[0];
+    if (dirRetiro) paradas.push(dirRetiro + ", Chile");
+    else if (o.dir && o.dir.trim()) paradas.push(o.dir + ", Chile");
   });
 
   // 3. Resto de retiros listos
   retiros.filter(o => !o.completaOC && o.listo).forEach(o => {
-    if (o.dir && o.dir.trim()) paradas.push(o.dir + ", Chile");
+    const dirRetiro = o.lineas
+      .filter(l => l.estado === "Retiro" && l.obsLogistica && l.obsLogistica.trim())
+      .map(l => l.obsLogistica.trim())[0];
+    if (dirRetiro) paradas.push(dirRetiro + ", Chile");
+    else if (o.dir && o.dir.trim()) paradas.push(o.dir + ", Chile");
   });
 
   if (paradas.length === 0) {
