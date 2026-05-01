@@ -153,6 +153,8 @@ body::after {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  align-items: center;
+  text-align: center;
 }
 
 .metric-card::before {
@@ -196,10 +198,11 @@ body::after {
 
 .metric-icon {
   position: absolute;
-  bottom: 12px;
-  right: 16px;
-  font-size: 32px;
-  opacity: 0.08;
+  bottom: 10px;
+  right: 14px;
+  font-size: 28px;
+  opacity: 0.07;
+  pointer-events: none;
 }
 
 /* ── FILA TABLAS ── */
@@ -579,8 +582,10 @@ function renderizar(data) {
     if (ocsProcesadas.has(oc.idOC)) return;
     ocsProcesadas.add(oc.idOC);
     (oc.lineas || []).forEach(l => {
-      montoTotal    += Number(l.valorTotal    || 0);
-      utilidadTotal += Number(l.utilidad      || 0);
+      const vl = Number(l.valorTotal    || 0);
+      const cl = Number(l.costoRealTotal || 0);
+      montoTotal    += vl;
+      if (cl > 0) utilidadTotal += (vl - cl);
     });
   });
 
@@ -601,7 +606,7 @@ function renderizar(data) {
   const totalAtrasadas = (m.alertas?.vencidas || 0);
   document.getElementById("m-atrasadas").textContent     = totalAtrasadas;
   document.getElementById("m-atrasadas-sub").textContent =
-    `${m.alertas?.criticas || 0} críticas · ${m.alertas?.sinEncargado || 0} sin encargado`;
+    `${m.alertas?.criticas || 0} críticas · ${m.adq?.sinEncargado || 0} sin asignar`;
 
   // ── TABLA URGENTES ──
   const urgentes = [...alertas]
