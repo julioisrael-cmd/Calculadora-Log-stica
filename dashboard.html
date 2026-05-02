@@ -40,7 +40,6 @@ body {
   position: relative;
 }
 
-/* Grid de fondo */
 body::before {
   content: '';
   position: fixed;
@@ -52,7 +51,6 @@ body::before {
   pointer-events: none;
 }
 
-/* Glow ambiental */
 body::after {
   content: '';
   position: fixed;
@@ -65,7 +63,6 @@ body::after {
   pointer-events: none;
 }
 
-/* ── LAYOUT ── */
 .dashboard {
   display: grid;
   grid-template-rows: 52px 1fr 1fr;
@@ -82,7 +79,6 @@ body::after {
   gap: 16px;
   padding: 0 4px;
 }
-
 .logo {
   font-family: var(--display);
   font-size: 22px;
@@ -91,21 +87,18 @@ body::after {
   letter-spacing: -0.5px;
 }
 .logo span { color: var(--blue); }
-
 .tagline {
   font-size: 12px;
   color: var(--txt-3);
   font-family: var(--mono);
   letter-spacing: 0.05em;
 }
-
 .topbar-right {
   margin-left: auto;
   display: flex;
   align-items: center;
   gap: 20px;
 }
-
 .sync-badge {
   display: flex;
   align-items: center;
@@ -114,7 +107,6 @@ body::after {
   color: var(--txt-3);
   font-family: var(--mono);
 }
-
 .sync-dot {
   width: 6px;
   height: 6px;
@@ -122,12 +114,10 @@ body::after {
   background: var(--green);
   animation: pulse 2s infinite;
 }
-
 @keyframes pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+  50%       { opacity: 0.3; }
 }
-
 .clock {
   font-family: var(--mono);
   font-size: 18px;
@@ -136,18 +126,17 @@ body::after {
   letter-spacing: 0.05em;
 }
 
-/* ── FILA MÉTRICAS ── */
+/* ── MÉTRICAS ── */
 .row-metrics {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 10px;
 }
-
 .metric-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 18px 20px;
+  padding: 16px 18px;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -156,18 +145,17 @@ body::after {
   align-items: center;
   text-align: center;
 }
-
 .metric-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 2px;
 }
-.metric-card.blue::before   { background: var(--blue); }
-.metric-card.teal::before   { background: var(--teal); }
-.metric-card.amber::before  { background: var(--amber); }
-.metric-card.red::before    { background: var(--red); }
-.metric-card.green::before  { background: var(--green); }
+.metric-card.blue::before  { background: var(--blue); }
+.metric-card.teal::before  { background: var(--teal); }
+.metric-card.amber::before { background: var(--amber); }
+.metric-card.red::before   { background: var(--red); }
+.metric-card.green::before { background: var(--green); }
 
 .metric-label {
   font-size: 11px;
@@ -176,26 +164,23 @@ body::after {
   letter-spacing: 0.08em;
   font-family: var(--mono);
 }
-
 .metric-value {
   font-family: var(--display);
-  font-size: 42px;
+  font-size: 36px;
   font-weight: 800;
   line-height: 1;
-  margin: 8px 0 4px;
+  margin: 6px 0 4px;
 }
 .metric-value.blue  { color: var(--blue); }
 .metric-value.teal  { color: var(--teal); }
 .metric-value.amber { color: var(--amber); }
 .metric-value.red   { color: var(--red); }
 .metric-value.green { color: var(--green); }
-
 .metric-sub {
   font-size: 11px;
   color: var(--txt-3);
   font-family: var(--mono);
 }
-
 .metric-icon {
   position: absolute;
   bottom: 10px;
@@ -205,13 +190,57 @@ body::after {
   pointer-events: none;
 }
 
-/* ── FILA TABLAS ── */
+/* ── Semáforo vertical en montos ── */
+.semaforo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  padding: 2px 0;
+}
+.semaforo-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.semaforo-item.rojo     { background: var(--red-dim); }
+.semaforo-item.amarillo { background: var(--amber-dim); }
+.semaforo-item.verde    { background: var(--green-dim); }
+
+.semaforo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.semaforo-dot.rojo     { background: var(--red);   box-shadow: 0 0 5px var(--red); }
+.semaforo-dot.amarillo { background: var(--amber); box-shadow: 0 0 5px var(--amber); }
+.semaforo-dot.verde    { background: var(--green); box-shadow: 0 0 5px var(--green); }
+
+.semaforo-lbl {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--txt-3);
+  flex-shrink: 0;
+}
+.semaforo-monto {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: auto;
+}
+.semaforo-monto.rojo     { color: var(--red); }
+.semaforo-monto.amarillo { color: var(--amber); }
+.semaforo-monto.verde    { color: var(--green); }
+
+/* ── TABLAS ── */
 .row-tables {
   display: grid;
-  grid-template-columns: 1fr 1fr 1.2fr;
+  grid-template-columns: 1fr 1fr 1.6fr 1fr;
   gap: 10px;
 }
-
 .table-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -220,16 +249,13 @@ body::after {
   display: flex;
   flex-direction: column;
 }
-
 .table-header {
-  padding: 12px 16px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  justify-content: space-between;
   flex-shrink: 0;
 }
-
 .table-title {
   font-size: 11px;
   font-weight: 600;
@@ -241,25 +267,23 @@ body::after {
   align-items: center;
   gap: 8px;
 }
-
 .table-title .dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
-
 .table-body {
   flex: 1;
   overflow: hidden;
-  padding: 6px 0;
+  padding: 4px 0;
 }
 
-/* Filas de tabla */
 .t-row {
   display: flex;
   align-items: center;
-  padding: 7px 16px;
-  gap: 10px;
+  padding: 6px 14px;
+  gap: 8px;
   border-bottom: 1px solid var(--border);
   animation: fadeIn 0.3s ease;
 }
@@ -275,16 +299,15 @@ body::after {
   font-size: 11px;
   color: var(--txt-3);
   min-width: 20px;
+  flex-shrink: 0;
 }
-
 .t-oc {
   font-family: var(--mono);
   font-size: 11px;
   color: var(--blue);
-  min-width: 120px;
+  min-width: 108px;
   flex-shrink: 0;
 }
-
 .t-name {
   font-size: 12px;
   color: var(--txt);
@@ -293,13 +316,13 @@ body::after {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 .t-sub {
   font-size: 11px;
   color: var(--txt-3);
   font-family: var(--mono);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
-
 .t-badge {
   font-size: 10px;
   padding: 2px 7px;
@@ -307,6 +330,7 @@ body::after {
   font-family: var(--mono);
   font-weight: 500;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 .badge-red    { background: var(--red-dim);   color: var(--red); }
 .badge-amber  { background: var(--amber-dim); color: var(--amber); }
@@ -318,22 +342,27 @@ body::after {
   font-family: var(--mono);
   font-size: 11px;
   color: var(--teal);
-  min-width: 80px;
+  min-width: 64px;
   text-align: right;
   flex-shrink: 0;
 }
-
+.t-monto-util {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--green);
+  min-width: 64px;
+  text-align: right;
+  flex-shrink: 0;
+}
 .t-margen {
   font-family: var(--mono);
   font-size: 11px;
-  min-width: 50px;
+  min-width: 44px;
   text-align: right;
   flex-shrink: 0;
 }
-
-/* Barra de progreso margen */
 .margen-bar {
-  width: 60px;
+  width: 44px;
   height: 4px;
   background: var(--surface2);
   border-radius: 2px;
@@ -343,11 +372,8 @@ body::after {
 .margen-fill {
   height: 100%;
   border-radius: 2px;
-  background: var(--green);
   transition: width 0.5s ease;
 }
-
-/* Empty state */
 .empty {
   display: flex;
   align-items: center;
@@ -372,7 +398,6 @@ body::after {
   transition: opacity 0.5s;
 }
 .loading-overlay.hidden { opacity: 0; pointer-events: none; }
-
 .loader {
   width: 40px;
   height: 40px;
@@ -382,7 +407,6 @@ body::after {
   animation: spin 0.8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-
 .loading-text {
   font-family: var(--mono);
   font-size: 12px;
@@ -403,6 +427,7 @@ body::after {
   font-size: 12px;
   font-family: var(--mono);
   display: none;
+  z-index: 200;
 }
 .error-msg.visible { display: block; }
 </style>
@@ -413,7 +438,6 @@ body::after {
   <div class="loader"></div>
   <div class="loading-text">Conectando con el gestor...</div>
 </div>
-
 <div class="error-msg" id="error-msg"></div>
 
 <div class="dashboard">
@@ -433,36 +457,65 @@ body::after {
 
   <!-- FILA 1: MÉTRICAS -->
   <div class="row-metrics">
+
     <div class="metric-card blue">
       <div class="metric-label">OCs en gestión</div>
       <div class="metric-value blue" id="m-gestion">—</div>
       <div class="metric-sub" id="m-gestion-sub">—</div>
       <div class="metric-icon">📋</div>
     </div>
+
     <div class="metric-card teal">
       <div class="metric-label">Monto comprometido</div>
-      <div class="metric-value teal" id="m-monto" style="font-size:28px">—</div>
+      <div class="metric-value teal" id="m-monto" style="font-size:26px">—</div>
       <div class="metric-sub" id="m-utilidad">— utilidad estimada</div>
       <div class="metric-icon">💰</div>
     </div>
+
     <div class="metric-card amber">
       <div class="metric-label">Listos para despachar</div>
       <div class="metric-value amber" id="m-despacho">—</div>
       <div class="metric-sub" id="m-despacho-sub">—</div>
       <div class="metric-icon">🚚</div>
     </div>
+
     <div class="metric-card red">
       <div class="metric-label">OCs atrasadas</div>
       <div class="metric-value red" id="m-atrasadas">—</div>
       <div class="metric-sub" id="m-atrasadas-sub">—</div>
       <div class="metric-icon">⚠️</div>
     </div>
+
+    <!-- Morosidad semáforo vertical en montos -->
+    <div class="metric-card green">
+      <div class="metric-label">Morosidad clientes</div>
+      <div class="semaforo">
+        <div class="semaforo-item rojo">
+          <div class="semaforo-dot rojo"></div>
+          <span class="semaforo-lbl">&gt;60d</span>
+          <span class="semaforo-monto rojo" id="sem-rojo">$—</span>
+        </div>
+        <div class="semaforo-item amarillo">
+          <div class="semaforo-dot amarillo"></div>
+          <span class="semaforo-lbl">30-60d</span>
+          <span class="semaforo-monto amarillo" id="sem-amarillo">$—</span>
+        </div>
+        <div class="semaforo-item verde">
+          <div class="semaforo-dot verde"></div>
+          <span class="semaforo-lbl">&lt;30d</span>
+          <span class="semaforo-monto verde" id="sem-verde">$—</span>
+        </div>
+      </div>
+      <div class="metric-sub" id="m-mora-total">— total en mora</div>
+      <div class="metric-icon">🔴</div>
+    </div>
+
   </div>
 
   <!-- FILA 2: TABLAS -->
   <div class="row-tables">
 
-    <!-- OCs más urgentes -->
+    <!-- OCs urgentes -->
     <div class="table-card">
       <div class="table-header">
         <div class="table-title">
@@ -475,28 +528,41 @@ body::after {
       </div>
     </div>
 
-    <!-- Top por margen -->
+    <!-- Morosidad por ejecutivo -->
     <div class="table-card">
       <div class="table-header">
         <div class="table-title">
-          <div class="dot" style="background:var(--green)"></div>
-          Mejores márgenes activos
+          <div class="dot" style="background:var(--amber)"></div>
+          Morosidad por ejecutivo
         </div>
       </div>
-      <div class="table-body" id="tabla-margenes">
+      <div class="table-body" id="tabla-morosidad">
         <div class="empty">Cargando...</div>
       </div>
     </div>
 
-    <!-- Ranking ejecutivos -->
+    <!-- Ranking ejecutivos fusionado — más ancho -->
     <div class="table-card">
       <div class="table-header">
         <div class="table-title">
           <div class="dot" style="background:var(--blue)"></div>
-          Ranking ejecutivos
+          Ranking ejecutivos — Utilidad &amp; Facturación
         </div>
       </div>
       <div class="table-body" id="tabla-ejecutivos">
+        <div class="empty">Cargando...</div>
+      </div>
+    </div>
+
+    <!-- Mejores márgenes -->
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-title">
+          <div class="dot" style="background:var(--green)"></div>
+          Mejores márgenes
+        </div>
+      </div>
+      <div class="table-body" id="tabla-margenes">
         <div class="empty">Cargando...</div>
       </div>
     </div>
@@ -521,7 +587,7 @@ function fmtMonto(n) {
   if (!n || isNaN(n)) return "$0";
   if (Math.abs(n) >= 1000000) return "$" + (n / 1000000).toFixed(1) + "M";
   if (Math.abs(n) >= 1000)    return "$" + (n / 1000).toFixed(0) + "K";
-  return "$" + n.toFixed(0);
+  return "$" + Math.round(n);
 }
 
 function fmtPct(n) {
@@ -536,28 +602,46 @@ function colorMargen(pct) {
   return "var(--red)";
 }
 
-// ── CARGA DE DATOS ────────────────────────────────────────────
-function cargarDatos() {
-  const script = document.createElement("script");
-  script.src = API_URL + "?callback=handleResponse&t=" + Date.now();
-  script.onerror = () => mostrarError("Error de conexión con el servidor");
-  document.body.appendChild(script);
-  setTimeout(() => { if (script.parentNode) script.remove(); }, 30000);
-}
+// ── CARGA DE DATOS via fetch ──────────────────────────────────
+let cargando = false;
 
-function handleResponse(json) {
-  document.getElementById("loader").classList.add("hidden");
-  if (!json.ok) { mostrarError(json.error || "Error desconocido"); return; }
-  renderizar(json.data);
-  document.getElementById("sync-info").textContent =
-    "Actualizado " + new Date().toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" });
+async function cargarDatos() {
+  if (cargando) return;
+  cargando = true;
+
+  const controller = new AbortController();
+  const timeoutId  = setTimeout(() => controller.abort(), 15000);
+
+  try {
+    const res = await fetch(API_URL + "?t=" + Date.now(), { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+
+    const json = await res.json();
+    document.getElementById("loader").classList.add("hidden");
+
+    if (!json.ok) { mostrarError(json.error || "Error del servidor"); return; }
+
+    renderizar(json.data);
+    document.getElementById("sync-info").textContent =
+      "Actualizado " + new Date().toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" });
+
+  } catch (err) {
+    clearTimeout(timeoutId);
+    document.getElementById("loader").classList.add("hidden");
+    mostrarError(err.name === "AbortError"
+      ? "Tiempo de espera agotado (15s)"
+      : "Error de conexión: " + err.message);
+  } finally {
+    cargando = false;
+  }
 }
 
 function mostrarError(msg) {
   const el = document.getElementById("error-msg");
   el.textContent = "⚠ " + msg;
   el.classList.add("visible");
-  setTimeout(() => el.classList.remove("visible"), 5000);
+  setTimeout(() => el.classList.remove("visible"), 6000);
 }
 
 // ── RENDER PRINCIPAL ──────────────────────────────────────────
@@ -566,91 +650,208 @@ function renderizar(data) {
   const bodega   = data.bodega        || [];
   const alertas  = data.alertas       || [];
   const despacho = data.despacho      || [];
-  const retiros  = data.retiros       ? (data.retiros.retiros || []) : [];
   const m        = data.metricas      || {};
 
-  // ── Calcular métricas financieras ──
-  // Todas las OCs activas (adq + bodega + despacho)
+  // Todas las OCs sin duplicar líneas
   const todasOCs = [...adq, ...bodega, ...despacho];
-  
-  let montoTotal   = 0;
-  let utilidadTotal = 0;
-  let ocsProcesadas = new Set();
+  const lineasVistas = new Set();
+  let montoTotal = 0, utilidadTotal = 0;
 
-  // Calcular desde las lineas de cada OC
   todasOCs.forEach(oc => {
-    if (ocsProcesadas.has(oc.idOC)) return;
-    ocsProcesadas.add(oc.idOC);
     (oc.lineas || []).forEach(l => {
-      const vl = Number(l.valorTotal    || 0);
-      const cl = Number(l.costoRealTotal || 0);
-      montoTotal    += vl;
-      if (cl > 0) utilidadTotal += (vl - cl);
+      const clave = oc.idOC + "|" + l.producto;
+      if (lineasVistas.has(clave)) return;
+      lineasVistas.add(clave);
+      const vt = Number(l.valorTotal    || 0);
+      const ct = Number(l.costoRealTotal || 0);
+      montoTotal += vt;
+      if (vt > 0 && ct > 0) utilidadTotal += (vt - ct);
     });
   });
 
-  // ── MÉTRICAS ──
+  // Métricas
   const totalGestion = (m.adq?.total || 0) + (m.bodega?.total || 0);
   document.getElementById("m-gestion").textContent     = totalGestion;
   document.getElementById("m-gestion-sub").textContent =
     `${m.adq?.atrasadas || 0} atrasadas · ${m.adq?.express || 0} express`;
 
   document.getElementById("m-monto").textContent    = fmtMonto(montoTotal) || "—";
-  document.getElementById("m-utilidad").textContent =
-    fmtMonto(utilidadTotal) + " utilidad est.";
+  document.getElementById("m-utilidad").textContent = fmtMonto(utilidadTotal) + " utilidad est.";
 
   document.getElementById("m-despacho").textContent     = m.despacho?.total || 0;
   document.getElementById("m-despacho-sub").textContent =
     `${m.despacho?.urgentes || 0} urgentes · ${(m.despacho?.total || 0) - (m.despacho?.atrasadas || 0)} en plazo`;
 
-  const totalAtrasadas = (m.alertas?.vencidas || 0);
-  document.getElementById("m-atrasadas").textContent     = totalAtrasadas;
+  document.getElementById("m-atrasadas").textContent     = m.alertas?.vencidas || 0;
   document.getElementById("m-atrasadas-sub").textContent =
     `${m.alertas?.criticas || 0} críticas · ${m.adq?.sinEncargado || 0} sin asignar`;
 
-  // ── TABLA URGENTES ──
+  // Tablas
+  renderUrgentes(alertas);
+  renderMorosidad(todasOCs);
+  renderEjecutivos(todasOCs);
+  renderMargenes(todasOCs);
+}
+
+// ── URGENTES ─────────────────────────────────────────────────
+function renderUrgentes(alertas) {
   const urgentes = [...alertas]
     .filter(o => o.diasAtrasoEntrega > 0)
-    .sort((a,b) => (b.diasAtrasoEntrega||0) - (a.diasAtrasoEntrega||0))
-    .slice(0, 6);
+    .sort((a, b) => (b.diasAtrasoEntrega || 0) - (a.diasAtrasoEntrega || 0))
+    .slice(0, 8);
 
-  if (urgentes.length === 0) {
-    document.getElementById("tabla-urgentes").innerHTML =
-      '<div class="empty">✅ Sin OCs atrasadas</div>';
-  } else {
-    document.getElementById("tabla-urgentes").innerHTML = urgentes.map((o,i) => `
-      <div class="t-row">
-        <span class="t-rank">${i+1}</span>
-        <span class="t-oc">${o.idOC}</span>
-        <span class="t-name">${o.cliente}</span>
-        <span class="t-sub">${o.ejecutivo?.split(" ")[0] || "—"}</span>
-        <span class="t-badge ${o.diasAtrasoEntrega >= 5 ? "badge-red" : "badge-amber"}">
-          ${o.diasAtrasoEntrega}d
-        </span>
-      </div>`).join("");
+  if (!urgentes.length) {
+    document.getElementById("tabla-urgentes").innerHTML = '<div class="empty">✅ Sin OCs atrasadas</div>';
+    return;
+  }
+  document.getElementById("tabla-urgentes").innerHTML = urgentes.map((o, i) => `
+    <div class="t-row">
+      <span class="t-rank">${i + 1}</span>
+      <span class="t-oc">${o.idOC}</span>
+      <span class="t-name">${o.cliente}</span>
+      <span class="t-sub">${(o.ejecutivo || "—").split(" ")[0]}</span>
+      <span class="t-badge ${o.diasAtrasoEntrega >= 5 ? "badge-red" : "badge-amber"}">${o.diasAtrasoEntrega}d</span>
+    </div>`).join("");
+}
+
+// ── MOROSIDAD ────────────────────────────────────────────────
+function renderMorosidad(todasOCs) {
+  const moraMap  = {};
+  const procesadas = new Set();
+  let montoRojo = 0, montoAmarillo = 0, montoVerde = 0;
+
+  todasOCs.forEach(oc => {
+    if (procesadas.has(oc.idOC)) return;
+    procesadas.add(oc.idOC);
+    if (!oc.mora) return;
+
+    const ejec  = oc.ejecutivo  || "Sin asignar";
+    const nivel = oc.mora.nivel || "verde";
+    const saldo = Number(oc.mora.saldoTotal || 0);
+    const dias  = Number(oc.mora.diasMax    || 0);
+
+    if (nivel === "rojo")          montoRojo      += saldo;
+    else if (nivel === "amarillo") montoAmarillo  += saldo;
+    else                           montoVerde     += saldo;
+
+    if (!moraMap[ejec]) moraMap[ejec] = { saldoTotal: 0, diasMax: 0, nivel: "verde" };
+    moraMap[ejec].saldoTotal += saldo;
+    if (dias > moraMap[ejec].diasMax) {
+      moraMap[ejec].diasMax = dias;
+      moraMap[ejec].nivel   = nivel;
+    }
+  });
+
+  // Semáforo
+  document.getElementById("sem-rojo").textContent     = fmtMonto(montoRojo);
+  document.getElementById("sem-amarillo").textContent = fmtMonto(montoAmarillo);
+  document.getElementById("sem-verde").textContent    = fmtMonto(montoVerde);
+  const totalMora = montoRojo + montoAmarillo + montoVerde;
+  document.getElementById("m-mora-total").textContent =
+    totalMora > 0 ? fmtMonto(totalMora) + " total en mora" : "Sin mora activa";
+
+  // Tabla ranking
+  const ranking = Object.entries(moraMap)
+    .map(([nombre, d]) => ({ nombre, ...d }))
+    .sort((a, b) => b.saldoTotal - a.saldoTotal)
+    .slice(0, 8);
+
+  if (!ranking.length) {
+    document.getElementById("tabla-morosidad").innerHTML = '<div class="empty">✅ Sin clientes en mora</div>';
+    return;
   }
 
-  // ── TABLA MARGENES ──
-  // Calcular margen por OC desde lineas disponibles
+  const nivelBadge = { rojo: "badge-red", amarillo: "badge-amber", verde: "badge-green" };
+  const nivelLabel = { rojo: ">60d",      amarillo: "30-60d",      verde: "<30d" };
+  const nivelColor = { rojo: "var(--red)", amarillo: "var(--amber)", verde: "var(--green)" };
+
+  document.getElementById("tabla-morosidad").innerHTML = ranking.map((e, i) => `
+    <div class="t-row">
+      <span class="t-rank">${i + 1}</span>
+      <span class="t-name">${e.nombre.split(" ")[0]}</span>
+      <span class="t-badge ${nivelBadge[e.nivel] || "badge-green"}">${nivelLabel[e.nivel] || e.nivel}</span>
+      <span class="t-sub">${e.diasMax}d</span>
+      <span class="t-monto" style="color:${nivelColor[e.nivel] || "var(--green)"}">
+        ${fmtMonto(e.saldoTotal)}
+      </span>
+    </div>`).join("");
+}
+
+// ── EJECUTIVOS (ordenado por utilidad) ───────────────────────
+function renderEjecutivos(todasOCs) {
+  const execMap    = {};
+  const lineasVistas = new Set();
+
+  todasOCs.forEach(oc => {
+    const ejec = oc.ejecutivo || "Sin asignar";
+    if (!execMap[ejec]) execMap[ejec] = { ocs: new Set(), monto: 0, utilidad: 0 };
+    execMap[ejec].ocs.add(oc.idOC);
+
+    (oc.lineas || []).forEach(l => {
+      const clave = oc.idOC + "|" + l.producto;
+      if (lineasVistas.has(clave)) return;
+      lineasVistas.add(clave);
+
+      const vt = Number(l.valorTotal    || 0);
+      const ct = Number(l.costoRealTotal || 0);
+      execMap[ejec].monto += vt;
+      if (vt > 0 && ct > 0) execMap[ejec].utilidad += (vt - ct);
+    });
+  });
+
+  const ranking = Object.entries(execMap)
+    .map(([nombre, d]) => ({
+      nombre,
+      ocs:      d.ocs.size,
+      monto:    d.monto,
+      utilidad: d.utilidad,
+      margen:   d.monto > 0 ? d.utilidad / d.monto : 0,
+    }))
+    .filter(e => e.monto > 0)
+    .sort((a, b) => b.utilidad - a.utilidad)  // ← por utilidad
+    .slice(0, 8);
+
+  if (!ranking.length) {
+    document.getElementById("tabla-ejecutivos").innerHTML = '<div class="empty">Sin datos</div>';
+    return;
+  }
+
+  const medals = ["🥇", "🥈", "🥉"];
+  document.getElementById("tabla-ejecutivos").innerHTML = ranking.map((e, i) => `
+    <div class="t-row">
+      <span class="t-rank">${medals[i] || (i + 1)}</span>
+      <span class="t-name">${e.nombre.split(" ")[0]}</span>
+      <span class="t-badge badge-blue">${e.ocs} OC${e.ocs !== 1 ? "s" : ""}</span>
+      <div class="margen-bar">
+        <div class="margen-fill" style="width:${Math.min(100, e.margen * 300)}%;background:${colorMargen(e.margen)}"></div>
+      </div>
+      <span class="t-margen" style="color:${colorMargen(e.margen)}">${fmtPct(e.margen)}</span>
+      <span class="t-monto-util">${fmtMonto(e.utilidad)}</span>
+      <span class="t-sub">/ ${fmtMonto(e.monto)}</span>
+    </div>`).join("");
+}
+
+// ── MEJORES MÁRGENES ─────────────────────────────────────────
+function renderMargenes(todasOCs) {
   const ocsConMargen = [];
-  const todasConLineas = [...adq, ...bodega, ...despacho];
   const vistas = new Set();
 
-  todasConLineas.forEach(oc => {
+  todasOCs.forEach(oc => {
     if (vistas.has(oc.idOC)) return;
     vistas.add(oc.idOC);
-    let vt = 0, cr = 0;
+
+    let vt = 0, ct = 0;
     (oc.lineas || []).forEach(l => {
       vt += Number(l.valorTotal    || 0);
-      cr += Number(l.costoRealTotal || 0);
+      ct += Number(l.costoRealTotal || 0);
     });
-    if (vt > 0 && cr > 0) {
-      const utilidad = vt - cr;
+
+    if (vt > 0 && ct > 0) {
+      const utilidad = vt - ct;
       const margen   = utilidad / vt;
-      if (margen > 0) {
+      if (margen > 0 && margen < 1) {
         ocsConMargen.push({
           idOC: oc.idOC,
-          cliente: oc.cliente,
           ejecutivo: oc.ejecutivo,
           valorTotal: vt,
           utilidad,
@@ -660,76 +861,29 @@ function renderizar(data) {
     }
   });
 
-  const topMargenes = ocsConMargen
-    .sort((a,b) => b.margen - a.margen)
-    .slice(0, 6);
+  const top = ocsConMargen.sort((a, b) => b.margen - a.margen).slice(0, 8);
 
-  if (topMargenes.length === 0) {
-    document.getElementById("tabla-margenes").innerHTML =
-      '<div class="empty">Sin datos de margen disponibles</div>';
-  } else {
-    document.getElementById("tabla-margenes").innerHTML = topMargenes.map((o,i) => `
-      <div class="t-row">
-        <span class="t-rank">${i+1}</span>
-        <span class="t-oc">${o.idOC}</span>
-        <span class="t-name">${o.cliente}</span>
-        <div class="margen-bar">
-          <div class="margen-fill" style="width:${Math.min(100, o.margen*100*3)}%;background:${colorMargen(o.margen)}"></div>
-        </div>
-        <span class="t-margen" style="color:${colorMargen(o.margen)}">${fmtPct(o.margen)}</span>
-        <span class="t-monto">${fmtMonto(o.utilidad)}</span>
-      </div>`).join("");
+  if (!top.length) {
+    document.getElementById("tabla-margenes").innerHTML = '<div class="empty">Sin datos de margen</div>';
+    return;
   }
 
-  // ── TABLA EJECUTIVOS ──
-  const execMap = {};
-  todasConLineas.forEach(oc => {
-    const ejec = oc.ejecutivo || "Sin asignar";
-    if (!execMap[ejec]) execMap[ejec] = { ocs: new Set(), monto: 0, utilidad: 0 };
-    execMap[ejec].ocs.add(oc.idOC);
-    (oc.lineas || []).forEach(l => {
-      execMap[ejec].monto    += Number(l.valorTotal     || 0);
-      execMap[ejec].utilidad += Number(l.costoRealTotal || 0);
-    });
-  });
-
-  const ranking = Object.entries(execMap)
-    .map(([nombre, d]) => ({
-      nombre,
-      ocs:      d.ocs.size,
-      monto:    d.monto,
-      utilidad: d.monto - d.utilidad,
-      margen:   d.monto > 0 ? (d.monto - d.utilidad) / d.monto : 0,
-    }))
-    .filter(e => e.monto > 0)
-    .sort((a,b) => b.monto - a.monto)
-    .slice(0, 8);
-
-  if (ranking.length === 0) {
-    document.getElementById("tabla-ejecutivos").innerHTML =
-      '<div class="empty">Sin datos disponibles</div>';
-  } else {
-    document.getElementById("tabla-ejecutivos").innerHTML = ranking.map((e,i) => {
-      const medals = ["🥇","🥈","🥉"];
-      const prefix = medals[i] || `${i+1}`;
-      return `
-      <div class="t-row">
-        <span class="t-rank">${prefix}</span>
-        <span class="t-name">${e.nombre.split(" ")[0]}</span>
-        <span class="t-badge badge-blue">${e.ocs} OC${e.ocs !== 1 ? "s" : ""}</span>
-        <span class="t-monto">${fmtMonto(e.monto)}</span>
-        <div class="margen-bar">
-          <div class="margen-fill" style="width:${Math.min(100, e.margen*100*3)}%;background:${colorMargen(e.margen)}"></div>
-        </div>
-        <span class="t-margen" style="color:${colorMargen(e.margen)}">${fmtPct(e.margen)}</span>
-      </div>`;
-    }).join("");
-  }
+  document.getElementById("tabla-margenes").innerHTML = top.map((o, i) => `
+    <div class="t-row">
+      <span class="t-rank">${i + 1}</span>
+      <span class="t-oc">${o.idOC}</span>
+      <span class="t-name">${(o.ejecutivo || "—").split(" ")[0]}</span>
+      <div class="margen-bar">
+        <div class="margen-fill" style="width:${Math.min(100, o.margen * 300)}%;background:${colorMargen(o.margen)}"></div>
+      </div>
+      <span class="t-margen" style="color:${colorMargen(o.margen)}">${fmtPct(o.margen)}</span>
+      <span class="t-monto-util">${fmtMonto(o.utilidad)}</span>
+    </div>`).join("");
 }
 
 // ── INICIO ────────────────────────────────────────────────────
 cargarDatos();
-setInterval(cargarDatos, 5 * 60 * 1000); // cada 5 minutos
+setInterval(cargarDatos, 5 * 60 * 1000);
 </script>
 </body>
 </html>
