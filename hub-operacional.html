@@ -1,859 +1,976 @@
-// ============================================================
-// PANEL DE PRIORIDADES SCC — Backend v2.1
-// Archivo: PanelBackend.gs
-// Cambios v2.1:
-//   - Agrega sección DESPACHO: OCs con todas las líneas Recepcionado
-//   - Agrega sección RETIROS: líneas en estado Retiro / Retiro Pte.
-//   - Alertas: excluye OCs con TODAS las líneas en estados cerrados
-//   - Alertas: filtra solo casos graves (vencida>=3d, adq>=48h, anulado+recepcionado)
-//   - adqMuyAtrasada: nuevo campo para >48h hábiles sin comprar
-// ============================================================
-
-const PANEL_CONFIG = {
-  SHEET_NAME: "GESTOR DE COMPRAS",
-  COL: {
-    EMPRESA:       0,
-    EJECUTIVO:     1,
-    ID_OC:         2,
-    CLIENTE:       3,
-    DIR_DESPACHO:  4,
-    REGION:        5,
-    FECHA_CARGA:   6,
-    ENTREGA_OC:    8,
-    NOMBRE_PROD:   11,
-    CANTIDAD:      12,
-    TIPO_COMPRA:   16,
-    ENCARGADO:     17,
-    ESTADO:        18,
-    PROVEEDOR:     25,
-    OBS_COMPRAS:   26,
-    OBS_LOGISTICA: 27,
-  },
-  // Estados que significan que la OC está cerrada completamente
-  ESTADOS_CERRADOS: [
-    "Despachado", "Retira cliente", "Anulado", "Devuelto", "Directo proveedor"
-  ],
-  // Estados de retiro que Daniel debe gestionar
-  ESTADOS_RETIRO: ["Retiro", "Retiro Pte."],
-  DIAS_HISTORICO: 180,
-  REGION_RM: "XIII - Región Metropolitana de Santiago",
-  EMAIL: {
-    JP:    "juanpablo.guillaume@scc.cl",
-    WENDY: "wendy.munera@scc.cl",
-    JULIO: "julio.israel@scc.cl",
-    ARIEL: "ariel.rodriguez@scc.cl",
-    PEDRO: "pedro.alcaide@scc.cl",
-    BEA:   "beatriz.pirela@scc.cl",
-  },
-  EJECUTIVOS: {
-    "Wendy Munera":    "wendy.munera@scc.cl",
-    "Wendy":           "wendy.munera@scc.cl",
-    "Gari Saez":       "gari.saez@corppremier.cl",
-    "Gari":            "gari.saez@corppremier.cl",
-    "Giorgina Vivas":  "giorgina.vivas@corppremier.cl",
-    "Giorgina":        "giorgina.vivas@corppremier.cl",
-    "Enrique Cabas":   "enrique.cabas@corppremier.cl",
-    "Enrique":         "enrique.cabas@corppremier.cl",
-    "Karla Nuñez":     "karla.nunez@corppremier.cl",
-    "Karla":           "karla.nunez@corppremier.cl",
-    "Belen Sazo":      "belen.sazo@corppremier.cl",
-    "Belen":           "belen.sazo@corppremier.cl",
-    "Manuel Sifontes": "manuel.sifontes@corppremier.cl",
-    "Manuel":          "manuel.sifontes@corppremier.cl",
-    "Zulay Ramires":   "zulay.ramires@corppremier.cl",
-    "Zulay":           "zulay.ramires@corppremier.cl",
-    "Pamela Ramos":    "pamela.ramos@corppremier.cl",
-    "Pamela":          "pamela.ramos@corppremier.cl",
-    "Esteban Yalpi":   "estaban.yalpi@scc.cl",
-    "Esteban":         "estaban.yalpi@scc.cl",
-  },
-};
-
-// ── Días hábiles entre dos fechas ────────────────────────────
-function diasHabiles(desde, hasta) {
-  let count = 0;
-  const d = new Date(desde);
-  d.setHours(0, 0, 0, 0);
-  const h = new Date(hasta);
-  h.setHours(23, 59, 59, 0);
-  while (d < h) {
-    d.setDate(d.getDate() + 1);
-    const dow = d.getDay();
-    if (dow !== 0 && dow !== 6) count++;
-  }
-  return count;
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Operacional SCC</title>
+<style>
+:root {
+  --bg:#f5f4f0; --surface:#fff; --border:rgba(0,0,0,.10); --border-md:rgba(0,0,0,.18);
+  --txt:#1a1a18; --txt-2:#5f5e5a; --txt-3:#8f8e8a;
+  --blue:#185FA5; --blue-bg:#E6F1FB; --blue-txt:#0C447C;
+  --teal:#0F6E56; --teal-bg:#E1F5EE; --teal-txt:#085041;
+  --amber:#854F0B; --amber-bg:#FAEEDA; --amber-txt:#633806;
+  --red:#A32D2D; --red-bg:#FCEBEB; --red-txt:#791F1F;
+  --green:#3B6D11; --green-bg:#EAF3DE; --green-txt:#27500A;
+  --gray-bg:#f1efe8; --gray-txt:#5f5e5a;
+  --r-sm:6px; --r-md:10px; --r-lg:14px;
 }
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1a1a18;--surface:#242420;--border:rgba(255,255,255,.10);--border-md:rgba(255,255,255,.18);
+  --txt:#f0efe9;--txt-2:#a8a79f;--txt-3:#6e6d67;
+  --blue-bg:#0c3a6b;--blue-txt:#85b7eb;--teal-bg:#073d2f;--teal-txt:#5dcaa5;
+  --amber-bg:#4a2800;--amber-txt:#fac775;--red-bg:#4a1515;--red-txt:#f09595;
+  --green-bg:#1a3308;--green-txt:#97c459;--gray-bg:#2c2c2a;--gray-txt:#a8a79f;
+}}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--txt);font-size:14px;min-height:100vh;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:12px;height:52px;position:sticky;top:0;z-index:10;}
+.logo{font-size:15px;font-weight:600;}.logo span{color:var(--blue);}
+.sync-info{font-size:12px;color:var(--txt-3);margin-left:auto;}
+.sync-btn{font-size:12px;background:none;border:1px solid var(--border-md);border-radius:var(--r-sm);padding:4px 10px;cursor:pointer;color:var(--txt-2);}
+.sync-btn:hover{background:var(--gray-bg);}
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);padding:0 20px;overflow-x:auto;}
+.tab{padding:12px 16px;font-size:13px;cursor:pointer;border:none;background:none;color:var(--txt-2);border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.tab.active{color:var(--txt);border-bottom-color:var(--blue);font-weight:500;}
+.tab-count{font-size:11px;padding:1px 6px;border-radius:10px;background:var(--gray-bg);color:var(--txt-3);}
+.tab.active .tab-count{background:var(--blue-bg);color:var(--blue-txt);}
+.tab-count.red{background:var(--red-bg);color:var(--red-txt);}
+.main{padding:16px 20px;max-width:1100px;margin:0 auto;}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 14px;}
+.metric-label{font-size:11px;color:var(--txt-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;}
+.metric-value{font-size:24px;font-weight:500;color:var(--txt);}
+.metric-value.red{color:var(--red);}.metric-value.amber{color:var(--amber);}.metric-value.blue{color:var(--blue);}
+.kpi-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:16px;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:10px 14px;display:flex;align-items:center;gap:10px;}
+.kpi-icon{font-size:20px;}
+.kpi-label{font-size:11px;color:var(--txt-3);}
+.kpi-value{font-size:16px;font-weight:500;color:var(--txt);}
+.section-label{font-size:11px;font-weight:500;color:var(--txt-3);text-transform:uppercase;letter-spacing:.06em;padding:4px 2px 8px;margin-top:16px;}
+.oc-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);margin-bottom:6px;overflow:hidden;border-left-width:3px;}
+.oc-card.urgent{border-left-color:var(--red);}
+.oc-card.express{border-left-color:var(--teal);}
+.oc-card.warn{border-left-color:var(--amber);}
+.oc-card.normal{border-left-color:var(--border);}
+.oc-header{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;}
+.oc-header:hover{background:var(--gray-bg);}
+.oc-id{font-size:13px;font-weight:500;flex-shrink:0;}
+.copy-oc-btn{background:none;border:none;cursor:pointer;font-size:13px;color:var(--txt-3);padding:0 4px;line-height:1;border-radius:3px;transition:color .1s,background .1s;}
+.copy-oc-btn:hover{color:var(--blue);background:var(--blue-bg);}
+.copy-oc-btn.copiado{color:var(--teal);}
+.oc-cliente{font-size:13px;color:var(--txt-2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.oc-meta{display:flex;align-items:center;gap:5px;flex-shrink:0;flex-wrap:wrap;}
+.oc-progress{font-size:11px;color:var(--txt-3);flex-shrink:0;}
+.chevron{font-size:10px;color:var(--txt-3);margin-left:4px;transition:transform .15s;}
+.oc-card.open .chevron{transform:rotate(90deg);}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:500;white-space:nowrap;}
+.b-red{background:var(--red-bg);color:var(--red-txt);}
+.b-amber{background:var(--amber-bg);color:var(--amber-txt);}
+.b-blue{background:var(--blue-bg);color:var(--blue-txt);}
+.b-teal{background:var(--teal-bg);color:var(--teal-txt);}
+.b-green{background:var(--green-bg);color:var(--green-txt);}
+.b-gray{background:var(--gray-bg);color:var(--gray-txt);}
+.oc-lines{display:none;border-top:1px solid var(--border);}
+.oc-card.open .oc-lines{display:block;}
+.lines-table{width:100%;border-collapse:collapse;font-size:12px;}
+.lines-table th{padding:6px 12px;text-align:left;color:var(--txt-3);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.04em;background:var(--bg);}
+.lines-table td{padding:7px 12px;border-top:1px solid var(--border);color:var(--txt);vertical-align:top;}
+.lines-table td.muted{color:var(--txt-2);}
+.lines-table tr:first-child td{border-top:none;}
+.estado{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:500;}
+.e-cotizado{background:var(--gray-bg);color:var(--gray-txt);}
+.e-comprado{background:var(--blue-bg);color:var(--blue-txt);}
+.e-recepcionado{background:var(--teal-bg);color:var(--teal-txt);}
+.e-parcial{background:var(--amber-bg);color:var(--amber-txt);}
+.e-anulado{background:var(--red-bg);color:var(--red-txt);}
+.loading{text-align:center;padding:3rem;color:var(--txt-3);}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:8px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.error-box{background:var(--red-bg);border:1px solid var(--red-txt);border-radius:var(--r-md);padding:16px;color:var(--red-txt);margin:1rem 0;font-size:13px;}
+.empty{text-align:center;padding:2.5rem;color:var(--txt-3);font-size:13px;}
+.alert-banner{background:var(--red-bg);border:1px solid var(--red-txt);border-radius:var(--r-md);padding:10px 14px;margin-bottom:8px;font-size:12px;color:var(--red-txt);}
+.view{display:none;}.view.active{display:block;}
 
-// ── Horas hábiles entre dos fechas ───────────────────────────
-function horasHabiles(desde, hasta) {
-  return diasHabiles(desde, hasta) * 8;
-}
+/* ── COBRANZA ─────────────────────────────────────────────── */
+.cob-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+.cob-select{font-size:12px;border:1px solid var(--border-md);border-radius:6px;padding:5px 10px;background:var(--surface);color:var(--txt);cursor:pointer;}
+.cob-search{font-size:12px;border:1px solid var(--border-md);border-radius:6px;padding:5px 10px;background:var(--surface);color:var(--txt);flex:1;min-width:160px;}
+.cob-table-wrap{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border);}
+.cob-table{width:100%;border-collapse:collapse;font-size:12px;background:var(--surface);}
+.cob-table th{padding:8px 12px;text-align:left;color:var(--txt-3);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.04em;background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap;}
+.cob-table td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--txt);}
+.cob-table tr:last-child td{border-bottom:none;}
+.cob-table tr:hover td{background:var(--gray-bg);}
+.semaforo{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;}
+.semaforo.verde{background:var(--teal-bg);color:var(--teal-txt);}
+.semaforo.amarillo{background:var(--amber-bg);color:var(--amber-txt);}
+.semaforo.rojo{background:var(--red-bg);color:var(--red-txt);}
+.obs-input{width:100%;font-size:11px;border:1px solid var(--border);border-radius:4px;padding:4px 7px;background:var(--surface);color:var(--txt);font-family:inherit;resize:none;min-width:160px;}
+.obs-input:focus{outline:none;border-color:var(--blue);}
+.obs-input.guardando{border-color:var(--amber);background:var(--amber-bg);}
+.obs-input.guardado{border-color:var(--teal);background:var(--teal-bg);}
+.cob-monto{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;}
+.cob-empty{text-align:center;padding:2rem;color:var(--txt-3);font-size:13px;}
+.cob-resumen{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px;}
+.cob-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:10px 14px;}
+.cob-kpi-label{font-size:11px;color:var(--txt-3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em;}
+.cob-kpi-value{font-size:20px;font-weight:500;}
+.cob-kpi-value.rojo{color:var(--red);}
+.cob-kpi-value.amarillo{color:var(--amber);}
+.cob-kpi-value.verde{color:var(--teal);}
+.cob-kpi-sub{font-size:11px;color:var(--txt-3);margin-top:2px;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">SCC <span>Hub</span> Operacional</div>
+  <button class="sync-btn" onclick="cargarDatos()">↻ Actualizar</button>
+  <select id="filtro-ejecutivo" onchange="aplicarFiltro()" style="font-size:12px;border:1px solid var(--border-md);border-radius:6px;padding:4px 10px;background:var(--surface);color:var(--txt);cursor:pointer;">
+    <option value="">Todos los ejecutivos</option>
+    <option value="Wendy Munera">Wendy Munera</option>
+    <option value="Gari Saez">Gari Saez</option>
+    <option value="Giorgina Vivas">Giorgina Vivas</option>
+    <option value="Enrique Cabas">Enrique Cabas</option>
+    <option value="Karla Nuñez">Karla Nuñez</option>
+    <option value="Belen Sazo">Belen Sazo</option>
+    <option value="Manuel Sifontes">Manuel Sifontes</option>
+    <option value="Zulay Ramires">Zulay Ramires</option>
+    <option value="Pamela Ramos">Pamela Ramos</option>
+    <option value="Esteban Yalpi">Esteban Yalpi</option>
+  </select>
+  <span class="sync-info" id="sync-info">—</span>
+</div>
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('adq')" id="tab-adq">Adquisiciones <span class="tab-count" id="cnt-adq">—</span></button>
+  <button class="tab" onclick="switchTab('bodega')" id="tab-bodega">Bodega <span class="tab-count" id="cnt-bodega">—</span></button>
+  <button class="tab" onclick="switchTab('alertas')" id="tab-alertas">Alertas <span class="tab-count red" id="cnt-alertas">—</span></button>
+  <button class="tab" onclick="switchTab('retiros')" id="tab-retiros">Ruta Logística <span class="tab-count red" id="cnt-retiros">—</span></button>
+  <button class="tab" onclick="switchTab('despacho')" id="tab-despacho">Despacho <span class="tab-count red" id="cnt-despacho">—</span></button>
+  <button class="tab" onclick="switchTab('cobranza')" id="tab-cobranza">Cobranza <span class="tab-count red" id="cnt-cobranza">—</span></button>
+</div>
+<div class="main">
+  <div id="view-adq" class="view active"></div>
+  <div id="view-bodega" class="view"></div>
+  <div id="view-alertas" class="view"></div>
+  <div id="view-retiros" class="view"></div>
+  <div id="view-despacho" class="view"></div>
+  <div id="view-cobranza" class="view"></div>
+</div>
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzwgkQUoJtc4Kw-LB2NS2FjL_WvOjLkkv0DgI_iLr78fG8jVbyV2JpAsuAgKfoFk4jTVA/exec";
+let datos = null;
+let datosFiltrados = null;
+let tabActiva = "adq";
+let filtroEjecutivo = "";
 
-// ── Endpoint principal ───────────────────────────────────────
-function doGet(e) {
-  const output = ContentService.createTextOutput();
-  output.setMimeType(ContentService.MimeType.JSON);
-  try {
-    const data = obtenerDatos();
-    output.setContent(JSON.stringify({ ok: true, data }));
-  } catch (err) {
-    output.setContent(JSON.stringify({ ok: false, error: err.message }));
-  }
-  return output;
-}
-
-// ── Lector principal del sheet ───────────────────────────────
-function leerOCs() {
-  const sheet = SpreadsheetApp
-    .getActiveSpreadsheet()
-    .getSheetByName(PANEL_CONFIG.SHEET_NAME);
-  if (!sheet) throw new Error("Hoja no encontrada: " + PANEL_CONFIG.SHEET_NAME);
-
-  const rows  = sheet.getDataRange().getValues();
-  const hoy   = new Date();
-  const corte = new Date();
-  corte.setDate(corte.getDate() - PANEL_CONFIG.DIAS_HISTORICO);
-
-  const ocMap = {};
-
-  for (let i = 2; i < rows.length; i++) {
-    const r        = rows[i];
-    const idOC     = String(r[PANEL_CONFIG.COL.ID_OC]  || "").trim();
-    const estado   = String(r[PANEL_CONFIG.COL.ESTADO] || "").trim();
-    const fechaCarga = r[PANEL_CONFIG.COL.FECHA_CARGA];
-
-    if (!idOC || !estado) continue;
-    if (fechaCarga && new Date(fechaCarga) < corte) continue;
-
-    if (!ocMap[idOC]) {
-      ocMap[idOC] = {
-        idOC,
-        empresa:    String(r[PANEL_CONFIG.COL.EMPRESA]      || "").trim(),
-        ejecutivo:  String(r[PANEL_CONFIG.COL.EJECUTIVO]    || "").trim(),
-        cliente:    String(r[PANEL_CONFIG.COL.CLIENTE]      || "").trim(),
-        dir:        String(r[PANEL_CONFIG.COL.DIR_DESPACHO] || "").trim(),
-        region:     String(r[PANEL_CONFIG.COL.REGION]       || "").trim(),
-        tipoCompra: String(r[PANEL_CONFIG.COL.TIPO_COMPRA]  || "").trim(),
-        encargado:  String(r[PANEL_CONFIG.COL.ENCARGADO]    || "").trim(),
-        fechaCarga: fechaCarga ? new Date(fechaCarga).toISOString() : null,
-        entregaOC:  r[PANEL_CONFIG.COL.ENTREGA_OC]
-                      ? new Date(r[PANEL_CONFIG.COL.ENTREGA_OC]).toISOString()
-                      : null,
-        lineas: [],
-      };
-    }
-
-    ocMap[idOC].lineas.push({
-      producto:     String(r[PANEL_CONFIG.COL.NOMBRE_PROD]    || "").trim(),
-      cantidad:     r[PANEL_CONFIG.COL.CANTIDAD]              || "",
-      proveedor:    String(r[PANEL_CONFIG.COL.PROVEEDOR]      || "").trim(),
-      obsCompras:   String(r[PANEL_CONFIG.COL.OBS_COMPRAS]    || "").trim(),
-      obsLogistica: String(r[PANEL_CONFIG.COL.OBS_LOGISTICA]  || "").trim(),
-      estado,
-    });
-  }
-
-  return { ocMap, hoy };
-}
-
-// ── Datos para el panel ──────────────────────────────────────
-function obtenerDatos() {
-  const { ocMap, hoy } = leerOCs();
-  const adquisiciones = [];
-  const bodega        = [];
-  const alertas       = [];
-  const despacho      = [];       // ← NUEVO
-  const retirosArr    = [];       // ← NUEVO: retiros para Daniel
-  const despachosRM   = [];       // ← NUEVO: despachos RM para Daniel
-
-  for (const idOC in ocMap) {
-    const oc     = ocMap[idOC];
-    const lineas = oc.lineas;
-    const estados = lineas.map(l => l.estado);
-
-    const esExpress    = oc.tipoCompra === "Compra express" || oc.tipoCompra === "Express";
-    const sinEncargado = !oc.encargado || oc.encargado.trim() === "";
-
-    // ¿Todas las líneas están en estados cerrados?
-    const todasCerradas = lineas.every(l =>
-      PANEL_CONFIG.ESTADOS_CERRADOS.includes(l.estado)
-    );
-    // Si toda la OC está cerrada, no aparece en ninguna sección operativa
-    if (todasCerradas) continue;
-
-    // KPI: horas hábiles desde solicitud → hoy
-    const hh_solicitud = oc.fechaCarga
-      ? horasHabiles(new Date(oc.fechaCarga), hoy) : null;
-
-    // Días de atraso en entrega
-    let diasAtrasoEntrega = 0;
-    if (oc.entregaOC) {
-      const fe = new Date(oc.entregaOC);
-      if (fe < hoy) diasAtrasoEntrega = diasHabiles(fe, hoy);
-    }
-
-    // ── RETIROS: líneas en estado Retiro / Retiro Pte. ──────
-    const lineasRetiro = lineas.filter(l =>
-      PANEL_CONFIG.ESTADOS_RETIRO.includes(l.estado)
-    );
-    if (lineasRetiro.length > 0) {
-      // ¿Completa la OC? = no quedan líneas activas fuera de retiro y recepcionado
-      const lineasPendientesNoRetiro = lineas.filter(l =>
-        !PANEL_CONFIG.ESTADOS_CERRADOS.includes(l.estado) &&
-        !PANEL_CONFIG.ESTADOS_RETIRO.includes(l.estado) &&
-        l.estado !== "Recepcionado"
-      );
-      const completaOC = lineasPendientesNoRetiro.length === 0;
-
-      // ¿Está listo para retirar? = al menos una línea en "Retiro" (no "Retiro Pte.")
-      const listo = lineasRetiro.some(l => l.estado === "Retiro");
-
-      retirosArr.push({
-        ...oc,
-        lineas: lineasRetiro,
-        totalLineas: lineas.length,
-        completaOC,
-        listo,
-        diasAtrasoEntrega,
-        alertaAnuladoRecepcionado:
-          estados.includes("Anulado") && estados.includes("Recepcionado"),
-      });
-    }
-
-    // ── DESPACHO: OCs completamente recepcionadas ────────────
-    // Excluir retiros y estados cerrados para calcular líneas activas
-    const lineasActivas = lineas.filter(l =>
-      !["Anulado","Devuelto","Directo proveedor","Retira cliente","Despachado",
-        "Retiro","Retiro Pte."].includes(l.estado)
-    );
-    const todasRecepcionadas = lineasActivas.length > 0 &&
-      lineasActivas.every(l => l.estado === "Recepcionado");
-
-    if (todasRecepcionadas) {
-      despacho.push({
-        ...oc,
-        lineas: lineasActivas,
-        totalLineas: lineas.length,
-        diasAtrasoEntrega,
-      });
-
-      // ── DESPACHOS RM para Daniel (Ruta Logística prioridad 1) ──
-      const esRM = oc.region && oc.region.indexOf("Metropolitana") !== -1;
-      if (esRM) {
-        despachosRM.push({
-          ...oc,
-          lineas: lineasActivas,
-          totalLineas: lineas.length,
-          diasAtraso: diasAtrasoEntrega,
-        });
-      }
-
-      continue; // No mostrar en adq/bodega
-    }
-
-    // ── ADQUISICIONES: líneas pendientes de compra ───────────
-    // Todos los estados que requieren acción de adquisiciones
-    const ESTADOS_ADQ = [
-      "Nueva", "Cotizado", "En pago", "Pendiente de pago",
-      "Stock en bodega", "Compra pausada", "", null
-    ];
-    const lineasAdq = lineas.filter(l => ESTADOS_ADQ.includes(l.estado));
-    if (lineasAdq.length > 0) {
-      const adqAtrasada    = hh_solicitud !== null && hh_solicitud > 24;
-      const adqMuyAtrasada = hh_solicitud !== null && hh_solicitud > 48;
-      adquisiciones.push({
-        ...oc,
-        lineas: lineasAdq,
-        totalLineas: lineas.length,
-        horasHabiles: Math.round(hh_solicitud || 0),
-        esExpress,
-        sinEncargado,
-        adqAtrasada,
-        adqMuyAtrasada,       // ← NUEVO campo
-        diasAtrasoEntrega,
-        alertaAnuladoRecepcionado:
-          estados.includes("Anulado") && estados.includes("Recepcionado"),
-      });
-    }
-
-    // ── BODEGA: líneas compradas pendientes de recepción ─────
-    const lineasBodega = lineas.filter(l =>
-      l.estado === "Comprado" || l.estado === "Recepcion parcial"
-    );
-    if (lineasBodega.length > 0) {
-      const diasComprado = oc.fechaCarga
-        ? diasHabiles(new Date(oc.fechaCarga), hoy) : 0;
-      const tienePartiales     = estados.includes("Recepcion parcial");
-      const tieneRecepcionados = estados.includes("Recepcionado");
-
-      bodega.push({
-        ...oc,
-        lineas: lineasBodega,
-        totalLineas: lineas.length,
-        lineasRecepcionadas: lineas.filter(l => l.estado === "Recepcionado").length,
-        diasComprado,
-        tienePartiales,
-        tieneRecepcionados,
-        diasAtrasoEntrega,
-        alertaAnuladoRecepcionado:
-          estados.includes("Anulado") && estados.includes("Recepcionado"),
-      });
-    }
-
-    // ── ALERTAS: solo casos graves ───────────────────────────
-    // 1. Vencida >= 3 días hábiles
-    // 2. Adquisición >= 48h hábiles sin comprar (y hay líneas sin comprar)
-    // 3. Anulado + Recepcionado en misma OC
-    const tieneLineasSinComprar = lineas.some(l =>
-      ["Cotizado","En pago","Pendiente de pago",""].includes(l.estado)
-    );
-    const esAlertaGrave =
-      diasAtrasoEntrega >= 3 ||
-      (hh_solicitud !== null && hh_solicitud >= 48 && tieneLineasSinComprar) ||
-      (estados.includes("Anulado") && estados.includes("Recepcionado"));
-
-    if (esAlertaGrave) {
-      alertas.push({
-        ...oc,
-        lineas,
-        totalLineas: lineas.length,
-        horasHabiles: Math.round(hh_solicitud || 0),
-        esExpress,
-        sinEncargado,
-        adqAtrasada:    hh_solicitud !== null && hh_solicitud > 24,
-        adqMuyAtrasada: hh_solicitud !== null && hh_solicitud > 48,
-        adqComprada:    !tieneLineasSinComprar,
-        diasAtrasoEntrega,
-        critico: diasAtrasoEntrega >= 3 ||
-                 (estados.includes("Anulado") && estados.includes("Recepcionado")),
-        alertaAnuladoRecepcionado:
-          estados.includes("Anulado") && estados.includes("Recepcionado"),
-      });
-    }
-  }
-
-  // ── Ordenar ──────────────────────────────────────────────────
-  adquisiciones.sort((a, b) => {
-    if (a.sinEncargado   !== b.sinEncargado)   return a.sinEncargado   ? -1 : 1;
-    if (a.adqMuyAtrasada !== b.adqMuyAtrasada) return a.adqMuyAtrasada ? -1 : 1;
-    if (a.adqAtrasada    !== b.adqAtrasada)    return a.adqAtrasada    ? -1 : 1;
-    if (a.esExpress      !== b.esExpress)      return a.esExpress      ? -1 : 1;
-    return (b.horasHabiles || 0) - (a.horasHabiles || 0);
-  });
-
-  bodega.sort((a, b) => (b.diasComprado || 0) - (a.diasComprado || 0));
-
-  alertas.sort((a, b) => {
-    if (a.critico !== b.critico) return a.critico ? -1 : 1;
-    return (b.diasAtrasoEntrega || 0) - (a.diasAtrasoEntrega || 0);
-  });
-
-  despacho.sort((a, b) => (b.diasAtrasoEntrega || 0) - (a.diasAtrasoEntrega || 0));
-
-  // Retiros: primero los que completan OC, luego los listos, luego el resto
-  retirosArr.sort((a, b) => {
-    if (a.completaOC !== b.completaOC) return a.completaOC ? -1 : 1;
-    if (a.listo      !== b.listo)      return a.listo      ? -1 : 1;
-    return (b.diasAtrasoEntrega || 0) - (a.diasAtrasoEntrega || 0);
-  });
-
-  // Despachos RM: más atrasados primero
-  despachosRM.sort((a, b) => (b.diasAtraso || 0) - (a.diasAtraso || 0));
-
-  // ── Métricas ─────────────────────────────────────────────────
-  const metricas = {
-    adq: {
-      total:        adquisiciones.length,
-      atrasadas:    adquisiciones.filter(o => o.adqAtrasada).length,
-      muyAtrasadas: adquisiciones.filter(o => o.adqMuyAtrasada).length,
-      express:      adquisiciones.filter(o => o.esExpress).length,
-      sinEncargado: adquisiciones.filter(o => o.sinEncargado).length,
-    },
-    bodega: {
-      total:      bodega.length,
-      parciales:  bodega.filter(o => o.tienePartiales).length,
-      masAntiguo: bodega.length > 0 ? Math.max(...bodega.map(o => o.diasComprado || 0)) : 0,
-      hoy:        bodega.filter(o => (o.diasComprado || 0) === 0).length,
-    },
-    alertas: {
-      vencidas3d:   alertas.filter(o => o.diasAtrasoEntrega >= 3).length,
-      adqMas48h:    alertas.filter(o => o.horasHabiles >= 48 && !o.adqComprada).length,
-      anulRec:      alertas.filter(o => o.alertaAnuladoRecepcionado).length,
-      // Mantener compatibilidad con campos anteriores
-      vencidas:     alertas.filter(o => o.diasAtrasoEntrega >= 1).length,
-      sinEncargado: alertas.filter(o => o.sinEncargado).length,
-      criticas:     alertas.filter(o => o.critico).length,
-      adqMasde48:   alertas.filter(o => o.horasHabiles > 48).length,
-    },
-    despacho: {
-      total:     despacho.length,
-      atrasadas: despacho.filter(o => o.diasAtrasoEntrega > 0).length,
-      urgentes:  despacho.filter(o => o.diasAtrasoEntrega >= 3).length,
-    },
-  };
-
-  // ── Retiros: estructura para Ruta Logística ──────────────────
-  // despachos = OCs RM listas para que Daniel despache
-  // retiros   = líneas que Daniel debe ir a buscar a proveedores
-  const retiros = {
-    retiros:   retirosArr,
-    despachos: despachosRM,
-    metricas: {
-      totalRetiros: retirosArr.length,
-      completanOC:  retirosArr.filter(o => o.completaOC).length,
-      despachosRM:  despachosRM.length,
-      atrasados:    retirosArr.filter(o => o.diasAtrasoEntrega > 0).length,
-    },
-  };
-
-  return {
-    adquisiciones,
-    bodega,
-    alertas,
-    despacho,
-    retiros,
-    metricas,
-    generadoEn: new Date().toISOString(),
-  };
-}
-
-// ============================================================
-// SCRIPT DE ALERTAS — verificarCambiosEstado
-// Corre cada 15 minutos via trigger
-// ============================================================
-
-function verificarCambiosEstado() {
-  const { ocMap, hoy } = leerOCs();
-  const cache = CacheService.getScriptCache();
-
-  for (const idOC in ocMap) {
-    const oc     = ocMap[idOC];
-    const lineas = oc.lineas;
-    const estados = lineas.map(l => l.estado);
-
-    // Ignorar OCs completamente cerradas
-    const todasCerradas = lineas.every(l =>
-      PANEL_CONFIG.ESTADOS_CERRADOS.includes(l.estado)
-    );
-    if (todasCerradas) continue;
-
-    const esExpress    = oc.tipoCompra === "Compra express" || oc.tipoCompra === "Express";
-    const sinEncargado = !oc.encargado || oc.encargado.trim() === "";
-    const hh_solicitud = oc.fechaCarga
-      ? horasHabiles(new Date(oc.fechaCarga), hoy) : null;
-
-    // ── Aviso a JP: líneas en Comprado ──────────────────────
-    const compradas = lineas.filter(l => l.estado === "Comprado");
-    if (compradas.length > 0) {
-      const key = `jp_${idOC}`;
-      if (!cache.get(key)) {
-        emailJP(idOC, oc, lineas, compradas);
-        cache.put(key, "1", 43200);
-      }
-    }
-
-    // ── Aviso al ejecutivo: OC completa en bodega ───────────
-    const pendientesBodega = lineas.filter(l =>
-      !["Recepcionado","Despachado","Directo proveedor","Retira cliente","Anulado"].includes(l.estado)
-    );
-    if (pendientesBodega.length === 0 && lineas.length > 0) {
-      const key = `ejec_${idOC}`;
-      if (!cache.get(key)) {
-        const email = PANEL_CONFIG.EJECUTIVOS[oc.ejecutivo] || null;
-        if (email) {
-          emailEjecutivo(idOC, oc, lineas, email);
-          cache.put(key, "1", 86400);
-        }
-      }
-    }
-
-    // ── Alerta ejecutivo: sin encargado >2 días hábiles ─────
-    if (sinEncargado && hh_solicitud !== null && hh_solicitud > 16) {
-      const key = `sinenc_${idOC}`;
-      if (!cache.get(key)) {
-        const email = PANEL_CONFIG.EJECUTIVOS[oc.ejecutivo] || null;
-        if (email) emailSinEncargado(idOC, oc, email);
-        cache.put(key, "1", 28800);
-      }
-    }
-
-    // ── Alerta ejecutivo: línea en Comprado >3 días sin cambio
-    const compradasAntiguas = lineas.filter(l => {
-      if (l.estado !== "Comprado") return false;
-      const dh = oc.fechaCarga ? diasHabiles(new Date(oc.fechaCarga), hoy) : 0;
-      return dh > 3;
-    });
-    if (compradasAntiguas.length > 0) {
-      const key = `compold_${idOC}`;
-      if (!cache.get(key)) {
-        const email = PANEL_CONFIG.EJECUTIVOS[oc.ejecutivo] || null;
-        if (email) emailCompradoSinActualizar(idOC, oc, compradasAntiguas, email);
-        cache.put(key, "1", 28800);
-      }
-    }
-
-    // ── Alerta: OC vencida sin despachar ────────────────────
-    if (oc.entregaOC) {
-      const fe   = new Date(oc.entregaOC);
-      const dias = diasHabiles(fe, hoy);
-      const sinDespachar = lineas.filter(l =>
-        !["Despachado","Directo proveedor","Retira cliente","Anulado"].includes(l.estado)
-      );
-      if (dias > 0 && sinDespachar.length > 0) {
-        const key = `atraso_${idOC}`;
-        if (!cache.get(key)) {
-          emailAtraso(idOC, oc, dias, sinDespachar.length, lineas.length);
-          if (dias >= 5) emailAtrasoJulio(idOC, oc, dias);
-          cache.put(key, "1", 21600);
-        }
-      }
-    }
-
-    // ── Alerta: Anulado + Recepcionado en misma OC ──────────
-    if (estados.includes("Anulado") && estados.includes("Recepcionado")) {
-      const key = `anulrec_${idOC}`;
-      if (!cache.get(key)) {
-        emailAnuladoRecepcionado(idOC, oc, lineas);
-        cache.put(key, "1", 86400);
-      }
-    }
-
-    // ── Alerta: Cotizado >24h sin avanzar ───────────────────
-    const cotizadas = lineas.filter(l => l.estado === "Cotizado");
-    if (cotizadas.length > 0 && hh_solicitud !== null && hh_solicitud > 24) {
-      const key = `cotiz_${idOC}`;
-      if (!cache.get(key)) {
-        emailCotizadoAtrasado(idOC, oc, cotizadas);
-        cache.put(key, "1", 28800);
-      }
-    }
-
-    // ── Alerta: Pendiente de pago sin movimiento ─────────────
-    const pendPago = lineas.filter(l => l.estado === "Pendiente de pago");
-    if (pendPago.length > 0 && hh_solicitud !== null && hh_solicitud > 24) {
-      const key = `pendpago_${idOC}`;
-      if (!cache.get(key)) {
-        emailPendientePago(idOC, oc, pendPago);
-        cache.put(key, "1", 28800);
-      }
-    }
-  }
-}
-
-// ── RESUMEN DIARIO 8:00 AM ───────────────────────────────────
-function resumenDiario() {
-  const { ocMap, hoy } = leerOCs();
-
-  const atrasadas  = [];
-  const express    = [];
-  const normales   = [];
-  const sinAsignar = [];
-
-  for (const idOC in ocMap) {
-    const oc     = ocMap[idOC];
-    const lineas = oc.lineas;
-
-    const todasCerradas = lineas.every(l =>
-      PANEL_CONFIG.ESTADOS_CERRADOS.includes(l.estado)
-    );
-    if (todasCerradas) continue;
-
-    const lineasPend = lineas.filter(l =>
-      ["Cotizado","En pago","Pendiente de pago"].includes(l.estado)
-    );
-    if (lineasPend.length === 0) continue;
-
-    const hh     = oc.fechaCarga ? horasHabiles(new Date(oc.fechaCarga), hoy) : 0;
-    const sinEnc = !oc.encargado || oc.encargado.trim() === "";
-    const esExp  = oc.tipoCompra === "Compra express";
-
-    const item = {
-      idOC: oc.idOC,
-      cliente: oc.cliente,
-      ejecutivo: oc.ejecutivo,
-      encargado: oc.encargado,
-      horas: Math.round(hh),
-      lineasPendientes: lineasPend.length,
-      totalLineas: lineas.length,
-      esExpress: esExp,
+function aplicarFiltro() {
+  filtroEjecutivo = document.getElementById("filtro-ejecutivo").value;
+  if (!datos) return;
+  if (!filtroEjecutivo) {
+    datosFiltrados = datos;
+  } else {
+    const ret = datos.retiros || { retiros:[], despachos:[], metricas:{} };
+    datosFiltrados = {
+      ...datos,
+      adquisiciones: datos.adquisiciones.filter(o => o.ejecutivo === filtroEjecutivo),
+      bodega:        datos.bodega.filter(o => o.ejecutivo === filtroEjecutivo),
+      alertas:       datos.alertas.filter(o => o.ejecutivo === filtroEjecutivo),
+      despacho:      (datos.despacho||[]).filter(o => o.ejecutivo === filtroEjecutivo),
+      cobranza:      (datos.cobranza||[]).filter(o => o.vendedor === filtroEjecutivo),
+      retiros: {
+        ...ret,
+        retiros:   (ret.retiros||[]).filter(o => o.ejecutivo === filtroEjecutivo),
+        despachos: (ret.despachos||[]).filter(o => o.ejecutivo === filtroEjecutivo),
+      },
     };
-
-    if (sinEnc)       sinAsignar.push(item);
-    else if (hh > 24) atrasadas.push(item);
-    else if (esExp)   express.push(item);
-    else              normales.push(item);
   }
-
-  atrasadas.sort((a,b) => b.horas - a.horas);
-  express.sort((a,b) => b.horas - a.horas);
-
-  const filaTabla = (item, color) => `
-    <tr style="border-bottom:1px solid #eee">
-      <td style="padding:6px 10px;font-size:12px;font-weight:500">${item.idOC}</td>
-      <td style="padding:6px 10px;font-size:12px">${item.cliente}</td>
-      <td style="padding:6px 10px;font-size:12px">${item.ejecutivo}</td>
-      <td style="padding:6px 10px;font-size:12px;text-align:center">
-        <span style="background:${color};color:#fff;padding:1px 6px;border-radius:3px;font-size:11px">
-          ${item.horas}h
-        </span>
-      </td>
-      <td style="padding:6px 10px;font-size:12px;text-align:center">${item.lineasPendientes}/${item.totalLineas}</td>
-      <td style="padding:6px 10px;font-size:12px">${item.encargado || '—'}</td>
-    </tr>`;
-
-  const seccion = (titulo, color, items) => {
-    if (items.length === 0) return "";
-    return `
-      <div style="margin-top:20px">
-        <div style="font-size:11px;font-weight:500;color:${color};text-transform:uppercase;
-                    letter-spacing:.05em;padding:6px 10px;background:#f8f8f6;border-left:3px solid ${color}">
-          ${titulo} (${items.length})
-        </div>
-        <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e0e0d8">
-          <thead><tr style="background:#f0efe8">
-            <th style="padding:6px 10px;font-size:11px;text-align:left;color:#5f5e5a">OC</th>
-            <th style="padding:6px 10px;font-size:11px;text-align:left;color:#5f5e5a">Cliente</th>
-            <th style="padding:6px 10px;font-size:11px;text-align:left;color:#5f5e5a">Ejecutivo</th>
-            <th style="padding:6px 10px;font-size:11px;text-align:center;color:#5f5e5a">Tiempo</th>
-            <th style="padding:6px 10px;font-size:11px;text-align:center;color:#5f5e5a">Líneas</th>
-            <th style="padding:6px 10px;font-size:11px;text-align:left;color:#5f5e5a">Encargado</th>
-          </tr></thead>
-          <tbody>${items.map(i => filaTabla(i, color)).join("")}</tbody>
-        </table>
-      </div>`;
-  };
-
-  const fecha = Utilities.formatDate(hoy, "America/Santiago", "EEEE dd 'de' MMMM yyyy");
-
-  const html = `
-  <div style="font-family:Arial,sans-serif;max-width:760px;margin:0 auto">
-    <div style="background:#185FA5;padding:16px 24px;border-radius:8px 8px 0 0">
-      <h2 style="color:#fff;margin:0;font-size:18px">📋 Resumen diario — Adquisiciones</h2>
-      <p style="color:#B5D4F4;margin:4px 0 0;font-size:13px">${fecha}</p>
-    </div>
-    <div style="background:#f8f8f6;padding:20px 24px;border:1px solid #e0e0d8">
-      ${seccion("🔴 Sin encargado asignado", "#A32D2D", sinAsignar)}
-      ${seccion("🟡 Atrasadas >24h hábiles", "#854F0B", atrasadas)}
-      ${seccion("🟢 Express — priorizar", "#0F6E56", express)}
-      ${seccion("🔵 Pendientes normales", "#185FA5", normales)}
-    </div>
-  </div>`;
-
-  MailApp.sendEmail({
-    to: [PANEL_CONFIG.EMAIL.ARIEL, PANEL_CONFIG.EMAIL.PEDRO, PANEL_CONFIG.EMAIL.WENDY].join(","),
-    subject: `📋 Adquisiciones ${Utilities.formatDate(hoy,"America/Santiago","dd/MM")} — ${sinAsignar.length} sin asignar · ${atrasadas.length} atrasadas`,
-    htmlBody: html,
-  });
+  renderizarTodo();
 }
 
-// ── EMAILS INDIVIDUALES ──────────────────────────────────────
+async function cargarDatos() {
+  mostrarLoading();
+  try {
+    const res  = await fetch(API_URL);
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || "Error desconocido");
+    datos = json.data;
+    renderizarTodo();
+    document.getElementById("sync-info").textContent =
+      "Actualizado " + new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"});
+  } catch(e) { mostrarError(e.message); }
+}
 
-function emailJP(idOC, oc, todasLineas, compradas) {
-  const fecha = oc.entregaOC ? Utilities.formatDate(new Date(oc.entregaOC),"America/Santiago","dd/MM/yyyy") : "Sin fecha";
-  const pendientes = todasLineas.filter(l =>
-    !["Recepcionado","Despachado","Directo proveedor"].includes(l.estado)
-  ).length;
+function mostrarLoading() {
+  ["adq","bodega","alertas","retiros","despacho","cobranza"].forEach(v => {
+    document.getElementById("view-"+v).innerHTML =
+      '<div class="loading"><div class="spinner"></div><br>Cargando datos...</div>';
+  });
+}
+function mostrarError(msg) {
+  document.getElementById("view-"+tabActiva).innerHTML =
+    '<div class="error-box">Error al cargar datos: '+msg+'</div>';
+}
 
-  let filas = compradas.map(l => `<tr style="border-bottom:1px solid #eee">
-    <td style="padding:7px 10px;font-size:12px">${l.producto || "—"}</td>
-    <td style="padding:7px 10px;font-size:12px;text-align:center">${l.cantidad || "—"}</td>
-    <td style="padding:7px 10px;font-size:12px;color:#5f5e5a">${l.proveedor || "—"}</td>
-    <td style="padding:7px 10px;font-size:12px;color:#5f5e5a">${l.obsLogistica || "—"}</td>
-  </tr>`).join("");
+function renderizarTodo() {
+  if (!datos) return;
+  datosFiltrados = filtroEjecutivo ? datosFiltrados : datos;
+  const m = datos.metricas;
 
-  const html = `<div style="font-family:Arial,sans-serif;max-width:680px">
-    <div style="background:#185FA5;padding:14px 20px;border-radius:8px 8px 0 0">
-      <h2 style="color:#fff;margin:0;font-size:17px">📦 Pedido listo para recepcionar</h2>
+  document.getElementById("cnt-adq").textContent    = m.adq ? m.adq.total : 0;
+  document.getElementById("cnt-bodega").textContent  = m.bodega ? m.bodega.total : 0;
+  document.getElementById("cnt-alertas").textContent = "…";
+
+  if (!datos.despacho)       datos.despacho = [];
+  if (!datos.retiros)        datos.retiros  = { retiros:[], despachos:[], metricas:{} };
+  if (!datos.retiros.retiros)   datos.retiros.retiros   = [];
+  if (!datos.retiros.despachos) datos.retiros.despachos = [];
+  if (!datos.cobranza)       datos.cobranza = [];
+
+  const totalRetiros = (datos.retiros.metricas||{}).totalRetiros || 0;
+  const despachosRM  = (datos.retiros.metricas||{}).despachosRM  || 0;
+  document.getElementById("cnt-retiros").textContent  = totalRetiros + despachosRM;
+  document.getElementById("cnt-despacho").textContent = (m.despacho||{}).total || datos.despacho.length || 0;
+
+  // Contador cobranza: documentos en rojo o amarillo
+  const cob = datos.cobranza || [];
+  const cobCriticos = cob.filter(f => f.nivel === "rojo" || f.nivel === "amarillo").length;
+  document.getElementById("cnt-cobranza").textContent = cobCriticos || cob.length;
+
+  renderizarAdq();
+  renderizarBodega();
+  renderizarAlertas();
+  renderizarRetiros();
+  renderizarDespacho();
+  renderizarCobranza();
+}
+
+// ── ADQUISICIONES ─────────────────────────────────────────────
+let filtroAdq = "todos";
+
+function renderizarAdq() {
+  const d = datosFiltrados || datos;
+  const m   = datos.metricas.adq;
+  const ocs = d.adquisiciones;
+  let html  = metricas([
+    {label:"Pendientes",    value:m.total,        cls:""},
+    {label:"Atrasadas",     value:m.atrasadas,    cls:m.atrasadas>0?"red":""},
+    {label:"Express",       value:m.express,      cls:m.express>0?"amber":""},
+    {label:"Sin encargado", value:m.sinEncargado, cls:m.sinEncargado>0?"red":""},
+  ]);
+
+  const sinAsignar   = ocs.filter(o=>o.sinEncargado);
+  const muyAtrasadas = ocs.filter(o=>o.adqMuyAtrasada && !o.sinEncargado);
+  const atrasadas    = ocs.filter(o=>o.adqAtrasada && !o.adqMuyAtrasada && !o.sinEncargado);
+  const express      = ocs.filter(o=>!o.adqAtrasada&&o.esExpress&&!o.sinEncargado);
+  const normales     = ocs.filter(o=>!o.adqAtrasada&&!o.esExpress&&!o.sinEncargado);
+  const todasAtrasadas = [...muyAtrasadas, ...atrasadas];
+
+  const subTabs = [
+    {key:"todos",      label:"Todas",        cnt:ocs.length,            cls:"b-gray"},
+    {key:"sinAsignar", label:"Sin asignar",  cnt:sinAsignar.length,     cls:"b-red"},
+    {key:"atrasadas",  label:"Atrasadas",    cnt:todasAtrasadas.length, cls:"b-amber"},
+    {key:"express",    label:"⚡ Express",   cnt:express.length,        cls:"b-teal"},
+    {key:"normales",   label:"Normales",     cnt:normales.length,       cls:"b-blue"},
+  ];
+
+  html += `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">` +
+    subTabs.map(t => `<button onclick="setFiltroAdq('${t.key}')" id="adq-sub-${t.key}"
+      style="border:1px solid var(--border-md);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;
+      background:${filtroAdq===t.key?"var(--blue)":"var(--surface)"};
+      color:${filtroAdq===t.key?"#fff":"var(--txt-2)"};font-weight:${filtroAdq===t.key?500:400}">
+      ${t.label} <span style="opacity:.7">${t.cnt}</span>
+    </button>`).join("") + `</div>`;
+
+  if (ocs.length===0){html+='<div class="empty">Sin órdenes pendientes</div>';
+    document.getElementById("view-adq").innerHTML=html;return;}
+
+  let mostrar = { sinAsignar, muyAtrasadas, atrasadas, express, normales };
+  if (filtroAdq === "sinAsignar")  { mostrar = {sinAsignar, muyAtrasadas:[], atrasadas:[], express:[], normales:[]}; }
+  if (filtroAdq === "atrasadas")   { mostrar = {sinAsignar:[], muyAtrasadas, atrasadas, express:[], normales:[]}; }
+  if (filtroAdq === "express")     { mostrar = {sinAsignar:[], muyAtrasadas:[], atrasadas:[], express, normales:[]}; }
+  if (filtroAdq === "normales")    { mostrar = {sinAsignar:[], muyAtrasadas:[], atrasadas:[], express:[], normales}; }
+
+  if(mostrar.sinAsignar.length>0){html+='<div class="section-label">Sin encargado asignado</div>';
+    mostrar.sinAsignar.forEach(o=>{html+=cardAdq(o,"urgent");});}
+  if(mostrar.muyAtrasadas.length>0){html+='<div class="section-label">🔴 Alerta máxima — más de 48h sin comprar</div>';
+    mostrar.muyAtrasadas.forEach(o=>{html+=cardAdq(o,"urgent");});}
+  if(mostrar.atrasadas.length>0){html+='<div class="section-label">🟡 Atrasadas — más de 24h sin comprar</div>';
+    mostrar.atrasadas.forEach(o=>{html+=cardAdq(o,"warn");});}
+  if(mostrar.express.length>0){html+='<div class="section-label">⚡ Express — cotización lista</div>';
+    mostrar.express.forEach(o=>{html+=cardAdq(o,"express");});}
+  if(mostrar.normales.length>0){html+='<div class="section-label">En gestión normal</div>';
+    mostrar.normales.forEach(o=>{html+=cardAdq(o,"normal");});}
+
+  const totalMostradas = Object.values(mostrar).flat().length;
+  if(totalMostradas===0){html+='<div class="empty">Sin órdenes en esta categoría</div>';}
+
+  document.getElementById("view-adq").innerHTML=html;
+}
+
+function setFiltroAdq(key) {
+  filtroAdq = key;
+  renderizarAdq();
+}
+
+function cardAdq(o, tipo) {
+  const badgeT = o.adqMuyAtrasada ? badge("🔴 "+o.horasHabiles+"h","b-red")
+    : o.adqAtrasada ? badge("🟡 "+o.horasHabiles+"h","b-amber")
+    : o.esExpress ? badge("⚡ Express","b-teal") : badge(o.horasHabiles+"h","b-blue");
+  const badgeE = o.sinEncargado ? badge("Sin asignar","b-red") : badge(o.encargado,"b-gray");
+
+  // ── Semáforo morosidad — usa campo "morosidad" del backend ──
+  let badgeMora = "";
+  if (o.morosidad) {
+    if (o.morosidad.nivel === "rojo") {
+      badgeMora = badge("🔴 Mora " + o.morosidad.diasMaxMora + "d", "b-red");
+    } else if (o.morosidad.nivel === "amarillo") {
+      badgeMora = badge("🟡 Mora " + o.morosidad.diasMaxMora + "d", "b-amber");
+    }
+    // verde = sin badge visible (cliente al día)
+  }
+
+  const badgeA = o.alertaAnuladoRecepcionado ? badge("⛔ Dev. pendiente","b-red") : "";
+  const progreso = `<span class="oc-progress">${o.lineas.length}/${o.totalLineas} líneas</span>`;
+
+  let filas = o.lineas.map(l=>{
+    const esRetiroPte = l.estado === "Retiro Pte.";
+    const estadoBadge = esRetiroPte
+      ? `<span class="estado" style="background:#EDE9F5;color:#5B3FA6;">⏳ Retiro Pte.</span>`
+      : `<span class="estado ${estadoCls(l.estado)}">${l.estado}</span>`;
+    return `<tr${esRetiroPte ? ' style="background:var(--gray-bg)"' : ''}>
+    <td>${l.producto||"—"}</td>
+    <td class="muted" style="text-align:center">${l.cantidad||"—"}</td>
+    <td class="muted">${l.proveedor||"—"}</td>
+    <td class="muted">${estadoBadge}</td>
+    <td class="muted">${l.obsVentas||"—"}</td>
+  </tr>`;}).join("");
+
+  // Bloque de advertencia morosidad expandido (dentro del detalle)
+  let bloquesMora = "";
+  if (o.morosidad && o.morosidad.nivel !== "verde") {
+    const colorMora = o.morosidad.nivel === "rojo" ? "var(--red-bg)" : "var(--amber-bg)";
+    const colorBorde = o.morosidad.nivel === "rojo" ? "var(--red)" : "var(--amber)";
+    const colorTxt  = o.morosidad.nivel === "rojo" ? "var(--red-txt)" : "var(--amber-txt)";
+    const accion = o.morosidad.nivel === "rojo"
+      ? "Cliente con mora grave (+60 días). El ejecutivo debe iniciar gestión de denuncia en Mercado Público o Contraloría."
+      : "Cliente con mora activa (30-60 días). Avisar al ejecutivo para seguimiento.";
+    bloquesMora = `<div style="padding:10px 14px;background:${colorMora};border-top:1px solid ${colorBorde};display:flex;align-items:flex-start;gap:8px;">
+      <span style="font-size:16px">${o.morosidad.nivel==="rojo"?"🔴":"🟡"}</span>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:${colorTxt};margin-bottom:2px;">Alerta de morosidad — ${o.morosidad.diasMaxMora} días</div>
+        <div style="font-size:11px;color:${colorTxt};opacity:.85">${accion}</div>
+      </div>
+    </div>`;
+  }
+
+  return `<div class="oc-card ${tipo}" onclick="toggleCard(this)">
+    <div class="oc-header">
+      <span class="oc-id">${o.idOC}</span>
+      <button class="copy-oc-btn" onclick="copiarOC(event,'${o.idOC}')" title="Copiar OC">⧉</button>
+      <span class="oc-cliente">${o.cliente}</span>
+      <div class="oc-meta">${badgeT}${badgeE}${badgeA}${badgeMora}${progreso}</div>
+      <span class="chevron">▶</span>
     </div>
-    <div style="background:#f8f8f6;padding:18px 20px;border:1px solid #e0e0d8">
-      <table style="width:100%;border-collapse:collapse;margin-bottom:14px">
-        <tr><td style="font-size:12px;color:#5f5e5a;padding:3px 8px 3px 0">OC</td>
-            <td style="font-size:13px;font-weight:600;padding:3px 16px 3px 0">${idOC}</td>
-            <td style="font-size:12px;color:#5f5e5a;padding:3px 8px 3px 0">Cliente</td>
-            <td style="font-size:13px;padding:3px 0">${oc.cliente}</td></tr>
-        <tr><td style="font-size:12px;color:#5f5e5a;padding:3px 8px 3px 0">Ejecutivo</td>
-            <td style="font-size:13px;padding:3px 16px 3px 0">${oc.ejecutivo}</td>
-            <td style="font-size:12px;color:#5f5e5a;padding:3px 8px 3px 0">Entrega</td>
-            <td style="font-size:13px;padding:3px 0">${fecha}</td></tr>
-        <tr><td style="font-size:12px;color:#5f5e5a;padding:3px 8px 3px 0">Líneas pendientes</td>
-            <td style="font-size:13px;font-weight:600;color:#185FA5;padding:3px 0" colspan="3">${pendientes} de ${todasLineas.length}</td></tr>
-      </table>
-      <table style="width:100%;border-collapse:collapse;border:1px solid #e0e0d8;background:#fff">
-        <thead><tr style="background:#E6F1FB">
-          <th style="padding:6px 10px;font-size:11px;text-align:left;color:#0C447C">Producto</th>
-          <th style="padding:6px 10px;font-size:11px;text-align:center;color:#0C447C">Cant.</th>
-          <th style="padding:6px 10px;font-size:11px;text-align:left;color:#0C447C">Proveedor</th>
-          <th style="padding:6px 10px;font-size:11px;text-align:left;color:#0C447C">Obs. logística</th>
-        </tr></thead>
+    <div class="oc-lines">
+      ${bloquesMora}
+      <table class="lines-table">
+        <thead><tr><th>Producto</th><th>Cant.</th><th>Proveedor</th><th>Estado</th><th>Obs. ventas</th></tr></thead>
         <tbody>${filas}</tbody>
       </table>
     </div>
   </div>`;
-
-  MailApp.sendEmail({
-    to: PANEL_CONFIG.EMAIL.JP,
-    subject: `📦 [BODEGA] ${idOC} — ${compradas.length} línea(s) · ${oc.cliente}`,
-    htmlBody: html,
-  });
 }
 
-function emailEjecutivo(idOC, oc, lineas, emailEjec) {
-  const fecha = oc.entregaOC ? Utilities.formatDate(new Date(oc.entregaOC),"America/Santiago","dd/MM/yyyy") : "Sin fecha";
-  let filas = lineas.map(l => `<tr style="border-bottom:1px solid #eee">
-    <td style="padding:7px 10px;font-size:12px">${l.producto || "—"}</td>
-    <td style="padding:7px 10px;font-size:12px;text-align:center">${l.cantidad || "—"}</td>
+// ── BODEGA ────────────────────────────────────────────────────
+function renderizarBodega() {
+  const d = datosFiltrados || datos;
+  const m   = datos.metricas.bodega;
+  const ocs = d.bodega;
+  let html  = metricas([
+    {label:"Por recepcionar", value:m.total,      cls:""},
+    {label:"Parciales",       value:m.parciales,  cls:m.parciales>0?"amber":""},
+    {label:"Más antiguo (d)", value:m.masAntiguo, cls:m.masAntiguo>=3?"red":""},
+    {label:"Llegaron hoy",    value:m.hoy,        cls:"blue"},
+  ]);
+
+  html += `<div class="kpi-bar">
+    <div class="kpi"><span class="kpi-icon">⏱</span><div>
+      <div class="kpi-label">Prom. solicitud → compra</div>
+      <div class="kpi-value">${kpiPromedio(ocs,"horasHabiles")}h hábiles</div>
+    </div></div>
+    <div class="kpi"><span class="kpi-icon">📦</span><div>
+      <div class="kpi-label">Prom. compra → recepción</div>
+      <div class="kpi-value">${kpiPromedio(ocs,"diasComprado")}d</div>
+    </div></div>
+    <div class="kpi"><span class="kpi-icon">🚚</span><div>
+      <div class="kpi-label">Más antigua sin recepcionar</div>
+      <div class="kpi-value">${m.masAntiguo} días</div>
+    </div></div>
+  </div>`;
+
+  if(ocs.length===0){html+='<div class="empty">Sin pedidos pendientes en bodega</div>';
+    document.getElementById("view-bodega").innerHTML=html;return;}
+
+  html+='<div class="section-label">Ordenado de más antiguo a más reciente</div>';
+  ocs.forEach(o=>{
+    const d    = o.diasComprado||0;
+    const tipo = d>=3?"urgent":d>=1?"warn":"normal";
+    const badgeD = d===0?badge("Llegó hoy","b-blue"):d===1?badge("Hace 1 día","b-amber"):badge("Hace "+d+"d","b-red");
+    const badgeP = o.tienePartiales?badge("Parcial","b-amber"):"";
+    const badgeA = o.alertaAnuladoRecepcionado?badge("⛔ Dev. pendiente","b-red"):"";
+    const progreso = `<span class="oc-progress">${o.lineasRecepcionadas}/${o.totalLineas} recep.</span>`;
+
+    let filas = o.lineas.map(l=>`<tr>
+      <td>${l.producto||"—"}</td>
+      <td class="muted" style="text-align:center">${l.cantidad||"—"}</td>
+      <td class="muted">${l.proveedor||"—"}</td>
+      <td class="muted"><span class="estado ${estadoCls(l.estado)}">${l.estado}</span></td>
+      <td class="muted">${l.obsCompras||"—"}</td>
+      <td class="muted" style="color:var(--teal-txt)">${l.obsLogistica||"—"}</td>
+    </tr>`).join("");
+
+    html+=`<div class="oc-card ${tipo}" onclick="toggleCard(this)">
+      <div class="oc-header">
+        <span class="oc-id">${o.idOC}</span>
+        <button class="copy-oc-btn" onclick="copiarOC(event,'${o.idOC}')" title="Copiar OC">⧉</button>
+        <span class="oc-cliente">${o.cliente}</span>
+        <div class="oc-meta">${badgeD}${badgeP}${badgeA}${badge(o.ejecutivo,"b-gray")}${progreso}</div>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="oc-lines"><table class="lines-table">
+        <thead><tr><th>Producto</th><th>Cant.</th><th>Proveedor</th><th>Estado</th><th>Obs. compras</th><th>Obs. logística</th></tr></thead>
+        <tbody>${filas}</tbody>
+      </table></div>
+    </div>`;
+  });
+  document.getElementById("view-bodega").innerHTML=html;
+}
+
+// ── ALERTAS ───────────────────────────────────────────────────
+function renderizarAlertas() {
+  const d = datosFiltrados || datos;
+  const m   = datos.metricas.alertas;
+  const ocs = d.alertas;
+
+  const graves = ocs.filter(o =>
+    o.diasAtrasoEntrega >= 3 ||
+    (o.horasHabiles >= 48 && !o.adqComprada) ||
+    o.alertaAnuladoRecepcionado
+  );
+
+  const cntVencidas3d = ocs.filter(o => o.diasAtrasoEntrega >= 3).length;
+  const cntSin48h     = ocs.filter(o => o.horasHabiles >= 48 && !o.adqComprada).length;
+  const cntAnulRec    = ocs.filter(o => o.alertaAnuladoRecepcionado).length;
+
+  let html = metricas([
+    {label:"Vencidas +3 días",    value:cntVencidas3d, cls:cntVencidas3d>0?"red":""},
+    {label:"+48h sin comprar",    value:cntSin48h,     cls:cntSin48h>0?"red":""},
+    {label:"Anulado+recepcionado",value:cntAnulRec,    cls:cntAnulRec>0?"red":""},
+    {label:"Total casos graves",  value:graves.length, cls:graves.length>0?"red":""},
+  ]);
+
+  document.getElementById("cnt-alertas").textContent = graves.length;
+
+  if(graves.length===0){html+='<div class="empty">Sin alertas graves activas ✅</div>';
+    document.getElementById("view-alertas").innerHTML=html;return;}
+
+  const vencidas3d = graves.filter(o => o.diasAtrasoEntrega >= 3);
+  const sin48h     = graves.filter(o => o.horasHabiles >= 48 && !o.adqComprada && !(o.diasAtrasoEntrega >= 3));
+  const anulRec    = graves.filter(o => o.alertaAnuladoRecepcionado && !(o.diasAtrasoEntrega >= 3) && !(o.horasHabiles >= 48 && !o.adqComprada));
+
+  if(vencidas3d.length>0){html+='<div class="section-label">🔴 Vencidas más de 3 días — acción urgente</div>';
+    vencidas3d.forEach(o=>{html+=cardAlerta(o,"urgent");});}
+  if(sin48h.length>0){html+='<div class="section-label">🟠 Más de 48h sin comprar</div>';
+    sin48h.forEach(o=>{html+=cardAlerta(o,"warn");});}
+  if(anulRec.length>0){html+='<div class="section-label">⛔ Anulado con recepción pendiente — devolución</div>';
+    anulRec.forEach(o=>{html+=cardAlerta(o,"urgent");});}
+  document.getElementById("view-alertas").innerHTML=html;
+}
+
+function cardAlerta(o, tipo) {
+  const badges = [];
+  if(o.diasAtrasoEntrega>0) badges.push(badge(o.diasAtrasoEntrega+"d vencida",o.critico?"b-red":"b-amber"));
+  if(o.sinEncargado)        badges.push(badge("Sin asignar","b-red"));
+  if(o.horasHabiles>48)     badges.push(badge("Adq. "+o.horasHabiles+"h","b-amber"));
+  if(o.alertaAnuladoRecepcionado) badges.push(badge("⛔ Dev. pendiente","b-red"));
+  badges.push(badge(o.ejecutivo||"—","b-gray"));
+
+  let filas = o.lineas.map(l=>`<tr>
+    <td>${l.producto||"—"}</td>
+    <td class="muted" style="text-align:center">${l.cantidad||"—"}</td>
+    <td><span class="estado ${estadoCls(l.estado)}">${l.estado}</span></td>
+    <td class="muted">${l.proveedor||"—"}</td>
   </tr>`).join("");
 
-  const html = `<div style="font-family:Arial,sans-serif;max-width:680px">
-    <div style="background:#0F6E56;padding:14px 20px;border-radius:8px 8px 0 0">
-      <h2 style="color:#fff;margin:0;font-size:17px">✅ OC completa en bodega</h2>
+  return `<div class="oc-card ${tipo}" onclick="toggleCard(this)">
+    <div class="oc-header">
+      <span class="oc-id">${o.idOC}</span>
+      <button class="copy-oc-btn" onclick="copiarOC(event,'${o.idOC}')" title="Copiar OC">⧉</button>
+      <span class="oc-cliente">${o.cliente}</span>
+      <div class="oc-meta">${badges.join("")}</div>
+      <span class="chevron">▶</span>
     </div>
-    <div style="background:#f8f8f6;padding:18px 20px;border:1px solid #e0e0d8">
-      <p style="font-size:13px;margin:0 0 14px">Hola <strong>${oc.ejecutivo}</strong>, todos los productos de <strong>${idOC}</strong> están en bodega.</p>
-      <div style="background:#E1F5EE;border-left:4px solid #1D9E75;padding:10px 14px;border-radius:4px;margin-top:14px">
-        <p style="margin:0;font-size:12px;color:#085041">
-          <strong>Acción requerida:</strong> Contacta al cliente, confirma despacho y avisa a administración.
-        </p>
-      </div>
+    <div class="oc-lines"><table class="lines-table">
+      <thead><tr><th>Producto</th><th>Cant.</th><th>Estado</th><th>Proveedor</th></tr></thead>
+      <tbody>${filas}</tbody>
+    </table></div>
+  </div>`;
+}
+
+// ── COBRANZA ──────────────────────────────────────────────────
+let cobFiltroVendedor = "";
+let cobFiltroBusqueda = "";
+let cobFiltroNivel    = "";
+
+function renderizarCobranza() {
+  const d   = datosFiltrados || datos;
+  const filas = d.cobranza || [];
+
+  // KPIs
+  const totalSaldo    = filas.reduce((s, f) => s + (f.saldo||0), 0);
+  const totalRojo     = filas.filter(f=>f.nivel==="rojo").reduce((s,f)=>s+(f.saldo||0),0);
+  const totalAmarillo = filas.filter(f=>f.nivel==="amarillo").reduce((s,f)=>s+(f.saldo||0),0);
+  const totalVerde    = filas.filter(f=>f.nivel==="verde").reduce((s,f)=>s+(f.saldo||0),0);
+  const cntRojo       = filas.filter(f=>f.nivel==="rojo").length;
+  const cntAmarillo   = filas.filter(f=>f.nivel==="amarillo").length;
+
+  const fmt = v => "$" + Math.round(v).toLocaleString("es-CL");
+
+  let html = `<div class="cob-resumen">
+    <div class="cob-kpi">
+      <div class="cob-kpi-label">Cartera total</div>
+      <div class="cob-kpi-value">${fmt(totalSaldo)}</div>
+      <div class="cob-kpi-sub">${filas.length} documentos</div>
+    </div>
+    <div class="cob-kpi">
+      <div class="cob-kpi-label">🔴 En rojo (+60d)</div>
+      <div class="cob-kpi-value rojo">${fmt(totalRojo)}</div>
+      <div class="cob-kpi-sub">${cntRojo} documentos</div>
+    </div>
+    <div class="cob-kpi">
+      <div class="cob-kpi-label">🟡 En amarillo (30-60d)</div>
+      <div class="cob-kpi-value amarillo">${fmt(totalAmarillo)}</div>
+      <div class="cob-kpi-sub">${cntAmarillo} documentos</div>
+    </div>
+    <div class="cob-kpi">
+      <div class="cob-kpi-label">🟢 Al día (&lt;30d)</div>
+      <div class="cob-kpi-value verde">${fmt(totalVerde)}</div>
+      <div class="cob-kpi-sub">${filas.filter(f=>f.nivel==="verde").length} documentos</div>
     </div>
   </div>`;
 
-  MailApp.sendEmail({
-    to: [emailEjec, PANEL_CONFIG.EMAIL.WENDY].join(","),
-    subject: `✅ [DESPACHO] ${idOC} — ${oc.cliente} · todo en bodega`,
-    htmlBody: html,
+  // Toolbar con filtros
+  const vendedores = [...new Set(filas.map(f=>f.vendedor).filter(Boolean))].sort();
+  html += `<div class="cob-toolbar">
+    <select class="cob-select" onchange="setCobFiltroVendedor(this.value)">
+      <option value="">Todos los vendedores</option>
+      ${vendedores.map(v=>`<option value="${v}" ${cobFiltroVendedor===v?"selected":""}>${v}</option>`).join("")}
+    </select>
+    <select class="cob-select" onchange="setCobFiltroNivel(this.value)">
+      <option value="">Todos los niveles</option>
+      <option value="rojo" ${cobFiltroNivel==="rojo"?"selected":""}>🔴 Rojo (+60d)</option>
+      <option value="amarillo" ${cobFiltroNivel==="amarillo"?"selected":""}>🟡 Amarillo (30-60d)</option>
+      <option value="verde" ${cobFiltroNivel==="verde"?"selected":""}>🟢 Verde (al día)</option>
+    </select>
+    <input class="cob-search" type="text" placeholder="Buscar cliente o RUT…"
+      value="${cobFiltroBusqueda}"
+      oninput="setCobBusqueda(this.value)">
+  </div>`;
+
+  // Aplicar filtros locales
+  let filtradas = filas;
+  if (cobFiltroVendedor) filtradas = filtradas.filter(f=>f.vendedor===cobFiltroVendedor);
+  if (cobFiltroNivel)    filtradas = filtradas.filter(f=>f.nivel===cobFiltroNivel);
+  if (cobFiltroBusqueda) {
+    const q = cobFiltroBusqueda.toLowerCase();
+    filtradas = filtradas.filter(f=>
+      (f.razon||"").toLowerCase().includes(q) ||
+      (f.rut||"").toLowerCase().includes(q)
+    );
+  }
+
+  // Ordenar: rojo primero, luego amarillo, luego verde; dentro de cada grupo por días mora desc
+  filtradas = [...filtradas].sort((a,b)=>{
+    const ord = {rojo:0, amarillo:1, verde:2};
+    if (ord[a.nivel] !== ord[b.nivel]) return ord[a.nivel] - ord[b.nivel];
+    return (b.diasMora||0) - (a.diasMora||0);
   });
+
+  if (filtradas.length === 0) {
+    html += '<div class="cob-empty">Sin documentos que coincidan con los filtros</div>';
+    document.getElementById("view-cobranza").innerHTML = html;
+    return;
+  }
+
+  html += `<div class="cob-table-wrap"><table class="cob-table">
+    <thead><tr>
+      <th>Estado</th>
+      <th>Cliente</th>
+      <th>RUT</th>
+      <th>Vendedor</th>
+      <th>Doc.</th>
+      <th>Vencimiento</th>
+      <th>Días mora</th>
+      <th style="text-align:right">Saldo</th>
+      <th>Observaciones ejecutivo</th>
+    </tr></thead>
+    <tbody>`;
+
+  filtradas.forEach(f => {
+    const fv = f.fechaVenc
+      ? new Date(f.fechaVenc).toLocaleDateString("es-CL",{day:"2-digit",month:"2-digit",year:"numeric"})
+      : "—";
+    const iconNivel = f.nivel==="rojo"?"🔴":f.nivel==="amarillo"?"🟡":"🟢";
+    const labelNivel = f.nivel==="rojo"
+      ? `+60d — Denunciar`
+      : f.nivel==="amarillo"
+      ? `30-60d — Seguimiento`
+      : `Al día`;
+
+    html += `<tr>
+      <td><span class="semaforo ${f.nivel}">${iconNivel} ${labelNivel}</span></td>
+      <td style="font-weight:500;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${f.razon||''}">${f.razon||"—"}</td>
+      <td style="font-size:11px;color:var(--txt-3)">${f.rut||"—"}</td>
+      <td style="font-size:11px">${f.vendedor||"—"}</td>
+      <td style="font-size:11px;color:var(--txt-3)">${f.documento||""} ${f.numero||""}</td>
+      <td style="font-size:11px;white-space:nowrap">${fv}</td>
+      <td style="text-align:center;font-weight:${f.diasMora>0?600:400};color:${f.nivel==="rojo"?"var(--red)":f.nivel==="amarillo"?"var(--amber)":"var(--txt-2)"}">${f.diasMora>0?f.diasMora+"d":"—"}</td>
+      <td class="cob-monto" style="color:${f.nivel==="rojo"?"var(--red)":f.nivel==="amarillo"?"var(--amber)":"var(--txt)"}">${"$"+Math.round(f.saldo||0).toLocaleString("es-CL")}</td>
+      <td><textarea class="obs-input" rows="2"
+        data-row="${f.rowIndex}"
+        onblur="guardarObsCobranza(this)"
+        placeholder="Ej: Llamar el 20/05, prometió pago en 10 días…">${escapeHtml(f.obs||"")}</textarea></td>
+    </tr>`;
+  });
+
+  html += `</tbody></table></div>`;
+  html += `<div style="font-size:11px;color:var(--txt-3);margin-top:8px;text-align:right">
+    ${filtradas.length} de ${filas.length} documentos · Fuente: base de datos cobranza · Se actualiza con cada carga
+  </div>`;
+
+  document.getElementById("view-cobranza").innerHTML = html;
 }
 
-function emailSinEncargado(idOC, oc, emailEjec) {
-  MailApp.sendEmail({
-    to: emailEjec,
-    subject: `⚠️ [SIN GESTIONAR] ${idOC} — ${oc.cliente} lleva más de 2 días sin encargado`,
-    htmlBody: `<div style="font-family:Arial,sans-serif;max-width:600px;padding:20px">
-      <p style="font-size:14px">Hola <strong>${oc.ejecutivo}</strong>,</p>
-      <p style="font-size:13px">Tu pedido <strong>${idOC}</strong> (${oc.cliente}) lleva más de 2 días hábiles sin encargado.</p>
-      <p style="font-size:11px;color:#888;margin-top:16px">SCC Hub Operacional · Alerta automática</p>
-    </div>`,
-  });
+function setCobFiltroVendedor(v) { cobFiltroVendedor = v; renderizarCobranza(); }
+function setCobFiltroNivel(v)    { cobFiltroNivel    = v; renderizarCobranza(); }
+function setCobBusqueda(v)       { cobFiltroBusqueda = v; renderizarCobranza(); }
+
+async function guardarObsCobranza(textarea) {
+  const rowIndex = parseInt(textarea.dataset.row);
+  const obs      = textarea.value.trim();
+
+  // Actualizar en memoria para no perder al re-render
+  const filas = (datosFiltrados||datos).cobranza || [];
+  const fila  = filas.find(f => f.rowIndex === rowIndex);
+  if (fila) fila.obs = obs;
+  // También en datos originales
+  const filaOrig = (datos.cobranza||[]).find(f=>f.rowIndex===rowIndex);
+  if (filaOrig) filaOrig.obs = obs;
+
+  textarea.classList.add("guardando");
+  textarea.classList.remove("guardado");
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accion: "guardarObs", rowIndex, obs }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || "Error al guardar");
+    textarea.classList.remove("guardando");
+    textarea.classList.add("guardado");
+    setTimeout(()=>{ textarea.classList.remove("guardado"); }, 2000);
+  } catch(err) {
+    textarea.classList.remove("guardando");
+    textarea.style.borderColor = "var(--red)";
+    textarea.title = "Error al guardar: " + err.message;
+  }
 }
 
-function emailCompradoSinActualizar(idOC, oc, lineas, emailEjec) {
-  MailApp.sendEmail({
-    to: emailEjec,
-    subject: `🔍 [SEGUIMIENTO] ${idOC} — ${lineas.length} línea(s) en "Comprado" hace más de 3 días`,
-    htmlBody: `<div style="font-family:Arial,sans-serif;max-width:600px;padding:20px">
-      <p style="font-size:14px">Hola <strong>${oc.ejecutivo}</strong>,</p>
-      <p style="font-size:13px">El pedido <strong>${idOC}</strong> (${oc.cliente}) tiene ${lineas.length} línea(s) en estado <strong>Comprado</strong> hace más de 3 días sin actualización. Puede que estén en bodega sin recepcionar.</p>
-      <p style="font-size:11px;color:#888;margin-top:16px">SCC Hub Operacional · Alerta automática</p>
-    </div>`,
-  });
+function escapeHtml(str) {
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
-function emailAtraso(idOC, oc, dias, sinDespachar, totalLineas) {
-  const critico = dias >= 3;
-  const color   = critico ? "#A32D2D" : "#BA7517";
-  MailApp.sendEmail({
-    to: PANEL_CONFIG.EMAIL.WENDY,
-    subject: `${critico ? "🔴" : "🟡"} [ATRASO] ${idOC} — ${dias}d · ${oc.cliente} · ${oc.ejecutivo}`,
-    htmlBody: `<div style="font-family:Arial,sans-serif;max-width:600px;padding:20px;background:${critico?"#FCEBEB":"#FAEEDA"}">
-      <h3 style="color:${color};margin:0 0 12px">OC con atraso de ${dias} día(s) hábil(es)</h3>
-      <p style="font-size:13px"><strong>OC:</strong> ${idOC} · <strong>Cliente:</strong> ${oc.cliente}</p>
-      <p style="font-size:13px"><strong>Ejecutivo:</strong> ${oc.ejecutivo} · <strong>Sin despachar:</strong> ${sinDespachar} de ${totalLineas} líneas</p>
-      <p style="font-size:11px;color:#888;margin-top:16px">SCC Hub Operacional · Re-alerta cada 6h</p>
-    </div>`,
-  });
+// ── UTILS ─────────────────────────────────────────────────────
+function estadoCls(e) {
+  if(!e) return "e-cotizado";
+  if(e==="Comprado") return "e-comprado";
+  if(e==="Recepcionado") return "e-recepcionado";
+  if(e==="Recepcion parcial") return "e-parcial";
+  if(e==="Anulado") return "e-anulado";
+  return "e-cotizado";
 }
-
-function emailAtrasoJulio(idOC, oc, dias) {
-  MailApp.sendEmail({
-    to: PANEL_CONFIG.EMAIL.JULIO,
-    subject: `🔴 [CRÍTICO] ${idOC} — ${dias}d hábiles vencida · ${oc.cliente}`,
-    htmlBody: `<div style="font-family:Arial,sans-serif;max-width:600px;padding:20px;background:#FCEBEB">
-      <h3 style="color:#A32D2D;margin:0 0 12px">OC con ${dias} días hábiles de atraso</h3>
-      <p style="font-size:13px"><strong>OC:</strong> ${idOC} · <strong>Cliente:</strong> ${oc.cliente}</p>
-      <p style="font-size:13px"><strong>Ejecutivo:</strong> ${oc.ejecutivo} · <strong>Empresa:</strong> ${oc.empresa}</p>
-      <p style="font-size:11px;color:#888;margin-top:16px">SCC Hub Operacional · Alerta automática</p>
-    </div>`,
-  });
+function metricas(items) {
+  return '<div class="metrics">'+items.map(i=>
+    `<div class="metric"><div class="metric-label">${i.label}</div>
+     <div class="metric-value ${i.cls}">${i.value}</div></div>`
+  ).join("")+'</div>';
 }
+function badge(txt,cls){return `<span class="badge ${cls}">${txt}</span>`;}
+function kpiPromedio(ocs, campo) {
+  if(!ocs||ocs.length===0) return "—";
+  const vals = ocs.map(o=>o[campo]||0).filter(v=>v>0);
+  if(vals.length===0) return "—";
+  return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+}
+function switchTab(name) {
+  ["adq","bodega","alertas","retiros","despacho","cobranza"].forEach(n=>{
+    document.getElementById("tab-"+n).classList.toggle("active",n===name);
+    document.getElementById("view-"+n).classList.toggle("active",n===name);
+  });
+  tabActiva=name;
+}
+function toggleCard(card){card.classList.toggle("open");}
 
-function emailAnuladoRecepcionado(idOC, oc, lineas) {
-  const recepcionadas = lineas.filter(l => l.estado === "Recepcionado");
-  let filas = recepcionadas.map(l =>
-    `<tr><td style="padding:6px 10px;font-size:12px">${l.producto}</td>
-         <td style="padding:6px 10px;font-size:12px;text-align:center">${l.cantidad}</td>
-         <td style="padding:6px 10px;font-size:12px">${l.proveedor || "—"}</td></tr>`
-  ).join("");
+// ── RETIROS ───────────────────────────────────────────────────
+function renderizarRetiros() {
+  const d = datosFiltrados || datos;
+  const r = d.retiros || datos.retiros;
+  const m = r.metricas || {};
 
-  MailApp.sendEmail({
-    to: [PANEL_CONFIG.EMAIL.WENDY, PANEL_CONFIG.EMAIL.BEA].join(","),
-    subject: `⛔ [DEVOLUCIÓN] ${idOC} — ${oc.cliente} · productos recepcionados con líneas anuladas`,
-    htmlBody: `<div style="font-family:Arial,sans-serif;max-width:680px">
-      <div style="background:#A32D2D;padding:14px 20px;border-radius:8px 8px 0 0">
-        <h2 style="color:#fff;margin:0;font-size:17px">⛔ Devolución pendiente</h2>
-      </div>
-      <div style="background:#FCEBEB;padding:18px 20px;border:1px solid #e0e0d8">
-        <p style="font-size:13px">La OC <strong>${idOC}</strong> (${oc.cliente}) tiene líneas anuladas con productos ya recepcionados.</p>
-        <table style="width:100%;border-collapse:collapse;border:1px solid #e0e0d8;background:#fff;margin-top:12px">
-          <thead><tr style="background:#FCEBEB">
-            <th style="padding:6px 10px;font-size:11px;text-align:left">Producto</th>
-            <th style="padding:6px 10px;font-size:11px;text-align:center">Cant.</th>
-            <th style="padding:6px 10px;font-size:11px;text-align:left">Proveedor</th>
-          </tr></thead>
+  let html = metricas([
+    {label:"Retiros pendientes", value:m.totalRetiros||0,  cls:(m.totalRetiros||0)>0?"amber":""},
+    {label:"Completan OC",       value:m.completanOC||0,   cls:(m.completanOC||0)>0?"red":""},
+    {label:"Despachos RM",       value:m.despachosRM||0,   cls:(m.despachosRM||0)>0?"red":""},
+    {label:"Atrasados",          value:m.atrasados||0,     cls:(m.atrasados||0)>0?"red":""},
+  ]);
+
+  const despachos = r.despachos || [];
+  const retiros   = r.retiros   || [];
+
+  if(despachos.length>0||retiros.filter(o=>o.listo).length>0){
+    html+='<div style="margin-bottom:12px"><button onclick="generarRuta()" style="background:#0F6E56;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:500;cursor:pointer;width:100%">Generar ruta del dia en Google Maps</button></div>';}
+  if (despachos.length===0 && retiros.length===0) {
+    html += '<div class="empty">Sin retiros ni despachos pendientes ✅</div>';
+    document.getElementById("view-retiros").innerHTML = html;
+    return;
+  }
+
+  if (despachos.length > 0) {
+    html += '<div class="section-label">🚚 Prioridad 1 — Despachos RM Daniel</div>';
+    despachos.forEach(o => {
+      const badgeD = o.diasAtraso > 0
+        ? badge(o.diasAtraso+"d vencido","b-red")
+        : badge("En plazo","b-teal");
+      let filas = o.lineas.map(l => `<tr>
+        <td>${l.producto||"—"}</td>
+        <td class="muted" style="text-align:center">${l.cantidad||"—"}</td>
+        <td class="muted">${l.proveedor||"—"}</td>
+        <td class="muted">${l.obsLogistica||"—"}</td>
+      </tr>`).join("");
+      html += `<div class="oc-card ${o.diasAtraso>0?"urgent":"normal"}" onclick="toggleCard(this)">
+        <div class="oc-header">
+          <span class="oc-id">${o.idOC}</span>
+          <button class="copy-oc-btn" onclick="copiarOC(event,'${o.idOC}')" title="Copiar OC">⧉</button>
+          <span class="oc-cliente">${o.cliente}</span>
+          <div class="oc-meta">${badgeD}${badge("RM","b-blue")}${badge(o.ejecutivo,"b-gray")}</div>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="oc-lines"><table class="lines-table">
+          <thead><tr><th>Producto</th><th>Cant.</th><th>Proveedor</th><th>Obs.</th></tr></thead>
           <tbody>${filas}</tbody>
         </table>
+        <div style="padding:8px 12px;font-size:12px;color:var(--txt-2)">
+          📍 ${o.dir} · ${o.region}
+        </div></div>
+      </div>`;
+    });
+  }
+
+  const completanOC = retiros.filter(o => o.completaOC);
+  const resto       = retiros.filter(o => !o.completaOC);
+
+  if (completanOC.length > 0) {
+    html += '<div class="section-label">🔴 Prioridad 2 — Retiros que completan OC</div>';
+    completanOC.forEach(o => { html += cardRetiro(o, "urgent"); });
+  }
+  if (resto.length > 0) {
+    html += '<div class="section-label">🟡 Otros retiros</div>';
+    resto.forEach(o => { html += cardRetiro(o, "warn"); });
+  }
+
+  document.getElementById("view-retiros").innerHTML = html;
+}
+
+function cardRetiro(o, tipo) {
+  const badgeC = o.completaOC ? badge("Completa OC","b-red") : badge("Parcial","b-amber");
+  const badgeL = o.listo ? badge("✅ Listo retirar","b-teal") : badge("⏳ Pte. confirmar","b-amber");
+  const badgeD = o.diasAtrasoEntrega > 0
+    ? badge(o.diasAtrasoEntrega+"d vencida","b-red")
+    : badge("En plazo","b-teal");
+
+  let filas = o.lineas.map(l => `<tr>
+    <td>${l.producto||"—"}</td>
+    <td class="muted" style="text-align:center">${l.cantidad||"—"}</td>
+    <td class="muted">${l.proveedor||"—"}</td>
+    <td class="muted">${l.obsCompras||"—"}</td>
+    <td class="muted" style="color:var(--teal-txt)">${l.obsLogistica||"Sin direccion proveedor"}</td>
+  </tr>`).join("");
+
+  return `<div class="oc-card ${tipo}" onclick="toggleCard(this)">
+    <div class="oc-header">
+      <span class="oc-id">${o.idOC}</span>
+      <button class="copy-oc-btn" onclick="copiarOC(event,'${o.idOC}')" title="Copiar OC">⧉</button>
+      <span class="oc-cliente">${o.cliente}</span>
+      <div class="oc-meta">${badgeC}${badgeL}${badgeD}${badge(o.ejecutivo,"b-gray")}</div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="oc-lines"><table class="lines-table">
+      <thead><tr><th>Producto</th><th>Cant.</th><th>Proveedor</th><th>Obs. compras</th><th>Obs. logística</th></tr></thead>
+      <tbody>${filas}</tbody>
+    </table>
+    <div style="padding:8px 12px;font-size:12px;color:var(--txt-2)">
+      📍 ${o.dir} · ${o.region} &nbsp;|&nbsp; ${o.lineasListas||0}/${o.totalLineas} líneas listas
+    </div></div>
+  </div>`;
+}
+
+// ── DESPACHO ──────────────────────────────────────────────────
+function renderizarDespacho() {
+  const d = datosFiltrados || datos;
+  const ocs = d.despacho || [];
+  const m   = datos.metricas.despacho || {};
+
+  let html = metricas([
+    {label:"Listos para despachar", value:m.total||0,     cls:(m.total||0)>0?"blue":""},
+    {label:"Con atraso",            value:m.atrasadas||0, cls:(m.atrasadas||0)>0?"amber":""},
+    {label:"Urgentes (+3d)",        value:m.urgentes||0,  cls:(m.urgentes||0)>0?"red":""},
+    {label:"En plazo",              value:(m.total||0)-(m.atrasadas||0), cls:""},
+  ]);
+
+  if(ocs.length===0){
+    html += '<div class="empty">Sin pedidos listos para despachar ✅</div>';
+    document.getElementById("view-despacho").innerHTML=html;
+    return;
+  }
+
+  const urgentes  = ocs.filter(o=>o.diasAtrasoEntrega>=3);
+  const atrasadas = ocs.filter(o=>o.diasAtrasoEntrega>0&&o.diasAtrasoEntrega<3);
+  const enPlazo   = ocs.filter(o=>o.diasAtrasoEntrega===0);
+
+  if(urgentes.length>0){html+='<div class="section-label">🔴 Urgentes — más de 3 días vencidos</div>';
+    urgentes.forEach(o=>{html+=cardDespacho(o,"urgent");});}
+  if(atrasadas.length>0){html+='<div class="section-label">🟡 Con atraso</div>';
+    atrasadas.forEach(o=>{html+=cardDespacho(o,"warn");});}
+  if(enPlazo.length>0){html+='<div class="section-label">🟢 En plazo — solicitar despacho</div>';
+    enPlazo.forEach(o=>{html+=cardDespacho(o,"normal");});}
+
+  document.getElementById("view-despacho").innerHTML=html;
+}
+
+function cardDespacho(o, tipo) {
+  const fecha = o.entregaOC ? new Date(o.entregaOC).toLocaleDateString("es-CL") : "Sin fecha";
+  const badgeD = o.diasAtrasoEntrega>0
+    ? badge(o.diasAtrasoEntrega+"d vencida","b-red")
+    : badge("En plazo","b-teal");
+
+  let filas = o.lineas.map(l=>`<tr>
+    <td>${l.producto||"—"}</td>
+    <td class="muted" style="text-align:center">${l.cantidad||"—"}</td>
+    <td class="muted">${l.proveedor||"—"}</td>
+    <td><span class="estado e-recepcionado">${l.estado}</span></td>
+  </tr>`).join("");
+
+  return `<div class="oc-card ${tipo}" onclick="toggleCard(this)">
+    <div class="oc-header">
+      <span class="oc-id">${o.idOC}</span>
+      <button class="copy-oc-btn" onclick="copiarOC(event,'${o.idOC}')" title="Copiar OC">⧉</button>
+      <span class="oc-cliente">${o.cliente}</span>
+      <div class="oc-meta">${badgeD}${badge("✅ Listo despachar","b-teal")}${badge(o.ejecutivo,"b-gray")}</div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="oc-lines">
+      <table class="lines-table">
+        <thead><tr><th>Producto</th><th>Cant.</th><th>Proveedor</th><th>Estado</th></tr></thead>
+        <tbody>${filas}</tbody>
+      </table>
+      <div style="padding:8px 12px;font-size:12px;color:var(--txt-2)">
+        📍 ${o.dir} · ${o.region} &nbsp;|&nbsp; 📅 Entrega: ${fecha}
       </div>
-    </div>`,
-  });
+      <div style="padding:4px 12px 10px;font-size:12px;background:var(--teal-bg);color:var(--teal-txt);font-weight:500">
+        ⚡ Acción requerida: Contactar cliente y enviar solicitud de despacho a administración
+      </div>
+    </div>
+  </div>`;
 }
 
-function emailCotizadoAtrasado(idOC, oc, lineas) {
-  MailApp.sendEmail({
-    to: [PANEL_CONFIG.EMAIL.ARIEL, PANEL_CONFIG.EMAIL.PEDRO, PANEL_CONFIG.EMAIL.WENDY].join(","),
-    subject: `⚠️ [COTIZADO ATRASADO] ${idOC} — ${oc.cliente} · más de 24h sin avanzar`,
-    htmlBody: `<div style="font-family:Arial,sans-serif;max-width:600px;padding:20px;background:#FAEEDA">
-      <h3 style="color:#854F0B;margin:0 0 12px">Líneas en "Cotizado" sin avanzar >24h</h3>
-      <p style="font-size:13px"><strong>OC:</strong> ${idOC} · <strong>Cliente:</strong> ${oc.cliente}</p>
-      <p style="font-size:13px"><strong>Ejecutivo:</strong> ${oc.ejecutivo} · <strong>Encargado:</strong> ${oc.encargado || "Sin asignar"}</p>
-      <p style="font-size:11px;color:#888;margin-top:16px">SCC Hub Operacional · Alerta automática</p>
-    </div>`,
+function generarRuta() {
+  const d = datosFiltrados || datos;
+  if (!d || !d.retiros) return;
+
+  const despachos = d.retiros.despachos || [];
+  const retiros   = d.retiros.retiros   || [];
+  const paradas   = [];
+
+  despachos.forEach(o => {
+    if (o.dir && o.dir.trim()) paradas.push(o.dir + ", " + o.region + ", Chile");
   });
+  retiros.filter(o => o.completaOC && o.listo).forEach(o => {
+    const dirRetiro = o.lineas
+      .filter(l => l.estado === "Retiro" && l.obsLogistica && l.obsLogistica.trim())
+      .map(l => l.obsLogistica.trim())[0];
+    if (dirRetiro) paradas.push(dirRetiro + ", Chile");
+    else if (o.dir && o.dir.trim()) paradas.push(o.dir + ", Chile");
+  });
+  retiros.filter(o => !o.completaOC && o.listo).forEach(o => {
+    const dirRetiro = o.lineas
+      .filter(l => l.estado === "Retiro" && l.obsLogistica && l.obsLogistica.trim())
+      .map(l => l.obsLogistica.trim())[0];
+    if (dirRetiro) paradas.push(dirRetiro + ", Chile");
+    else if (o.dir && o.dir.trim()) paradas.push(o.dir + ", Chile");
+  });
+
+  if (paradas.length === 0) {
+    alert("No hay paradas con dirección registrada para generar la ruta.");
+    return;
+  }
+
+  const origen    = "Eliodoro Yanez 2745, Providencia, Santiago, Chile";
+  const destino   = paradas[paradas.length - 1];
+  const waypoints = paradas.slice(0, -1).join("|");
+
+  let url = "https://www.google.com/maps/dir/?api=1";
+  url += "&origin="      + encodeURIComponent(origen);
+  url += "&destination=" + encodeURIComponent(destino);
+  if (waypoints) url += "&waypoints=" + encodeURIComponent(waypoints);
+  url += "&travelmode=driving";
+  window.open(url, "_blank");
 }
 
-function emailPendientePago(idOC, oc, lineas) {
-  MailApp.sendEmail({
-    to: [PANEL_CONFIG.EMAIL.BEA, PANEL_CONFIG.EMAIL.WENDY].join(","),
-    subject: `💳 [PAGO PENDIENTE] ${idOC} — ${oc.cliente} · ${lineas.length} línea(s) esperando pago`,
-    htmlBody: `<div style="font-family:Arial,sans-serif;max-width:600px;padding:20px;background:#E6F1FB">
-      <h3 style="color:#185FA5;margin:0 0 12px">Líneas en "Pendiente de pago" sin movimiento</h3>
-      <p style="font-size:13px"><strong>OC:</strong> ${idOC} · <strong>Cliente:</strong> ${oc.cliente}</p>
-      <p style="font-size:13px"><strong>Ejecutivo:</strong> ${oc.ejecutivo} · <strong>Encargado:</strong> ${oc.encargado || "—"}</p>
-      <p style="font-size:11px;color:#888;margin-top:16px">SCC Hub Operacional · Alerta automática</p>
-    </div>`,
-  });
+function copiarOC(e, idOC) {
+  e.stopPropagation();
+  const btn = e.currentTarget;
+  function mostrarCopiado() {
+    btn.textContent = "✓";
+    btn.style.color = "var(--teal)";
+    btn.style.fontWeight = "700";
+    setTimeout(() => {
+      btn.textContent = "⧉";
+      btn.style.color = "";
+      btn.style.fontWeight = "";
+    }, 1500);
+  }
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(idOC).then(mostrarCopiado).catch(() => {
+      const ta = document.createElement("textarea");
+      ta.value = idOC; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      document.execCommand("copy"); document.body.removeChild(ta);
+      mostrarCopiado();
+    });
+  } else {
+    const ta = document.createElement("textarea");
+    ta.value = idOC; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    document.execCommand("copy"); document.body.removeChild(ta);
+    mostrarCopiado();
+  }
 }
 
-// ── INSTALACIÓN DE TRIGGERS ──────────────────────────────────
-function instalarTriggers() {
-  ScriptApp.getProjectTriggers().forEach(t => {
-    const fn = t.getHandlerFunction();
-    if (fn === "verificarCambiosEstado" || fn === "resumenDiario") {
-      ScriptApp.deleteTrigger(t);
-    }
-  });
-  ScriptApp.newTrigger("verificarCambiosEstado")
-    .timeBased().everyMinutes(15).create();
-  ScriptApp.newTrigger("resumenDiario")
-    .timeBased().atHour(8).everyDays(1).inTimezone("America/Santiago").create();
-  Logger.log("✅ Triggers instalados");
-}
-
-function testManual() {
-  const data = obtenerDatos();
-  Logger.log("adquisiciones: " + data.adquisiciones.length);
-  Logger.log("bodega: "        + data.bodega.length);
-  Logger.log("alertas: "       + data.alertas.length);
-  Logger.log("despacho: "      + data.despacho.length);
-  Logger.log("retiros: "       + data.retiros.retiros.length);
-  Logger.log("despachosRM: "   + data.retiros.despachos.length);
-}
+cargarDatos();
+setInterval(cargarDatos, 10*60*1000);
+</script>
+</body>
+</html>
