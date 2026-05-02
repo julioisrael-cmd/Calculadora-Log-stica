@@ -55,7 +55,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .oc-card.normal{border-left-color:var(--border);}
 .oc-header{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;}
 .oc-header:hover{background:var(--gray-bg);}
-.oc-id{font-size:13px;font-weight:500;min-width:120px;flex-shrink:0;}
+.oc-id{font-size:13px;font-weight:500;flex-shrink:0;}
+.copy-oc-btn{background:none;border:none;cursor:pointer;font-size:13px;color:var(--txt-3);padding:0 4px;line-height:1;border-radius:3px;transition:color .1s,background .1s;}
+.copy-oc-btn:hover{color:var(--blue);background:var(--blue-bg);}
+.copy-oc-btn.copiado{color:var(--teal);}
 .oc-cliente{font-size:13px;color:var(--txt-2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .oc-meta{display:flex;align-items:center;gap:5px;flex-shrink:0;flex-wrap:wrap;}
 .oc-progress{font-size:11px;color:var(--txt-3);flex-shrink:0;}
@@ -291,23 +294,29 @@ function cardAdq(o, tipo) {
   const badgeA = o.alertaAnuladoRecepcionado ? badge("⛔ Dev. pendiente","b-red") : "";
   const progreso = `<span class="oc-progress">${o.lineas.length}/${o.totalLineas} líneas</span>`;
 
-  let filas = o.lineas.map(l=>`<tr>
+  let filas = o.lineas.map(l=>{
+    const esRetiroPte = l.estado === "Retiro Pte.";
+    const estadoBadge = esRetiroPte
+      ? `<span class="estado" style="background:#EDE9F5;color:#5B3FA6;">⏳ Retiro Pte.</span>`
+      : `<span class="estado ${estadoCls(l.estado)}">${l.estado}</span>`;
+    return `<tr${esRetiroPte ? ' style="background:var(--gray-bg)"' : ''}>
     <td>${l.producto||"—"}</td>
     <td class="muted" style="text-align:center">${l.cantidad||"—"}</td>
     <td class="muted">${l.proveedor||"—"}</td>
-    <td class="muted"><span class="estado ${estadoCls(l.estado)}">${l.estado}</span></td>
-    <td class="muted">${l.obsCompras||"—"}</td>
-  </tr>`).join("");
+    <td class="muted">${estadoBadge}</td>
+    <td class="muted">${l.obsVentas||"—"}</td>
+  </tr>`;}).join("");
 
   return `<div class="oc-card ${tipo}" onclick="toggleCard(this)">
     <div class="oc-header">
       <span class="oc-id">${o.idOC}</span>
+      <button class="copy-oc-btn" onclick="copiarOC(event,'${o.idOC}')" title="Copiar OC">⧉</button>
       <span class="oc-cliente">${o.cliente}</span>
       <div class="oc-meta">${badgeT}${badgeE}${badgeA}${badgeMora}${progreso}</div>
       <span class="chevron">▶</span>
     </div>
     <div class="oc-lines"><table class="lines-table">
-      <thead><tr><th>Producto</th><th>Cant.</th><th>Proveedor</th><th>Estado</th><th>Obs.</th></tr></thead>
+      <thead><tr><th>Producto</th><th>Cant.</th><th>Proveedor</th><th>Estado</th><th>Obs. ventas</th></tr></thead>
       <tbody>${filas}</tbody>
     </table></div>
   </div>`;
@@ -358,18 +367,20 @@ function renderizarBodega() {
       <td class="muted" style="text-align:center">${l.cantidad||"—"}</td>
       <td class="muted">${l.proveedor||"—"}</td>
       <td class="muted"><span class="estado ${estadoCls(l.estado)}">${l.estado}</span></td>
-      <td class="muted">${l.obsLogistica||"—"}</td>
+      <td class="muted">${l.obsCompras||"—"}</td>
+      <td class="muted" style="color:var(--teal-txt)">${l.obsLogistica||"—"}</td>
     </tr>`).join("");
 
     html+=`<div class="oc-card ${tipo}" onclick="toggleCard(this)">
       <div class="oc-header">
         <span class="oc-id">${o.idOC}</span>
+        <button class="copy-oc-btn" onclick="copiarOC(event,'${o.idOC}')" title="Copiar OC">⧉</button>
         <span class="oc-cliente">${o.cliente}</span>
         <div class="oc-meta">${badgeD}${badgeP}${badgeA}${badge(o.ejecutivo,"b-gray")}${progreso}</div>
         <span class="chevron">▶</span>
       </div>
       <div class="oc-lines"><table class="lines-table">
-        <thead><tr><th>Producto</th><th>Cant.</th><th>Proveedor</th><th>Estado</th><th>Obs. logística</th></tr></thead>
+        <thead><tr><th>Producto</th><th>Cant.</th><th>Proveedor</th><th>Estado</th><th>Obs. compras</th><th>Obs. logística</th></tr></thead>
         <tbody>${filas}</tbody>
       </table></div>
     </div>`;
@@ -439,6 +450,7 @@ function cardAlerta(o, tipo) {
   return `<div class="oc-card ${tipo}" onclick="toggleCard(this)">
     <div class="oc-header">
       <span class="oc-id">${o.idOC}</span>
+      <button class="copy-oc-btn" onclick="copiarOC(event,'${o.idOC}')" title="Copiar OC">⧉</button>
       <span class="oc-cliente">${o.cliente}</span>
       <div class="oc-meta">${badges.join("")}</div>
       <span class="chevron">▶</span>
@@ -521,6 +533,7 @@ function renderizarRetiros() {
       html += `<div class="oc-card ${o.diasAtraso>0?"urgent":"normal"}" onclick="toggleCard(this)">
         <div class="oc-header">
           <span class="oc-id">${o.idOC}</span>
+          <button class="copy-oc-btn" onclick="copiarOC(event,'${o.idOC}')" title="Copiar OC">⧉</button>
           <span class="oc-cliente">${o.cliente}</span>
           <div class="oc-meta">${badgeD}${badge("RM","b-blue")}${badge(o.ejecutivo,"b-gray")}</div>
           <span class="chevron">▶</span>
@@ -569,6 +582,7 @@ function cardRetiro(o, tipo) {
   return `<div class="oc-card ${tipo}" onclick="toggleCard(this)">
     <div class="oc-header">
       <span class="oc-id">${o.idOC}</span>
+      <button class="copy-oc-btn" onclick="copiarOC(event,'${o.idOC}')" title="Copiar OC">⧉</button>
       <span class="oc-cliente">${o.cliente}</span>
       <div class="oc-meta">${badgeC}${badgeL}${badgeD}${badge(o.ejecutivo,"b-gray")}</div>
       <span class="chevron">▶</span>
@@ -633,6 +647,7 @@ function cardDespacho(o, tipo) {
   return `<div class="oc-card ${tipo}" onclick="toggleCard(this)">
     <div class="oc-header">
       <span class="oc-id">${o.idOC}</span>
+      <button class="copy-oc-btn" onclick="copiarOC(event,'${o.idOC}')" title="Copiar OC">⧉</button>
       <span class="oc-cliente">${o.cliente}</span>
       <div class="oc-meta">${badgeD}${badge("✅ Listo despachar","b-teal")}${badge(o.ejecutivo,"b-gray")}</div>
       <span class="chevron">▶</span>
@@ -704,6 +719,36 @@ function generarRuta() {
   url += "&travelmode=driving";
 
   window.open(url, "_blank");
+}
+
+function copiarOC(e, idOC) {
+  e.stopPropagation();
+  const btn = e.currentTarget;
+  function mostrarCopiado() {
+    btn.textContent = "✓";
+    btn.style.color = "var(--teal)";
+    btn.style.fontWeight = "700";
+    setTimeout(() => {
+      btn.textContent = "⧉";
+      btn.style.color = "";
+      btn.style.fontWeight = "";
+    }, 1500);
+  }
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(idOC).then(mostrarCopiado).catch(() => {
+      const ta = document.createElement("textarea");
+      ta.value = idOC; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      document.execCommand("copy"); document.body.removeChild(ta);
+      mostrarCopiado();
+    });
+  } else {
+    const ta = document.createElement("textarea");
+    ta.value = idOC; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    document.execCommand("copy"); document.body.removeChild(ta);
+    mostrarCopiado();
+  }
 }
 
 cargarDatos();
