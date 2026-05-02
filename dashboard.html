@@ -602,39 +602,51 @@ function colorMargen(pct) {
   return "var(--red)";
 }
 
-// ── CARGA DE DATOS via fetch ──────────────────────────────────
-let cargando = false;
+// ── CARGA DE DATOS via JSONP ──────────────────────────────────
+let cargando  = false;
+let timeoutId = null;
 
-async function cargarDatos() {
+function cargarDatos() {
   if (cargando) return;
   cargando = true;
 
-  const controller = new AbortController();
-  const timeoutId  = setTimeout(() => controller.abort(), 15000);
+  // Limpiar script anterior si existe
+  const viejo = document.getElementById("jsonp-script");
+  if (viejo) viejo.remove();
 
-  try {
-    const res = await fetch(API_URL + "?t=" + Date.now(), { signal: controller.signal });
-    clearTimeout(timeoutId);
-    if (!res.ok) throw new Error("HTTP " + res.status);
-
-    const json = await res.json();
-    document.getElementById("loader").classList.add("hidden");
-
-    if (!json.ok) { mostrarError(json.error || "Error del servidor"); return; }
-
-    renderizar(json.data);
-    document.getElementById("sync-info").textContent =
-      "Actualizado " + new Date().toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" });
-
-  } catch (err) {
-    clearTimeout(timeoutId);
-    document.getElementById("loader").classList.add("hidden");
-    mostrarError(err.name === "AbortError"
-      ? "Tiempo de espera agotado (15s)"
-      : "Error de conexión: " + err.message);
-  } finally {
+  // Timeout de 15s
+  timeoutId = setTimeout(() => {
     cargando = false;
-  }
+    document.getElementById("loader").classList.add("hidden");
+    mostrarError("Tiempo de espera agotado (15s)");
+  }, 15000);
+
+  const script = document.createElement("script");
+  script.id  = "jsonp-script";
+  script.src = API_URL + "?callback=handleResponse&t=" + Date.now();
+  script.onerror = () => {
+    clearTimeout(timeoutId);
+    cargando = false;
+    document.getElementById("loader").classList.add("hidden");
+    mostrarError("Error de conexión con el servidor");
+    script.remove();
+  };
+  document.body.appendChild(script);
+}
+
+function handleResponse(json) {
+  clearTimeout(timeoutId);
+  cargando = false;
+  document.getElementById("loader").classList.add("hidden");
+
+  const script = document.getElementById("jsonp-script");
+  if (script) script.remove();
+
+  if (!json.ok) { mostrarError(json.error || "Error del servidor"); return; }
+
+  renderizar(json.data);
+  document.getElementById("sync-info").textContent =
+    "Actualizado " + new Date().toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" });
 }
 
 function mostrarError(msg) {
@@ -665,7 +677,7 @@ function renderizar(data) {
       const vt = Number(l.valorTotal    || 0);
       const ct = Number(l.costoRealTotal || 0);
       montoTotal += vt;
-      if (vt > 0 && ct > 0) utilidadTotal += (vt - ct);
+      if (vt > 0 && ct > 0 && ct < vt) utilidadTotal += (vt - ct);
     });
   });
 
@@ -795,7 +807,7 @@ function renderEjecutivos(todasOCs) {
       const vt = Number(l.valorTotal    || 0);
       const ct = Number(l.costoRealTotal || 0);
       execMap[ejec].monto += vt;
-      if (vt > 0 && ct > 0) execMap[ejec].utilidad += (vt - ct);
+      if (vt > 0 && ct > 0 && ct < vt) execMap[ejec].utilidad += (vt - ct);
     });
   });
 
@@ -846,7 +858,7 @@ function renderMargenes(todasOCs) {
       ct += Number(l.costoRealTotal || 0);
     });
 
-    if (vt > 0 && ct > 0) {
+    if (vt > 0 && ct > 0 && ct < vt) {
       const utilidad = vt - ct;
       const margen   = utilidad / vt;
       if (margen > 0 && margen < 1) {
