@@ -321,11 +321,11 @@ function cardAdq(o, tipo) {
 
   // ── Semáforo morosidad — usa campo "morosidad" del backend ──
   let badgeMora = "";
-  if (o.morosidad) {
-    if (o.morosidad.nivel === "rojo") {
-      badgeMora = badge("🔴 Mora " + o.morosidad.diasMaxMora + "d", "b-red");
-    } else if (o.morosidad.nivel === "amarillo") {
-      badgeMora = badge("🟡 Mora " + o.morosidad.diasMaxMora + "d", "b-amber");
+  if (o.mora) {
+    if (o.mora.nivel === "rojo") {
+      badgeMora = badge("🔴 Mora " + o.mora.diasMax + "d", "b-red");
+    } else if (o.mora.nivel === "amarillo") {
+      badgeMora = badge("🟡 Mora " + o.mora.diasMax + "d", "b-amber");
     }
     // verde = sin badge visible (cliente al día)
   }
@@ -348,17 +348,17 @@ function cardAdq(o, tipo) {
 
   // Bloque de advertencia morosidad expandido (dentro del detalle)
   let bloquesMora = "";
-  if (o.morosidad && o.morosidad.nivel !== "verde") {
-    const colorMora = o.morosidad.nivel === "rojo" ? "var(--red-bg)" : "var(--amber-bg)";
-    const colorBorde = o.morosidad.nivel === "rojo" ? "var(--red)" : "var(--amber)";
-    const colorTxt  = o.morosidad.nivel === "rojo" ? "var(--red-txt)" : "var(--amber-txt)";
-    const accion = o.morosidad.nivel === "rojo"
+  if (o.mora && o.mora.nivel !== "verde") {
+    const colorMora = o.mora.nivel === "rojo" ? "var(--red-bg)" : "var(--amber-bg)";
+    const colorBorde = o.mora.nivel === "rojo" ? "var(--red)" : "var(--amber)";
+    const colorTxt  = o.mora.nivel === "rojo" ? "var(--red-txt)" : "var(--amber-txt)";
+    const accion = o.mora.nivel === "rojo"
       ? "Cliente con mora grave (+60 días). El ejecutivo debe iniciar gestión de denuncia en Mercado Público o Contraloría."
       : "Cliente con mora activa (30-60 días). Avisar al ejecutivo para seguimiento.";
     bloquesMora = `<div style="padding:10px 14px;background:${colorMora};border-top:1px solid ${colorBorde};display:flex;align-items:flex-start;gap:8px;">
-      <span style="font-size:16px">${o.morosidad.nivel==="rojo"?"🔴":"🟡"}</span>
+      <span style="font-size:16px">${o.mora.nivel==="rojo"?"🔴":"🟡"}</span>
       <div>
-        <div style="font-size:12px;font-weight:600;color:${colorTxt};margin-bottom:2px;">Alerta de morosidad — ${o.morosidad.diasMaxMora} días</div>
+        <div style="font-size:12px;font-weight:600;color:${colorTxt};margin-bottom:2px;">Alerta de morosidad — ${o.mora.diasMax} días</div>
         <div style="font-size:11px;color:${colorTxt};opacity:.85">${accion}</div>
       </div>
     </div>`;
