@@ -136,17 +136,18 @@ function aplicarFiltro() {
   if (!filtroEjecutivo) {
     datosFiltrados = datos;
   } else {
+    const ret = datos.retiros || { retiros:[], despachos:[], metricas:{} };
     datosFiltrados = {
       ...datos,
       adquisiciones: datos.adquisiciones.filter(o => o.ejecutivo === filtroEjecutivo),
       bodega:        datos.bodega.filter(o => o.ejecutivo === filtroEjecutivo),
       alertas:       datos.alertas.filter(o => o.ejecutivo === filtroEjecutivo),
-      despacho:      datos.despacho ? datos.despacho.filter(o => o.ejecutivo === filtroEjecutivo) : [],
-      retiros:       datos.retiros ? {
-        ...datos.retiros,
-        retiros:   datos.retiros.retiros.filter(o => o.ejecutivo === filtroEjecutivo),
-        despachos: datos.retiros.despachos.filter(o => o.ejecutivo === filtroEjecutivo),
-      } : datos.retiros,
+      despacho:      (datos.despacho||[]).filter(o => o.ejecutivo === filtroEjecutivo),
+      retiros: {
+        ...ret,
+        retiros:   (ret.retiros||[]).filter(o => o.ejecutivo === filtroEjecutivo),
+        despachos: (ret.despachos||[]).filter(o => o.ejecutivo === filtroEjecutivo),
+      },
     };
   }
   renderizarTodo();
@@ -166,7 +167,7 @@ async function cargarDatos() {
 }
 
 function mostrarLoading() {
-  ["adq","bodega","alertas"].forEach(v => {
+  ["adq","bodega","alertas","retiros","despacho"].forEach(v => {
     document.getElementById("view-"+v).innerHTML =
       '<div class="loading"><div class="spinner"></div><br>Cargando datos...</div>';
   });
@@ -180,17 +181,35 @@ function renderizarTodo() {
   if (!datos) return;
   datosFiltrados = filtroEjecutivo ? datosFiltrados : datos;
   const m = datos.metricas;
-  document.getElementById("cnt-adq").textContent    = m.adq.total;
-  document.getElementById("cnt-bodega").textContent  = m.bodega.total;
-  document.getElementById("cnt-alertas").textContent = m.alertas.vencidas + m.alertas.sinEncargado;
+
+  // Contadores tabs
+  document.getElementById("cnt-adq").textContent    = m.adq ? m.adq.total : 0;
+  document.getElementById("cnt-bodega").textContent  = m.bodega ? m.bodega.total : 0;
+  // Alertas: el contador se actualiza dentro de renderizarAlertas() con casos graves reales
+  document.getElementById("cnt-alertas").textContent = "…";
+
+  // Siempre inicializar arrays si el backend no los manda (evita crashes)
+  if (!datos.despacho)       datos.despacho = [];
+  if (!datos.retiros)        datos.retiros  = { retiros:[], despachos:[], metricas:{} };
+  if (!datos.retiros.retiros)   datos.retiros.retiros   = [];
+  if (!datos.retiros.despachos) datos.retiros.despachos = [];
+
+  // Contadores Ruta Logística y Despacho
+  const totalRetiros = (datos.retiros.metricas||{}).totalRetiros || 0;
+  const despachosRM  = (datos.retiros.metricas||{}).despachosRM  || 0;
+  document.getElementById("cnt-retiros").textContent  = totalRetiros + despachosRM;
+  document.getElementById("cnt-despacho").textContent = (m.despacho||{}).total || datos.despacho.length || 0;
+
   renderizarAdq();
   renderizarBodega();
   renderizarAlertas();
-  if (datos.retiros) renderizarRetiros();
-  if (datos.despacho) renderizarDespacho();
+  renderizarRetiros();
+  renderizarDespacho();
 }
 
 // ── ADQUISICIONES ─────────────────────────────────────────────
+let filtroAdq = "todos"; // "todos" | "sinAsignar" | "express" | "normales" | "atrasadas"
+
 function renderizarAdq() {
   const d = datosFiltrados || datos;
   const m   = datos.metricas.adq;
@@ -201,26 +220,61 @@ function renderizarAdq() {
     {label:"Express",       value:m.express,      cls:m.express>0?"amber":""},
     {label:"Sin encargado", value:m.sinEncargado, cls:m.sinEncargado>0?"red":""},
   ]);
-  if (ocs.length===0){html+='<div class="empty">Sin órdenes pendientes</div>';
-    document.getElementById("view-adq").innerHTML=html;return;}
 
-  const sinAsignar = ocs.filter(o=>o.sinEncargado);
+  // Sub-tabs de Adquisiciones
+  const sinAsignar   = ocs.filter(o=>o.sinEncargado);
   const muyAtrasadas = ocs.filter(o=>o.adqMuyAtrasada && !o.sinEncargado);
   const atrasadas    = ocs.filter(o=>o.adqAtrasada && !o.adqMuyAtrasada && !o.sinEncargado);
   const express      = ocs.filter(o=>!o.adqAtrasada&&o.esExpress&&!o.sinEncargado);
   const normales     = ocs.filter(o=>!o.adqAtrasada&&!o.esExpress&&!o.sinEncargado);
+  const todasAtrasadas = [...muyAtrasadas, ...atrasadas];
 
-  if(sinAsignar.length>0){html+='<div class="section-label">Sin encargado asignado</div>';
-    sinAsignar.forEach(o=>{html+=cardAdq(o,"urgent");});}
-  if(muyAtrasadas.length>0){html+='<div class="section-label">🔴 Alerta máxima — más de 48h sin comprar</div>';
-    muyAtrasadas.forEach(o=>{html+=cardAdq(o,"urgent");});}
-  if(atrasadas.length>0){html+='<div class="section-label">🟡 Atrasadas — más de 24h sin comprar</div>';
-    atrasadas.forEach(o=>{html+=cardAdq(o,"warn");});}
-  if(express.length>0){html+='<div class="section-label">⚡ Express — cotización lista</div>';
-    express.forEach(o=>{html+=cardAdq(o,"express");});}
-  if(normales.length>0){html+='<div class="section-label">En gestión normal</div>';
-    normales.forEach(o=>{html+=cardAdq(o,"normal");});}
+  const subTabs = [
+    {key:"todos",      label:"Todas",        cnt:ocs.length,            cls:"b-gray"},
+    {key:"sinAsignar", label:"Sin asignar",  cnt:sinAsignar.length,     cls:"b-red"},
+    {key:"atrasadas",  label:"Atrasadas",    cnt:todasAtrasadas.length, cls:"b-amber"},
+    {key:"express",    label:"⚡ Express",   cnt:express.length,        cls:"b-teal"},
+    {key:"normales",   label:"Normales",     cnt:normales.length,       cls:"b-blue"},
+  ];
+
+  html += `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">` +
+    subTabs.map(t => `<button onclick="setFiltroAdq('${t.key}')" id="adq-sub-${t.key}"
+      style="border:1px solid var(--border-md);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;
+      background:${filtroAdq===t.key?"var(--blue)":"var(--surface)"};
+      color:${filtroAdq===t.key?"#fff":"var(--txt-2)"};font-weight:${filtroAdq===t.key?500:400}">
+      ${t.label} <span style="opacity:.7">${t.cnt}</span>
+    </button>`).join("") + `</div>`;
+
+  if (ocs.length===0){html+='<div class="empty">Sin órdenes pendientes</div>';
+    document.getElementById("view-adq").innerHTML=html;return;}
+
+  // Aplicar filtro activo
+  let mostrar = { sinAsignar, muyAtrasadas, atrasadas, express, normales };
+  if (filtroAdq === "sinAsignar")  { mostrar = {sinAsignar, muyAtrasadas:[], atrasadas:[], express:[], normales:[]}; }
+  if (filtroAdq === "atrasadas")   { mostrar = {sinAsignar:[], muyAtrasadas, atrasadas, express:[], normales:[]}; }
+  if (filtroAdq === "express")     { mostrar = {sinAsignar:[], muyAtrasadas:[], atrasadas:[], express, normales:[]}; }
+  if (filtroAdq === "normales")    { mostrar = {sinAsignar:[], muyAtrasadas:[], atrasadas:[], express:[], normales}; }
+
+  if(mostrar.sinAsignar.length>0){html+='<div class="section-label">Sin encargado asignado</div>';
+    mostrar.sinAsignar.forEach(o=>{html+=cardAdq(o,"urgent");});}
+  if(mostrar.muyAtrasadas.length>0){html+='<div class="section-label">🔴 Alerta máxima — más de 48h sin comprar</div>';
+    mostrar.muyAtrasadas.forEach(o=>{html+=cardAdq(o,"urgent");});}
+  if(mostrar.atrasadas.length>0){html+='<div class="section-label">🟡 Atrasadas — más de 24h sin comprar</div>';
+    mostrar.atrasadas.forEach(o=>{html+=cardAdq(o,"warn");});}
+  if(mostrar.express.length>0){html+='<div class="section-label">⚡ Express — cotización lista</div>';
+    mostrar.express.forEach(o=>{html+=cardAdq(o,"express");});}
+  if(mostrar.normales.length>0){html+='<div class="section-label">En gestión normal</div>';
+    mostrar.normales.forEach(o=>{html+=cardAdq(o,"normal");});}
+
+  const totalMostradas = Object.values(mostrar).flat().length;
+  if(totalMostradas===0){html+='<div class="empty">Sin órdenes en esta categoría</div>';}
+
   document.getElementById("view-adq").innerHTML=html;
+}
+
+function setFiltroAdq(key) {
+  filtroAdq = key;
+  renderizarAdq();
 }
 
 function cardAdq(o, tipo) {
@@ -228,8 +282,11 @@ function cardAdq(o, tipo) {
     : o.adqAtrasada ? badge("🟡 "+o.horasHabiles+"h","b-amber")
     : o.esExpress ? badge("⚡ Express","b-teal") : badge(o.horasHabiles+"h","b-blue");
   const badgeE = o.sinEncargado ? badge("Sin asignar","b-red") : badge(o.encargado,"b-gray");
-  const badgeMora = o.mora && o.mora.diasMax > 30
-    ? badge("⚠️ Mora " + o.mora.diasMax + "d","b-red")
+  // Semáforo morosidad: rojo >60d, amarillo 30-60d
+  const badgeMora = o.mora && o.mora.diasMax > 60
+    ? badge("🔴 Mora " + o.mora.diasMax + "d","b-red")
+    : o.mora && o.mora.diasMax > 30
+    ? badge("🟡 Mora " + o.mora.diasMax + "d","b-amber")
     : "";
   const badgeA = o.alertaAnuladoRecepcionado ? badge("⛔ Dev. pendiente","b-red") : "";
   const progreso = `<span class="oc-progress">${o.lineas.length}/${o.totalLineas} líneas</span>`;
@@ -325,23 +382,42 @@ function renderizarAlertas() {
   const d = datosFiltrados || datos;
   const m   = datos.metricas.alertas;
   const ocs = d.alertas;
-  let html  = metricas([
-    {label:"OCs vencidas",    value:m.vencidas,     cls:m.vencidas>0?"red":""},
-    {label:"Sin encargado",   value:m.sinEncargado, cls:m.sinEncargado>0?"red":""},
-    {label:">5d hábiles",     value:m.criticas,     cls:m.criticas>0?"red":""},
-    {label:"Adq. >48h",       value:m.adqMasde48,   cls:m.adqMasde48>0?"amber":""},
+
+  // FILTRO CASOS GRAVES: solo 3 condiciones reales
+  const graves = ocs.filter(o =>
+    o.diasAtrasoEntrega >= 3 ||          // vencidas +3 días
+    (o.horasHabiles >= 48 && !o.adqComprada) || // +48h sin comprar
+    o.alertaAnuladoRecepcionado          // anulado + recepcionado
+  );
+
+  // Contadores reales para métricas
+  const cntVencidas3d = ocs.filter(o => o.diasAtrasoEntrega >= 3).length;
+  const cntSin48h     = ocs.filter(o => o.horasHabiles >= 48 && !o.adqComprada).length;
+  const cntAnulRec    = ocs.filter(o => o.alertaAnuladoRecepcionado).length;
+
+  let html = metricas([
+    {label:"Vencidas +3 días",   value:cntVencidas3d, cls:cntVencidas3d>0?"red":""},
+    {label:"+48h sin comprar",   value:cntSin48h,     cls:cntSin48h>0?"red":""},
+    {label:"Anulado+recepcionado",value:cntAnulRec,   cls:cntAnulRec>0?"red":""},
+    {label:"Total casos graves", value:graves.length, cls:graves.length>0?"red":""},
   ]);
 
-  if(ocs.length===0){html+='<div class="empty">Sin alertas activas ✅</div>';
+  // Actualizar badge del tab con casos graves reales
+  document.getElementById("cnt-alertas").textContent = graves.length;
+
+  if(graves.length===0){html+='<div class="empty">Sin alertas graves activas ✅</div>';
     document.getElementById("view-alertas").innerHTML=html;return;}
 
-  const criticas = ocs.filter(o=>o.critico);
-  const resto    = ocs.filter(o=>!o.critico);
+  const vencidas3d = graves.filter(o => o.diasAtrasoEntrega >= 3);
+  const sin48h     = graves.filter(o => o.horasHabiles >= 48 && !o.adqComprada && !(o.diasAtrasoEntrega >= 3));
+  const anulRec    = graves.filter(o => o.alertaAnuladoRecepcionado && !(o.diasAtrasoEntrega >= 3) && !(o.horasHabiles >= 48 && !o.adqComprada));
 
-  if(criticas.length>0){html+='<div class="section-label">Críticas</div>';
-    criticas.forEach(o=>{html+=cardAlerta(o,"urgent");});}
-  if(resto.length>0){html+='<div class="section-label">Otras alertas</div>';
-    resto.forEach(o=>{html+=cardAlerta(o,o.sinEncargado?"express":"warn");});}
+  if(vencidas3d.length>0){html+='<div class="section-label">🔴 Vencidas más de 3 días — acción urgente</div>';
+    vencidas3d.forEach(o=>{html+=cardAlerta(o,"urgent");});}
+  if(sin48h.length>0){html+='<div class="section-label">🟠 Más de 48h sin comprar</div>';
+    sin48h.forEach(o=>{html+=cardAlerta(o,"warn");});}
+  if(anulRec.length>0){html+='<div class="section-label">⛔ Anulado con recepción pendiente — devolución</div>';
+    anulRec.forEach(o=>{html+=cardAlerta(o,"urgent");});}
   document.getElementById("view-alertas").innerHTML=html;
 }
 
@@ -408,11 +484,9 @@ function toggleCard(card){card.classList.toggle("open");}
 
 // ── RETIROS ───────────────────────────────────────────────────
 function renderizarRetiros() {
-  const r = datos.retiros;
+  const d = datosFiltrados || datos;
+  const r = d.retiros || datos.retiros;
   const m = r.metricas || {};
-  document.getElementById("cnt-retiros").textContent =
-    (m.totalRetiros||0) + (m.despachosRM||0);
-  if(datos.despacho && datos.metricas.despacho) document.getElementById("cnt-despacho").textContent = datos.metricas.despacho.total||0;
 
   let html = metricas([
     {label:"Retiros pendientes", value:m.totalRetiros||0,  cls:(m.totalRetiros||0)>0?"amber":""},
