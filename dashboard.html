@@ -732,6 +732,15 @@ function renderMorosidad(todasOCs) {
   const procesadas = new Set();
   let montoRojo = 0, montoAmarillo = 0, montoVerde = 0;
 
+  // LOG DIAGNOSTICO - borrar despues de verificar
+  console.group("DIAGNOSTICO MOROSIDAD");
+  console.log("Total OCs:", todasOCs.length);
+  const conMora = todasOCs.filter(oc => oc.mora);
+  console.log("Con mora:", conMora.length, "| Sin mora:", todasOCs.length - conMora.length);
+  conMora.forEach(oc => console.log("OC", oc.idOC, "| ejec:", oc.ejecutivo, "| nivel:", oc.mora.nivel, "| saldo:", oc.mora.saldoTotal, "| dias:", oc.mora.diasMax));
+  console.groupEnd();
+  // FIN LOG
+
   todasOCs.forEach(oc => {
     if (procesadas.has(oc.idOC)) return;
     procesadas.add(oc.idOC);
@@ -806,7 +815,9 @@ function renderEjecutivos(todasOCs) {
 
       const vt = Number(l.valorTotal    || 0);
       const ct = Number(l.costoRealTotal || 0);
+      // Monto total siempre suma (es real aunque el costo esté sucio)
       execMap[ejec].monto += vt;
+      // Utilidad solo suma si la línea es limpia
       if (vt > 0 && ct > 0 && ct < vt) execMap[ejec].utilidad += (vt - ct);
     });
   });
@@ -854,11 +865,16 @@ function renderMargenes(todasOCs) {
 
     let vt = 0, ct = 0;
     (oc.lineas || []).forEach(l => {
-      vt += Number(l.valorTotal    || 0);
-      ct += Number(l.costoRealTotal || 0);
+      const lvt = Number(l.valorTotal    || 0);
+      const lct = Number(l.costoRealTotal || 0);
+      // Solo incluir líneas con datos limpios: costo existe y es menor al valor
+      if (lvt > 0 && lct > 0 && lct < lvt) {
+        vt += lvt;
+        ct += lct;
+      }
     });
 
-    if (vt > 0 && ct > 0 && ct < vt) {
+    if (vt > 0 && ct > 0) {
       const utilidad = vt - ct;
       const margen   = utilidad / vt;
       if (margen > 0 && margen < 1) {
