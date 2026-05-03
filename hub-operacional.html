@@ -809,6 +809,21 @@ function cardRetiro(o, tipo) {
     <td class="muted" style="color:var(--teal-txt)">${l.obsLogistica||"Sin direccion proveedor"}</td>
   </tr>`).join("");
 
+  // ── Pin adaptativo: dirección(es) de retiro desde obsLogistica ──
+  const dirsRetiro = o.lineas
+    .filter(l => l.estado === "Retiro" && l.obsLogistica && l.obsLogistica.trim())
+    .map(l => l.obsLogistica.trim());
+  const dirsUnicas = [...new Set(dirsRetiro)];
+
+  let pinHtml;
+  if (dirsUnicas.length === 0) {
+    pinHtml = `📍 <span style="color:var(--amber-txt,#b45309)">Direcciones no confirmadas por adquisiciones</span>`;
+  } else if (dirsUnicas.length === 1) {
+    pinHtml = `📍 ${dirsUnicas[0]}`;
+  } else {
+    pinHtml = `📍 ${dirsUnicas.length} direcciones distintas — ver columna Obs. logística`;
+  }
+
   return `<div class="oc-card ${tipo}" onclick="toggleCard(this)">
     <div class="oc-header">
       <span class="oc-id">${o.idOC}</span>
@@ -822,7 +837,7 @@ function cardRetiro(o, tipo) {
       <tbody>${filas}</tbody>
     </table>
     <div style="padding:8px 12px;font-size:12px;color:var(--txt-2)">
-      📍 ${o.dir} · ${o.region} &nbsp;|&nbsp; ${o.lineasListas||0}/${o.totalLineas} líneas listas
+      ${pinHtml} &nbsp;|&nbsp; ${o.lineasListas||0}/${o.totalLineas} líneas listas
     </div></div>
   </div>`;
 }
@@ -899,27 +914,38 @@ function cardDespacho(o, tipo) {
 function generarRuta() {
   const d = datosFiltrados || datos;
   if (!d || !d.retiros) return;
-
   const despachos = d.retiros.despachos || [];
   const retiros   = d.retiros.retiros   || [];
   const paradas   = [];
 
+  // Helper: extrae la dirección del formato "Retirar en: Proveedor - Dirección - Tel - Horario"
+  function extraerDir(obs) {
+    if (!obs) return null;
+    const limpio = obs.replace(/^retirar en:\s*/i, "").trim();
+    const partes = limpio.split(" - ").map(s => s.trim()).filter(Boolean);
+    if (partes.length >= 2) return partes[1];        // Proveedor - [Dirección] - Tel - Horario
+    if (partes.length === 1) return partes[0];       // Solo un valor: úsalo
+    return obs.trim();                               // Fallback: el texto crudo
+  }
+
+  // Despachos RM: usa dirección de cliente
   despachos.forEach(o => {
     if (o.dir && o.dir.trim()) paradas.push(o.dir + ", " + o.region + ", Chile");
   });
-  retiros.filter(o => o.completaOC && o.listo).forEach(o => {
-    const dirRetiro = o.lineas
+
+  // Retiros listos (completaOC primero, luego el resto): usa obsLogistica de cada línea en "Retiro"
+  const retirosListos = retiros.filter(o => o.listo);
+  retirosListos.sort((a, b) => (a.completaOC === b.completaOC) ? 0 : (a.completaOC ? -1 : 1));
+  retirosListos.forEach(o => {
+    const dirsRetiro = o.lineas
       .filter(l => l.estado === "Retiro" && l.obsLogistica && l.obsLogistica.trim())
-      .map(l => l.obsLogistica.trim())[0];
-    if (dirRetiro) paradas.push(dirRetiro + ", Chile");
-    else if (o.dir && o.dir.trim()) paradas.push(o.dir + ", Chile");
-  });
-  retiros.filter(o => !o.completaOC && o.listo).forEach(o => {
-    const dirRetiro = o.lineas
-      .filter(l => l.estado === "Retiro" && l.obsLogistica && l.obsLogistica.trim())
-      .map(l => l.obsLogistica.trim())[0];
-    if (dirRetiro) paradas.push(dirRetiro + ", Chile");
-    else if (o.dir && o.dir.trim()) paradas.push(o.dir + ", Chile");
+      .map(l => extraerDir(l.obsLogistica))
+      .filter(Boolean);
+    const dirsUnicas = [...new Set(dirsRetiro)];
+    if (dirsUnicas.length > 0) {
+      dirsUnicas.forEach(dir => paradas.push(dir + ", Chile"));
+    }
+    // Si no hay obsLogistica, NO se agrega la dirección de cliente (sería engañoso para retiros)
   });
 
   if (paradas.length === 0) {
@@ -930,7 +956,6 @@ function generarRuta() {
   const origen    = "Eliodoro Yanez 2745, Providencia, Santiago, Chile";
   const destino   = paradas[paradas.length - 1];
   const waypoints = paradas.slice(0, -1).join("|");
-
   let url = "https://www.google.com/maps/dir/?api=1";
   url += "&origin="      + encodeURIComponent(origen);
   url += "&destination=" + encodeURIComponent(destino);
