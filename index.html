@@ -7,80 +7,79 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Arial,sans-serif;background:#F0F4FA;color:#1a1a1a;min-height:100vh}
-header{background:#1F3864;color:#fff;padding:16px 24px;display:flex;align-items:center;gap:16px}
-header h1{font-size:18px;font-weight:700}
-header p{font-size:12px;color:#A8C4E5;margin-top:2px}
-.badge-usend{background:#2E5FA3;color:#fff;font-size:11px;padding:3px 9px;border-radius:20px;white-space:nowrap}
-.container{max-width:960px;margin:0 auto;padding:20px 16px}
-.card{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.08);padding:20px;margin-bottom:16px}
-.card-title{font-size:13px;font-weight:700;color:#2E5FA3;margin-bottom:14px;text-transform:uppercase;letter-spacing:.04em}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+header{background:#1F3864;color:#fff;padding:14px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:17px;font-weight:700;flex:1}
+header p{font-size:11px;color:#A8C4E5;margin-top:2px}
+.badge{font-size:11px;padding:3px 9px;border-radius:20px;white-space:nowrap;font-weight:600}
+.badge-blue{background:#2E5FA3;color:#fff}
+.badge-green{background:#1E7E34;color:#fff}
+.alert-bar{background:#F8D7DA;border-bottom:2px solid #E24B4A;padding:9px 24px;font-size:12px;color:#842029;display:flex;align-items:center;gap:8px}
+.container{max-width:980px;margin:0 auto;padding:18px 16px}
+.card{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.08);padding:18px 20px;margin-bottom:14px}
+.card-title{font-size:12px;font-weight:700;color:#2E5FA3;margin-bottom:14px;text-transform:uppercase;letter-spacing:.04em}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
 label{display:block;font-size:12px;color:#555;margin-bottom:5px;font-weight:600}
 input,select{width:100%;padding:9px 11px;border:1.5px solid #D0D8E8;border-radius:7px;font-size:14px;font-family:Arial,sans-serif;color:#1a1a1a;background:#fff;outline:none;transition:border .15s}
 input:focus,select:focus{border-color:#2E5FA3}
 .search-wrap{position:relative}
-#communeInput{padding-right:32px}
-.clear-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:16px;color:#aaa;cursor:pointer;line-height:1}
-.dropdown{position:absolute;top:calc(100% + 3px);left:0;right:0;background:#fff;border:1.5px solid #2E5FA3;border-radius:7px;max-height:220px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.12)}
-.dropdown-item{padding:9px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #f0f0f0}
-.dropdown-item:hover{background:#EBF3FD}
-.dropdown-item .comm-name{font-weight:700;color:#1F3864}
-.dropdown-item .comm-meta{font-size:11px;color:#888;margin-top:1px}
-.dropdown-item.no-result{color:#999;cursor:default;font-style:italic}
-.result-box{border-radius:10px;padding:20px;margin-bottom:16px}
-.result-ok{background:#D4EDDA;border:1.5px solid #28a745}
-.result-warn{background:#FFF3CD;border:1.5px solid #ffc107}
-.result-alert{background:#F8D7DA;border:1.5px solid #dc3545}
-.result-empty{background:#F2F2F2;border:1.5px dashed #ccc;text-align:center;color:#999;padding:32px}
-.result-title{font-size:13px;font-weight:700;margin-bottom:12px}
-.result-ok .result-title{color:#145217}
-.result-warn .result-title{color:#856404}
-.result-alert .result-title{color:#842029}
-.amounts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.amount-card{background:rgba(255,255,255,.7);border-radius:7px;padding:12px 14px}
-.amount-label{font-size:11px;color:#555;margin-bottom:3px}
-.amount-value{font-size:22px;font-weight:700}
-.result-ok .amount-value{color:#145217}
-.result-warn .amount-value{color:#856404}
-.result-alert .amount-value{color:#842029}
-.amount-sub{font-size:11px;color:#666;margin-top:2px}
-.detail-row{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.07)}
-.detail-row:last-child{border-bottom:none}
-.detail-label{color:#555}
-.detail-value{font-weight:600;color:#1a1a1a}
-.alert-row{background:#F8D7DA;border-radius:6px;padding:8px 12px;font-size:12px;color:#842029;margin-top:10px;display:flex;align-items:center;gap:8px}
-.alert-row .icon{font-size:15px;flex-shrink:0}
-.info-row{background:#EBF3FD;border-radius:6px;padding:8px 12px;font-size:12px;color:#0c5460;margin-top:8px;display:flex;align-items:center;gap:8px}
-.zone-pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;margin-left:6px}
-.z1{background:#D4EDDA;color:#145217}
-.z2{background:#FFF3CD;color:#856404}
-.z3{background:#F8D7DA;color:#842029}
-.zfc{background:#e2d9f3;color:#4a235a}
+.clear-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;color:#aaa;cursor:pointer}
+.dropdown{position:absolute;top:calc(100% + 3px);left:0;right:0;background:#fff;border:1.5px solid #2E5FA3;border-radius:7px;max-height:230px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.12)}
+.dd-item{padding:9px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #f0f0f0}
+.dd-item:hover{background:#EBF3FD}
+.dd-item .cn{font-weight:700;color:#1F3864}
+.dd-item .cm{font-size:11px;color:#888;margin-top:1px}
+.dd-item.no-res{color:#999;cursor:default;font-style:italic}
 .slider-wrap{margin-top:4px}
 input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:3px;background:#D0D8E8;outline:none;border:none;padding:0}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#2E5FA3;cursor:pointer}
 .slider-labels{display:flex;justify-content:space-between;font-size:10px;color:#999;margin-top:4px}
-.buffer-display{font-size:13px;font-weight:700;color:#2E5FA3;text-align:right;margin-top:4px}
-.weight-bands{margin-top:10px}
-.weight-bands-title{font-size:11px;color:#888;margin-bottom:6px}
-.bands-grid{display:flex;flex-wrap:wrap;gap:5px}
-.band-chip{font-size:11px;padding:3px 8px;border-radius:5px;background:#F2F2F2;color:#444;border:1px solid #E0E0E0}
-.band-chip.active{background:#2E5FA3;color:#fff;border-color:#2E5FA3}
-table.history{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
-table.history th{background:#2E5FA3;color:#fff;padding:7px 10px;text-align:left;font-weight:600}
-table.history td{padding:7px 10px;border-bottom:1px solid #f0f0f0}
-table.history tr:nth-child(even) td{background:#F8FAFD}
-table.history td.num{text-align:right;font-weight:600}
-.mini-tag{font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700;vertical-align:middle;margin-left:4px}
-.tag-green{background:#D4EDDA;color:#145217}
-.tag-amber{background:#FFF3CD;color:#856404}
-.tag-red{background:#F8D7DA;color:#842029}
-.commune-info-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
-.commune-name-big{font-size:20px;font-weight:700;color:#1F3864}
-.comm-region-text{font-size:12px;color:#666}
-footer{text-align:center;font-size:11px;color:#aaa;padding:20px;margin-top:8px}
-@media(max-width:600px){.grid2,.grid3{grid-template-columns:1fr}.amounts-grid{grid-template-columns:1fr}}
+.buf-disp{font-size:13px;font-weight:700;color:#2E5FA3;text-align:right;margin-top:4px}
+.result-box{border-radius:10px;padding:18px 20px;margin-bottom:14px}
+.result-empty{background:#F2F2F2;border:1.5px dashed #ccc;text-align:center;color:#999;padding:32px}
+.result-ok{background:#D4EDDA;border:1.5px solid #28a745}
+.result-warn{background:#FFF3CD;border:1.5px solid #ffc107}
+.result-danger{background:#F8D7DA;border:1.5px solid #dc3545}
+.rt{font-size:12px;font-weight:700;margin-bottom:12px}
+.result-ok .rt{color:#145217}
+.result-warn .rt{color:#856404}
+.result-danger .rt{color:#842029}
+.amounts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.amt-card{background:rgba(255,255,255,.75);border-radius:7px;padding:11px 14px}
+.amt-label{font-size:11px;color:#555;margin-bottom:3px}
+.amt-val{font-size:22px;font-weight:700}
+.result-ok .amt-val{color:#145217}
+.result-warn .amt-val{color:#856404}
+.result-danger .amt-val{color:#842029}
+.amt-sub{font-size:11px;color:#666;margin-top:2px}
+.det-row{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.07)}
+.det-row:last-child{border-bottom:none}
+.det-label{color:#555}
+.det-value{font-weight:600}
+.alert-row{background:#F8D7DA;border-radius:6px;padding:8px 12px;font-size:12px;color:#842029;margin-top:8px;display:flex;align-items:center;gap:8px}
+.info-row{background:#EBF3FD;border-radius:6px;padding:8px 12px;font-size:12px;color:#0c5460;margin-top:6px;display:flex;align-items:center;gap:8px}
+.zone-pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;margin-left:5px}
+.z1{background:#D4EDDA;color:#145217}
+.z2{background:#FFF3CD;color:#856404}
+.z3{background:#F8D7DA;color:#842029}
+.zfc{background:#e2d9f3;color:#4a235a}
+.comm-name-big{font-size:19px;font-weight:700;color:#1F3864}
+.comm-meta{font-size:12px;color:#666;margin-top:2px}
+table.ref{width:100%;border-collapse:collapse;font-size:12px}
+table.ref th{background:#2E5FA3;color:#fff;padding:7px 10px;text-align:left;font-weight:600}
+table.ref td{padding:6px 10px;border-bottom:1px solid #f0f0f0}
+table.ref tr:nth-child(even) td{background:#F8FAFD}
+table.ref td.num{text-align:right;font-weight:600}
+.mtag{font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700;vertical-align:middle;margin-left:4px}
+.tg{background:#D4EDDA;color:#145217}
+.ta{background:#FFF3CD;color:#856404}
+.tr{background:#F8D7DA;color:#842029}
+.sim-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+.sim-table th{background:#F2F2F2;color:#333;padding:6px 10px;text-align:right;font-weight:600;border-bottom:2px solid #D0D8E8}
+.sim-table th:first-child{text-align:left}
+.sim-table td{padding:6px 10px;text-align:right;border-bottom:1px solid #f0f0f0}
+.sim-table td:first-child{text-align:left;color:#555}
+footer{text-align:center;font-size:11px;color:#aaa;padding:16px}
+@media(max-width:600px){.grid3,.amounts-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -89,28 +88,27 @@ footer{text-align:center;font-size:11px;color:#aaa;padding:20px;margin-top:8px}
     <h1>Calculadora de Flete — Corp Premier</h1>
     <p>Estimador de costos U Send para cotizaciones en Mercado Público</p>
   </div>
-  <span class="badge-usend">Courier: U Send</span>
+  <span class="badge badge-blue">Courier: U Send</span>
+  <span class="badge badge-green">Tarifario oficial abril 2026</span>
 </header>
-
-<div style="background:#F8D7DA;border-bottom:2px solid #E24B4A;padding:10px 24px;font-size:12px;color:#842029;display:flex;align-items:center;gap:10px">
-  <span style="font-size:16px">⚠️</span>
-  <span><strong>Tarifas actualizadas al 1 de abril de 2026.</strong> U Send aplicó un alza del 10,5% en todas sus tarifas. El buffer recomendado aumentó de 12% a 15%. Actualiza tus cotizaciones en curso.</span>
+<div class="alert-bar">
+  <span style="font-size:15px">&#9888;&#65039;</span>
+  <span><strong>Tarifas vigentes desde 1 abril 2026.</strong> Calculadora actualizada con tarifario oficial U Send (+10,5%). Buffer recomendado: 15%. Cubre 357 comunas del pais.</span>
 </div>
 <div class="container">
-
 <div class="card">
   <div class="card-title">Datos del despacho</div>
-  <div class="grid3" style="gap:16px;align-items:end">
+  <div class="grid3" style="align-items:end">
     <div>
-      <label for="communeInput">Comuna de destino</label>
+      <label>Comuna de destino</label>
       <div class="search-wrap">
         <input type="text" id="communeInput" placeholder="Buscar comuna..." autocomplete="off">
-        <button class="clear-btn" id="clearBtn" title="Limpiar">×</button>
+        <button class="clear-btn" id="clearBtn">x</button>
         <div class="dropdown" id="dropdown" style="display:none"></div>
       </div>
     </div>
     <div>
-      <label for="weightInput">Peso del envío (kg)</label>
+      <label>Peso del envio (kg)</label>
       <input type="number" id="weightInput" placeholder="Ej: 45" min="0.1" step="0.1">
     </div>
     <div>
@@ -119,438 +117,535 @@ footer{text-align:center;font-size:11px;color:#aaa;padding:20px;margin-top:8px}
         <input type="range" id="bufferSlider" min="0" max="30" value="15" step="1">
         <div class="slider-labels"><span>0%</span><span>10%</span><span>20%</span><span>30%</span></div>
       </div>
-      <div class="buffer-display" id="bufferDisplay">+12%</div>
+      <div class="buf-disp" id="bufferDisplay">+15%</div>
     </div>
   </div>
 </div>
-
 <div id="resultSection">
   <div class="result-box result-empty">
-    <div style="font-size:28px;margin-bottom:8px">📦</div>
+    <div style="font-size:28px;margin-bottom:8px">&#128230;</div>
     <div style="font-size:14px;font-weight:600;color:#888">Ingresa la comuna de destino y el peso para calcular el flete estimado</div>
   </div>
 </div>
-
-<div id="communeDetailSection" style="display:none">
-  <div class="card">
-    <div class="card-title">Detalle de la comuna</div>
-    <div id="communeDetailContent"></div>
-  </div>
-</div>
-
 <div class="card">
-  <div class="card-title">Referencia rápida — top comunas frecuentes</div>
+  <div class="card-title">Simulador por tramos de peso</div>
+  <div id="simSection"><p style="font-size:12px;color:#aaa;font-style:italic">Selecciona una comuna para ver la proyeccion completa</p></div>
+</div>
+<div class="card">
+  <div class="card-title">Referencia rapida - comunas frecuentes</div>
   <div style="overflow-x:auto">
-  <table class="history">
+  <table class="ref">
     <thead><tr>
-      <th>Comuna</th><th>Región</th><th>Zona</th>
-      <th style="text-align:right">Flete promedio</th>
-      <th style="text-align:right">Peso prom. ref.</th>
-      <th style="text-align:right">$/kg adicional</th>
-      <th>Envíos hist.</th>
+      <th>Comuna</th><th>Region</th><th>Zona</th><th>SLA</th>
+      <th style="text-align:right">30 kg</th>
+      <th style="text-align:right">100 kg</th>
+      <th style="text-align:right">200 kg</th>
     </tr></thead>
     <tbody id="refTableBody"></tbody>
   </table>
   </div>
 </div>
-
 <div class="card" style="background:#EBF3FD;border:1px solid #B5D4F4">
   <div class="card-title" style="color:#1F3864">Notas para ejecutivos</div>
-  <div style="font-size:12px;color:#333;line-height:1.8">
-    <p><strong>El flete base</strong> es el promedio histórico real pagado a U Send para esa comuna y rango de peso. No es una tarifa garantizada.</p>
-    <p style="margin-top:6px"><strong>El buffer del 15%</strong> es el valor recomendado para cotizar en Mercado Público desde abril 2026, luego del alza del 10,5% de U Send.</p>
-    <p style="margin-top:6px"><strong>Zona Z3:</strong> comunas de acceso difícil o interior. Siempre consultar con logística antes de comprometer precio en la licitación.</p>
-    <p style="margin-top:6px"><strong>Aysén y Magallanes:</strong> tiempo de tránsito promedio 14–15 días. Si la OC exige entrega en menos de 7 días hábiles, coordinarlo previamente.</p>
-    <p style="margin-top:6px"><strong>Envíos sobre 200 kg:</strong> el cálculo es referencial — solicitar cotización directa a U Send para mayor precisión.</p>
+  <div style="font-size:12px;color:#333;line-height:1.9">
+    <p><strong>Tarifario oficial U Send vigente desde el 1 de abril de 2026</strong> con ajuste del +10,5%. Cubre 357 comunas a nivel nacional.</p>
+    <p style="margin-top:6px"><strong>El buffer del 15%</strong> es el valor recomendado para cotizar en Mercado Publico. Usa siempre el monto con buffer en tu propuesta.</p>
+    <p style="margin-top:6px"><strong>Zona Z3:</strong> comunas de dificil acceso o interior. Siempre consulta con logistica antes de comprometer precio en la licitacion.</p>
+    <p style="margin-top:6px"><strong>Destinos con SLA mayor a 7 dias:</strong> coordinar con Juan Pablo en logistica antes de comprometer plazo de entrega.</p>
+    <p style="margin-top:6px"><strong>FC (Fuera de Cobertura):</strong> cotizacion especial directa con U Send, no usar esta calculadora.</p>
+    <p style="margin-top:6px"><strong>Envios sobre 500 kg:</strong> solicitar cotizacion directa a U Send para mayor precision.</p>
   </div>
 </div>
-
 </div>
-<footer>Corp Premier — Uso interno | Tarifas vigentes desde 1 abril 2026 (ajuste +10,5% U Send) | Base histórica ene 2025–feb 2026</footer>
-
+<footer>Corp Premier - Uso interno | Tarifario U Send vigente 1 abril 2026 al 10 julio 2026 | 357 comunas</footer>
 <script>
+const TR = {
+  'ARICA':        {Z1:{b:16919,a:944,b2:838,c:739,d:692,e:569},  Z2:{b:20681,a:1277,b2:1126,c:982,d:885,e:696},  Z3:{b:27268,a:1789,b2:1574,c:1360,d:1187,e:845}},
+  'IQUIQUE':      {Z1:{b:15168,a:808,b2:645,c:505,d:475,e:395},  Z2:{b:18930,a:1141,b2:933,c:749,d:669,e:522},   Z3:{b:25517,a:1652,b2:1381,c:1126,d:970,e:671}},
+  'CALAMA':       {Z1:{b:14684,a:791,b2:632,c:494,d:468,e:387},  Z2:{b:18446,a:1124,b2:920,c:737,d:661,e:514},   Z3:{b:25033,a:1635,b2:1368,c:1115,d:963,e:663}},
+  'ANTOFAGASTA':  {Z1:{b:14229,a:698,b2:557,c:436,d:413,e:344},  Z2:{b:17991,a:1030,b2:846,c:679,d:607,e:471},   Z3:{b:24579,a:1542,b2:1293,c:1057,d:909,e:620}},
+  'COPIAPO':      {Z1:{b:12664,a:621,b2:496,c:387,d:370,e:311},  Z2:{b:16426,a:954,b2:784,c:631,d:564,e:438},    Z3:{b:23013,a:1465,b2:1232,c:1008,d:866,e:586}},
+  'LA SERENA':    {Z1:{b:11506,a:559,b2:456,c:355,d:340,e:286},  Z2:{b:15268,a:892,b2:745,c:599,d:534,e:413},    Z3:{b:21855,a:1403,b2:1192,c:976,d:836,e:562}},
+  'VALPARAISO':   {Z1:{b:9127,a:505,b2:404,c:314,d:303,e:258},   Z2:{b:12889,a:838,b2:692,c:558,d:496,e:385},    Z3:{b:19476,a:1349,b2:1140,c:935,d:798,e:534}},
+  'SANTIAGO':     {Z1:{b:7653,a:440,b2:352,c:275,d:262,e:243},   Z2:{b:11416,a:772,b2:640,c:518,d:455,e:370},    Z3:{b:18003,a:1284,b2:1088,c:896,d:757,e:519}},
+  'RANCAGUA':     {Z1:{b:9127,a:505,b2:404,c:314,d:303,e:258},   Z2:{b:12889,a:838,b2:692,c:558,d:496,e:385},    Z3:{b:19476,a:1349,b2:1140,c:935,d:798,e:534}},
+  'CURICO':       {Z1:{b:9127,a:505,b2:404,c:314,d:303,e:258},   Z2:{b:12889,a:838,b2:692,c:558,d:496,e:385},    Z3:{b:19476,a:1349,b2:1140,c:935,d:798,e:534}},
+  'TALCA':        {Z1:{b:9800,a:541,b2:430,c:337,d:324,e:273},   Z2:{b:13563,a:873,b2:718,c:580,d:517,e:400},    Z3:{b:20150,a:1385,b2:1166,c:958,d:819,e:549}},
+  'CHILLAN':      {Z1:{b:11506,a:559,b2:456,c:355,d:340,e:286},  Z2:{b:15268,a:892,b2:745,c:599,d:534,e:413},    Z3:{b:21855,a:1403,b2:1192,c:976,d:836,e:562}},
+  'CONCEPCION':   {Z1:{b:11506,a:559,b2:456,c:355,d:340,e:286},  Z2:{b:15268,a:892,b2:745,c:599,d:534,e:413},    Z3:{b:21855,a:1403,b2:1192,c:976,d:836,e:562}},
+  'LOS ANGELES':  {Z1:{b:11506,a:559,b2:456,c:355,d:340,e:286},  Z2:{b:15268,a:892,b2:745,c:599,d:534,e:413},    Z3:{b:21855,a:1403,b2:1192,c:976,d:836,e:562}},
+  'TEMUCO':       {Z1:{b:12503,a:582,b2:466,c:363,d:346,e:292},  Z2:{b:16265,a:915,b2:754,c:606,d:540,e:419},    Z3:{b:22852,a:1426,b2:1202,c:984,d:841,e:568}},
+  'VALDIVIA':     {Z1:{b:12664,a:621,b2:496,c:387,d:370,e:311},  Z2:{b:16426,a:954,b2:784,c:631,d:564,e:438},    Z3:{b:23013,a:1465,b2:1232,c:1008,d:866,e:586}},
+  'OSORNO':       {Z1:{b:12664,a:621,b2:496,c:387,d:370,e:311},  Z2:{b:16426,a:954,b2:784,c:631,d:564,e:438},    Z3:{b:23013,a:1465,b2:1232,c:1008,d:866,e:586}},
+  'PUERTO MONTT': {Z1:{b:13416,a:675,b2:539,c:421,d:402,e:337},  Z2:{b:17178,a:1008,b2:827,c:664,d:596,e:464},   Z3:{b:23765,a:1519,b2:1275,c:1042,d:897,e:613}},
+  'COYHAIQUE':    {Z1:{b:16919,a:944,b2:838,c:739,d:692,e:569},  Z2:{b:20681,a:1277,b2:1126,c:982,d:885,e:696},  Z3:{b:27268,a:1789,b2:1574,c:1360,d:1187,e:845}},
+  'PUNTA ARENAS': {Z1:{b:21448,a:1320,b2:1111,c:1077,d:1031,e:956}, Z2:{b:25211,a:1653,b2:1399,c:1321,d:1224,e:1083}, Z3:{b:31798,a:2165,b2:1847,c:1698,d:1526,e:1232}},
+};
+
+function getRates(ag,z){
+  const a=ag.toUpperCase();
+  for(const k of Object.keys(TR)){if(a.includes(k)||k.includes(a))return TR[k][z];}
+  return TR['SANTIAGO'][z]||null;
+}
+
+function calcFlete(ag,z,peso){
+  const r=getRates(ag,z);
+  if(!r)return null;
+  const{b,a,b2,c,d,e}=r;
+  if(peso<=15)return Math.ceil(b*Math.max(0.35,peso/15));
+  if(peso<=50)return Math.ceil(b+(peso-15)*a);
+  if(peso<=100)return Math.ceil(b+35*a+(peso-50)*b2);
+  if(peso<=200)return Math.ceil(b+35*a+50*b2+(peso-100)*c);
+  if(peso<=500)return Math.ceil(b+35*a+50*b2+100*c+(peso-200)*d);
+  return Math.ceil(b+35*a+50*b2+100*c+300*d+(peso-500)*e);
+}
+
+const fmt=n=>'$'+Math.round(n).toLocaleString('es-CL');
+
 const DATA = [
-  {c:"PROVIDENCIA",r:"XIII",rn:"XIII - Región Metropolitana de Santiago",z:"Z1",b:12610,pw:17,rk:1120,n:45,wb:{"<3":4293,"3-6":1573,"6-10":1069,"10-15":862,"15-30":677,"100+":355}},
-  {c:"VALPARAISO",r:"V",rn:"V - Región de Valparaíso",z:"Z1",b:38999,pw:109,rk:534,n:40,wb:{"<3":3506,"6-10":728,"10-15":735,"15-30":744,"30-50":532,"50-100":439,"100+":310}},
-  {c:"COPIAPO",r:"III",rn:"III - Región de Atacama",z:"Z1",b:45651,pw:98,rk:570,n:35,wb:{"<3":2717,"15-30":780,"30-50":703,"50-100":559,"100+":394}},
-  {c:"PUERTO MONTT",r:"X",rn:"X - Región de Los Lagos",z:"Z1",b:48590,pw:96,rk:752,n:27,wb:{"10-15":1103,"15-30":789,"30-50":753,"50-100":608,"100+":425}},
-  {c:"ARICA",r:"XV",rn:"XV - Región de Arica y Parinacota",z:"Z1",b:72413,pw:93,rk:998,n:25,wb:{"<3":4424,"6-10":1581,"10-15":1280,"15-30":1040,"30-50":995,"50-100":882,"100+":690}},
-  {c:"TALCA",r:"VII",rn:"VII - Región del Maule",z:"Z1",b:34904,pw:82,rk:560,n:24,wb:{"<3":2366,"3-6":1186,"10-15":845,"15-30":598,"30-50":563,"50-100":470,"100+":375}},
-  {c:"CONCEPCION",r:"VIII",rn:"VIII - Región del Biobío",z:"Z1",b:30546,pw:67,rk:638,n:20,wb:{"3-6":1543,"10-15":864,"15-30":688,"30-50":617,"50-100":507,"100+":377}},
-  {c:"ANTOFAGASTA",r:"II",rn:"II - Región de Antofagasta",z:"Z1",b:33268,pw:54,rk:828,n:18,wb:{"3-6":1933,"15-30":873,"30-50":772,"50-100":633,"100+":482}},
-  {c:"IQUIQUE",r:"I",rn:"I - Región de Tarapacá",z:"Z1",b:58977,pw:102,rk:738,n:17,wb:{"6-10":1286,"10-15":1029,"30-50":883,"50-100":718,"100+":486}},
-  {c:"RANCAGUA",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z1",b:78692,pw:265,rk:434,n:15,wb:{"30-50":542,"50-100":430,"100+":276}},
-  {c:"LA SERENA",r:"IV",rn:"IV - Región de Coquimbo",z:"Z1",b:34276,pw:75,rk:524,n:13,wb:{"6-10":1207,"50-100":514,"100+":374}},
-  {c:"OVALLE",r:"IV",rn:"IV - Región de Coquimbo",z:"Z2",b:72578,pw:116,rk:925,n:13,wb:{"10-15":1226,"15-30":961,"30-50":930,"100+":565}},
-  {c:"PUNTA ARENAS",r:"XII",rn:"XII - Región de Magallanes y de la Antártica Chilena",z:"Z1",b:62441,pw:52,rk:1314,n:13,wb:{"15-30":1381,"30-50":1329,"50-100":1156,"100+":1092}},
-  {c:"ANCUD",r:"X",rn:"X - Región de Los Lagos",z:"Z3",b:64111,pw:51,rk:1520,n:13,wb:{"15-30":1518,"30-50":1507,"50-100":1300}},
-  {c:"OSORNO",r:"X",rn:"X - Región de Los Lagos",z:"Z1",b:69537,pw:164,rk:540,n:11,wb:{"50-100":547,"100+":376}},
-  {c:"QUILLOTA",r:"V",rn:"V - Región de Valparaíso",z:"Z2",b:37700,pw:60,rk:826,n:11,wb:{"<3":3659,"6-10":1403,"15-30":825,"100+":545}},
-  {c:"VALDIVIA",r:"XIV",rn:"XIV - Región de Los Ríos",z:"Z1",b:43879,pw:93,rk:693,n:10,wb:{"15-30":764,"30-50":687,"100+":388}},
-  {c:"CHILLAN",r:"XVI",rn:"XVI - Región de Ñuble",z:"Z1",b:35484,pw:82,rk:652,n:10,wb:{"<3":5392,"50-100":498,"100+":371}},
-  {c:"VIÑA DEL MAR",r:"V",rn:"V - Región de Valparaíso",z:"Z1",b:29869,pw:67,rk:441,n:9,wb:{"10-15":1528,"50-100":441,"100+":344}},
-  {c:"MAULE",r:"VII",rn:"VII - Región del Maule",z:"Z1",b:41569,pw:106,rk:559,n:9,wb:{"30-50":571,"50-100":463,"100+":334}},
-  {c:"COYHAIQUE",r:"XI",rn:"XI - Región de Aysén del General Carlos Ibáñez del Campo",z:"Z1",b:77832,pw:98,rk:854,n:9,wb:{"15-30":1059,"50-100":852,"100+":730}},
-  {c:"TEMUCO",r:"IX",rn:"IX - Región de La Araucanía",z:"Z1",b:48763,pw:112,rk:528,n:8,wb:{"15-30":767,"50-100":523,"100+":380}},
-  {c:"COQUIMBO",r:"IV",rn:"IV - Región de Coquimbo",z:"Z1",b:83888,pw:231,rk:504,n:8,wb:{"<3":4118,"50-100":508,"100+":334}},
-  {c:"ANGOL",r:"IX",rn:"IX - Región de La Araucanía",z:"Z2",b:47731,pw:68,rk:879,n:8,wb:{"50-100":772,"100+":585}},
-  {c:"POZO ALMONTE",r:"I",rn:"I - Región de Tarapacá",z:"Z2",b:79524,pw:99,rk:1215,n:8,wb:{"10-15":1497,"100+":703}},
-  {c:"LOS ANGELES",r:"VIII",rn:"VIII - Región del Biobío",z:"Z1",b:55018,pw:141,rk:385,n:6,wb:{"15-30":654,"100+":371}},
-  {c:"MACHALI",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z1",b:29274,pw:80,rk:458,n:6,wb:{"100+":338}},
-  {c:"CAUQUENES",r:"VII",rn:"VII - Región del Maule",z:"Z3",b:73248,pw:64,rk:1255,n:6,wb:{"30-50":1339,"100+":997}},
-  {c:"CALAMA",r:"II",rn:"II - Región de Antofagasta",z:"Z1",b:44764,pw:70,rk:776,n:6,wb:{"15-30":893,"100+":530}},
-  {c:"MELIPILLA",r:"XIII",rn:"XIII - Región Metropolitana de Santiago",z:"Z2",b:29139,pw:41,rk:753,n:6,wb:{"15-30":753,"50-100":652}},
-  {c:"SAN JUAN DE LA COSTA",r:"X",rn:"X - Región de Los Lagos",z:"Z3",b:64616,pw:50,rk:1458,n:6,wb:{"30-50":1459}},
-  {c:"QUILPUE",r:"V",rn:"V - Región de Valparaíso",z:"Z1",b:20583,pw:45,rk:534,n:6,wb:{}},
-  {c:"MEJILLONES",r:"II",rn:"II - Región de Antofagasta",z:"Z2",b:58284,pw:77,rk:1552,n:6,wb:{}},
-  {c:"QUEILEN",r:"X",rn:"X - Región de Los Lagos",z:"Z3",b:117168,pw:112,rk:1517,n:5,wb:{"30-50":1510}},
-  {c:"SAN CARLOS",r:"XVI",rn:"XVI - Región de Ñuble",z:"Z1",b:96795,pw:268,rk:513,n:5,wb:{"50-100":556,"100+":331}},
-  {c:"PURRANQUE",r:"X",rn:"X - Región de Los Lagos",z:"Z2",b:68267,pw:94,rk:812,n:5,wb:{"50-100":825,"100+":654}},
-  {c:"RENGO",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z2",b:41219,pw:56,rk:715,n:5,wb:{"50-100":708}},
-  {c:"COLINA",r:"XIII",rn:"XIII - Región Metropolitana de Santiago",z:"Z2",b:39199,pw:61,rk:656,n:5,wb:{"50-100":654}},
-  {c:"LIMACHE",r:"V",rn:"V - Región de Valparaíso",z:"Z2",b:37378,pw:49,rk:730,n:5,wb:{"50-100":717}},
-  {c:"NACIMIENTO",r:"VIII",rn:"VIII - Región del Biobío",z:"Z2",b:115984,pw:200,rk:730,n:4,wb:{"100+":546}},
-  {c:"PUTAENDO",r:"V",rn:"V - Región de Valparaíso",z:"Z3",b:70624,pw:59,rk:1218,n:4,wb:{"50-100":1140}},
-  {c:"SALAMANCA",r:"IV",rn:"IV - Región de Coquimbo",z:"Z3",b:153474,pw:189,rk:1545,n:4,wb:{}},
-  {c:"CASTRO",r:"X",rn:"X - Región de Los Lagos",z:"Z3",b:161511,pw:155,rk:1205,n:4,wb:{"100+":963}},
-  {c:"MARIA ELENA",r:"II",rn:"II - Región de Antofagasta",z:"Z3",b:101129,pw:82,rk:1392,n:4,wb:{"100+":1131}},
-  {c:"VALLENAR",r:"III",rn:"III - Región de Atacama",z:"Z3",b:98312,pw:101,rk:1481,n:4,wb:{"15-30":1473}},
-  {c:"SAN PEDRO",r:"XIII",rn:"XIII - Región Metropolitana de Santiago",z:"Z3",b:88863,pw:91,rk:1006,n:4,wb:{"100+":908}},
-  {c:"COMBARBALA",r:"IV",rn:"IV - Región de Coquimbo",z:"Z3",b:154263,pw:157,rk:1091,n:4,wb:{"100+":932}},
-  {c:"COLBUN",r:"VII",rn:"VII - Región del Maule",z:"Z2",b:52825,pw:87,rk:809,n:4,wb:{}},
-  {c:"AYSEN",r:"XI",rn:"XI - Región de Aysén del General Carlos Ibáñez del Campo",z:"Z2",b:192573,pw:182,rk:1283,n:4,wb:{"30-50":1283}},
-  {c:"LA UNION",r:"XIV",rn:"XIV - Región de Los Ríos",z:"Z2",b:100597,pw:156,rk:734,n:4,wb:{"100+":597}},
-  {c:"CAÑETE",r:"VIII",rn:"VIII - Región del Biobío",z:"Z3",b:192970,pw:239,rk:1019,n:3,wb:{"100+":772}},
-  {c:"CURACAUTIN",r:"IX",rn:"IX - Región de La Araucanía",z:"Z3",b:74940,pw:64,rk:1231,n:3,wb:{}},
-  {c:"ALGARROBO",r:"V",rn:"V - Región de Valparaíso",z:"Z3",b:278382,pw:397,rk:761,n:3,wb:{"100+":701}},
-  {c:"ALHUE",r:"XIII",rn:"XIII - Región Metropolitana de Santiago",z:"Z3",b:95207,pw:95,rk:1093,n:3,wb:{}},
-  {c:"HUARA",r:"I",rn:"I - Región de Tarapacá",z:"Z3",b:95320,pw:86,rk:1665,n:3,wb:{}},
-  {c:"CURICO",r:"VII",rn:"VII - Región del Maule",z:"Z1",b:24385,pw:60,rk:431,n:3,wb:{}},
-  {c:"CURANILAHUE",r:"VIII",rn:"VIII - Región del Biobío",z:"Z3",b:86282,pw:68,rk:1230,n:3,wb:{"50-100":1224}},
-  {c:"LOS VILOS",r:"IV",rn:"IV - Región de Coquimbo",z:"Z3",b:112604,pw:107,rk:1016,n:3,wb:{"100+":1012}},
-  {c:"QUELLON",r:"X",rn:"X - Región de Los Lagos",z:"Z3",b:64302,pw:46,rk:1501,n:3,wb:{"15-30":1518}},
-  {c:"TALTAL",r:"II",rn:"II - Región de Antofagasta",z:"Z3",b:114654,pw:104,rk:1302,n:3,wb:{}},
-  {c:"LINARES",r:"VII",rn:"VII - Región del Maule",z:"Z2",b:129408,pw:246,rk:723,n:3,wb:{"50-100":728}},
-  {c:"PENCO",r:"VIII",rn:"VIII - Región del Biobío",z:"Z1",b:34027,pw:80,rk:647,n:3,wb:{}},
-  {c:"MULCHEN",r:"VIII",rn:"VIII - Región del Biobío",z:"Z2",b:92337,pw:157,rk:933,n:3,wb:{}},
-  {c:"CAUQUENES",r:"VII",rn:"VII - Región del Maule",z:"Z3",b:73248,pw:64,rk:1255,n:6,wb:{"30-50":1339,"100+":997}},
-  {c:"LLANQUIHUE",r:"X",rn:"X - Región de Los Lagos",z:"Z3",b:62985,pw:52,rk:1527,n:3,wb:{}},
-  {c:"CORRAL",r:"XIV",rn:"XIV - Región de Los Ríos",z:"Z3",b:47245,pw:31,rk:1460,n:3,wb:{"15-30":1518}},
-  {c:"OLMUE",r:"V",rn:"V - Región de Valparaíso",z:"Z2",b:52912,pw:72,rk:711,n:3,wb:{"50-100":704}},
-  {c:"MAFIL",r:"XIV",rn:"XIV - Región de Los Ríos",z:"Z2",b:42294,pw:51,rk:1001,n:3,wb:{}},
-  {c:"ILLAPEL",r:"IV",rn:"IV - Región de Coquimbo",z:"Z3",b:52650,pw:40,rk:1394,n:3,wb:{}},
-  {c:"SAN ANTONIO",r:"V",rn:"V - Región de Valparaíso",z:"Z3",b:21547,pw:14,rk:1487,n:3,wb:{}},
-  {c:"SAN FERNANDO",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z2",b:26442,pw:39,rk:1078,n:3,wb:{"6-10":1205}},
-  {c:"CHILE CHICO",r:"XI",rn:"XI - Región de Aysén del General Carlos Ibáñez del Campo",z:"Z3",b:120989,pw:85,rk:1568,n:2,wb:{}},
-  {c:"CHEPICA",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z3",b:94176,pw:90,rk:1143,n:2,wb:{}},
-  {c:"PAREDONES",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z3",b:79513,pw:73,rk:1164,n:2,wb:{}},
-  {c:"NATALES",r:"XII",rn:"XII - Región de Magallanes y de la Antártica Chilena",z:"Z3",b:41597,pw:16,rk:4236,n:2,wb:{}},
-  {c:"ANTUCO",r:"VIII",rn:"VIII - Región del Biobío",z:"Z3",b:175101,pw:193,rk:929,n:2,wb:{"100+":905}},
-  {c:"VILLARRICA",r:"IX",rn:"IX - Región de La Araucanía",z:"Z2",b:130782,pw:217,rk:623,n:2,wb:{"100+":603}},
-  {c:"PAINE",r:"XIII",rn:"XIII - Región Metropolitana de Santiago",z:"Z2",b:38639,pw:65,rk:753,n:4,wb:{"15-30":753}},
-  {c:"BUIN",r:"XIII",rn:"XIII - Región Metropolitana de Santiago",z:"Z2",b:25194,pw:33,rk:756,n:2,wb:{"30-50":756}},
-  {c:"CALBUCO",r:"X",rn:"X - Región de Los Lagos",z:"Z2",b:79969,pw:93,rk:858,n:2,wb:{"50-100":857}},
-  {c:"FRUTILLAR",r:"X",rn:"X - Región de Los Lagos",z:"Z2",b:47913,pw:61,rk:1132,n:2,wb:{}},
-  {c:"PARRAL",r:"VII",rn:"VII - Región del Maule",z:"Z3",b:25705,pw:19,rk:1307,n:2,wb:{}},
-  {c:"PELARCO",r:"VII",rn:"VII - Región del Maule",z:"Z3",b:80777,pw:68,rk:1177,n:2,wb:{"50-100":1175}},
-  {c:"FUTALEUFU",r:"X",rn:"X - Región de Los Lagos",z:"Z3",b:33316,pw:19,rk:1917,n:2,wb:{}},
-  {c:"ALTO DEL CARMEN",r:"III",rn:"III - Región de Atacama",z:"Z3",b:129376,pw:136,rk:2015,n:2,wb:{}},
-  {c:"TOCOPILLA",r:"II",rn:"II - Región de Antofagasta",z:"Z3",b:41383,pw:23,rk:2817,n:2,wb:{}},
-  {c:"PUCON",r:"IX",rn:"IX - Región de La Araucanía",z:"Z3",b:69885,pw:55,rk:1271,n:1,wb:{}},
-  {c:"CANELA",r:"IV",rn:"IV - Región de Coquimbo",z:"Z3",b:208600,pw:274,rk:1047,n:2,wb:{}},
-  {c:"CHAÑARAL",r:"III",rn:"III - Región de Atacama",z:"Z3",b:83228,pw:73,rk:1244,n:2,wb:{}},
-  {c:"HUASCO",r:"III",rn:"III - Región de Atacama",z:"Z3",b:71557,pw:48,rk:1466,n:1,wb:{}},
-  {c:"TIERRA AMARILLA",r:"III",rn:"III - Región de Atacama",z:"Z1",b:71364,pw:172,rk:413,n:1,wb:{}},
-  {c:"LONQUIMAY",r:"IX",rn:"IX - Región de La Araucanía",z:"Z3",b:114906,pw:110,rk:1043,n:1,wb:{}},
-  {c:"PUREN",r:"IX",rn:"IX - Región de La Araucanía",z:"Z3",b:66236,pw:51,rk:1277,n:1,wb:{}},
-  {c:"GUAITECAS",r:"XI",rn:"XI - Región de Aysén del General Carlos Ibáñez del Campo",z:"Z3",b:299503,pw:244,rk:1226,n:1,wb:{}},
-  {c:"CAMARONES",r:"XV",rn:"XV - Región de Arica y Parinacota",z:"Z3",b:164908,pw:120,rk:1370,n:1,wb:{}},
-  {c:"LITUECHE",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z3",b:307324,pw:388,rk:791,n:1,wb:{}},
-  {c:"MONTE PATRIA",r:"IV",rn:"IV - Región de Coquimbo",z:"Z3",b:622608,pw:865,rk:720,n:1,wb:{}},
-  {c:"QUILLECO",r:"VIII",rn:"VIII - Región del Biobío",z:"Z3",b:194970,pw:195,rk:998,n:1,wb:{}},
-  {c:"PUNITAQUI",r:"IV",rn:"IV - Región de Coquimbo",z:"Z3",b:88607,pw:82,rk:1612,n:2,wb:{}},
-  {c:"COLCHANE",r:"I",rn:"I - Región de Tarapacá",z:"Z3",b:75497,pw:46,rk:1613,n:1,wb:{}},
-  {c:"PICA",r:"I",rn:"I - Región de Tarapacá",z:"Z3",b:285784,pw:287,rk:995,n:1,wb:{}},
-  {c:"ALTO HOSPICIO",r:"I",rn:"I - Región de Tarapacá",z:"Z1",b:32879,pw:38,rk:858,n:1,wb:{}},
-  {c:"CALERA DE TANGO",r:"XIII",rn:"XIII - Región Metropolitana de Santiago",z:"Z2",b:10732,pw:1,rk:1120,n:1,wb:{}},
-  {c:"PADRE HURTADO",r:"XIII",rn:"XIII - Región Metropolitana de Santiago",z:"Z2",b:13861,pw:29,rk:471,n:3,wb:{"15-30":476}},
-  {c:"ISLA DE MAIPO",r:"XIII",rn:"XIII - Región Metropolitana de Santiago",z:"Z2",b:15759,pw:19,rk:1014,n:4,wb:{}},
-  {c:"EL MONTE",r:"XIII",rn:"XIII - Región Metropolitana de Santiago",z:"Z2",b:45877,pw:69,rk:657,n:1,wb:{}},
-  {c:"CURACAVI",r:"XIII",rn:"XIII - Región Metropolitana de Santiago",z:"Z2",b:13017,pw:12,rk:1120,n:2,wb:{}},
-  {c:"MARIA PINTO",r:"XIII",rn:"XIII - Región Metropolitana de Santiago",z:"Z2",b:56033,pw:114,rk:794,n:2,wb:{}},
-  {c:"PEÑAFLOR",r:"XIII",rn:"XIII - Región Metropolitana de Santiago",z:"Z2",b:93519,pw:179,rk:521,n:1,wb:{}},
-  {c:"SIERRA GORDA",r:"II",rn:"II - Región de Antofagasta",z:"Z3",b:98222,pw:73,rk:1344,n:1,wb:{}},
-  {c:"SAN PEDRO DE ATACAMA",r:"II",rn:"II - Región de Antofagasta",z:"Z3",b:24671,pw:11,rk:2164,n:1,wb:{}},
-  {c:"OLLAGUE",r:"II",rn:"II - Región de Antofagasta",z:"Z3",b:34877,pw:21,rk:1603,n:1,wb:{}},
-  {c:"PAIGUANO",r:"IV",rn:"IV - Región de Coquimbo",z:"Z3",b:120747,pw:118,rk:1023,n:1,wb:{}},
-  {c:"VICUÑA",r:"IV",rn:"IV - Región de Coquimbo",z:"Z2",b:139216,pw:250,rk:555,n:1,wb:{}},
-  {c:"LA HIGUERA",r:"IV",rn:"IV - Región de Coquimbo",z:"Z3",b:481716,pw:837,rk:884,n:2,wb:{}},
-  {c:"COCHRANE",r:"XI",rn:"XI - Región de Aysén del General Carlos Ibáñez del Campo",z:"Z3",b:17395,pw:3,rk:4928,n:1,wb:{}},
-  {c:"CISNES",r:"XI",rn:"XI - Región de Aysén del General Carlos Ibáñez del Campo",z:"Z3",b:50708,pw:24,rk:2113,n:1,wb:{}},
-  {c:"LAGO VERDE",r:"XI",rn:"XI - Región de Aysén del General Carlos Ibáñez del Campo",z:"Z3",b:52359,pw:30,rk:1743,n:1,wb:{}},
-  {c:"O'HIGGINS",r:"XI",rn:"XI - Región de Aysén del General Carlos Ibáñez del Campo",z:"Z3",b:162150,pw:118,rk:1370,n:1,wb:{}},
-  {c:"PUQUELDON",r:"X",rn:"X - Región de Los Lagos",z:"Z3",b:70987,pw:53,rk:1317,n:1,wb:{}},
-  {c:"CURACO DE VELEZ",r:"X",rn:"X - Región de Los Lagos",z:"Z3",b:24854,pw:15,rk:1582,n:1,wb:{}},
-  {c:"SAN PABLO",r:"X",rn:"X - Región de Los Lagos",z:"Z1",b:16390,pw:21,rk:781,n:1,wb:{}},
-  {c:"MAULLIN",r:"X",rn:"X - Región de Los Lagos",z:"Z2",b:63821,pw:69,rk:962,n:2,wb:{}},
-  {c:"LOS MUERMOS",r:"X",rn:"X - Región de Los Lagos",z:"Z2",b:23324,pw:20,rk:1257,n:3,wb:{}},
-  {c:"FRESIA",r:"X",rn:"X - Región de Los Lagos",z:"Z2",b:52795,pw:69,rk:1605,n:2,wb:{}},
-  {c:"RIO NEGRO",r:"X",rn:"X - Región de Los Lagos",z:"Z2",b:23546,pw:22,rk:1018,n:4,wb:{"15-30":1012}},
-  {c:"GORBEA",r:"IX",rn:"IX - Región de La Araucanía",z:"Z2",b:45784,pw:52,rk:873,n:2,wb:{}},
-  {c:"LONCOCHE",r:"IX",rn:"IX - Región de La Araucanía",z:"Z2",b:43646,pw:51,rk:846,n:1,wb:{}},
-  {c:"CARAHUE",r:"IX",rn:"IX - Región de La Araucanía",z:"Z2",b:45357,pw:60,rk:952,n:3,wb:{}},
-  {c:"VICTORIA",r:"IX",rn:"IX - Región de La Araucanía",z:"Z2",b:19444,pw:17,rk:1141,n:4,wb:{"10-15":1364,"15-30":1012}},
-  {c:"PADRE LAS CASAS",r:"IX",rn:"IX - Región de La Araucanía",z:"Z1",b:17541,pw:22,rk:1078,n:2,wb:{}},
-  {c:"COLLIPULLI",r:"IX",rn:"IX - Región de La Araucanía",z:"Z2",b:92161,pw:145,rk:633,n:1,wb:{}},
-  {c:"RENAICO",r:"IX",rn:"IX - Región de La Araucanía",z:"Z3",b:20363,pw:10,rk:3853,n:2,wb:{}},
-  {c:"TOLTEN",r:"IX",rn:"IX - Región de La Araucanía",z:"Z3",b:81187,pw:64,rk:1258,n:1,wb:{}},
-  {c:"TEODORO SCHMIDT",r:"IX",rn:"IX - Región de La Araucanía",z:"Z2",b:39460,pw:49,rk:935,n:3,wb:{}},
-  {c:"LAUTARO",r:"IX",rn:"IX - Región de La Araucanía",z:"Z2",b:17726,pw:16,rk:1050,n:1,wb:{}},
-  {c:"LONCOCHE",r:"IX",rn:"IX - Región de La Araucanía",z:"Z2",b:43646,pw:51,rk:846,n:1,wb:{}},
-  {c:"PERQUENCO",r:"IX",rn:"IX - Región de La Araucanía",z:"Z2",b:42545,pw:50,rk:2318,n:2,wb:{}},
-  {c:"MOLINA",r:"VII",rn:"VII - Región del Maule",z:"Z1",b:19011,pw:44,rk:698,n:4,wb:{}},
-  {c:"RETIRO",r:"VII",rn:"VII - Región del Maule",z:"Z2",b:65154,pw:105,rk:617,n:2,wb:{"100+":617}},
-  {c:"HUALAÑE",r:"VII",rn:"VII - Región del Maule",z:"Z2",b:80355,pw:131,rk:614,n:1,wb:{}},
-  {c:"LICANTEN",r:"VII",rn:"VII - Región del Maule",z:"Z2",b:30663,pw:37,rk:818,n:1,wb:{}},
-  {c:"CONSTITUCION",r:"VII",rn:"VII - Región del Maule",z:"Z3",b:23787,pw:14,rk:6068,n:2,wb:{}},
-  {c:"LONGAVI",r:"VII",rn:"VII - Región del Maule",z:"Z2",b:41776,pw:55,rk:759,n:1,wb:{}},
-  {c:"SAN JAVIER",r:"VII",rn:"VII - Región del Maule",z:"Z1",b:14141,pw:23,rk:615,n:1,wb:{}},
-  {c:"CHANCO",r:"VII",rn:"VII - Región del Maule",z:"Z3",b:50559,pw:37,rk:1349,n:1,wb:{}},
-  {c:"RIO CLARO",r:"VII",rn:"VII - Región del Maule",z:"Z2",b:72255,pw:94,rk:762,n:1,wb:{}},
-  {c:"SAN RAFAEL",r:"VII",rn:"VII - Región del Maule",z:"Z1",b:67857,pw:194,rk:350,n:1,wb:{}},
-  {c:"TENO",r:"VII",rn:"VII - Región del Maule",z:"Z1",b:6363,pw:8,rk:739,n:1,wb:{}},
-  {c:"RAUCO",r:"VII",rn:"VII - Región del Maule",z:"Z1",b:33041,pw:91,rk:456,n:2,wb:{}},
-  {c:"YERBAS BUENAS",r:"VII",rn:"VII - Región del Maule",z:"Z3",b:142603,pw:148,rk:963,n:1,wb:{}},
-  {c:"TOME",r:"VIII",rn:"VIII - Región del Biobío",z:"Z1",b:63068,pw:169,rk:626,n:3,wb:{}},
-  {c:"HUALPEN",r:"VIII",rn:"VIII - Región del Biobío",z:"Z1",b:21313,pw:35,rk:646,n:3,wb:{}},
-  {c:"SAN PEDRO DE LA PAZ",r:"VIII",rn:"VIII - Región del Biobío",z:"Z1",b:31813,pw:69,rk:641,n:3,wb:{}},
-  {c:"TALCAHUANO",r:"VIII",rn:"VIII - Región del Biobío",z:"Z1",b:51277,pw:127,rk:452,n:2,wb:{}},
-  {c:"CORONEL",r:"VIII",rn:"VIII - Región del Biobío",z:"Z1",b:39714,pw:78,rk:509,n:1,wb:{}},
-  {c:"HUALQUI",r:"VIII",rn:"VIII - Región del Biobío",z:"Z1",b:7959,pw:6,rk:1192,n:1,wb:{}},
-  {c:"LAJA",r:"VIII",rn:"VIII - Región del Biobío",z:"Z2",b:45455,pw:59,rk:917,n:3,wb:{}},
-  {c:"YUMBEL",r:"VIII",rn:"VIII - Región del Biobío",z:"Z2",b:26496,pw:31,rk:2153,n:4,wb:{}},
-  {c:"LOTA",r:"VIII",rn:"VIII - Región del Biobío",z:"Z2",b:15048,pw:13,rk:1145,n:1,wb:{}},
-  {c:"TUCAPEL",r:"VIII",rn:"VIII - Región del Biobío",z:"Z2",b:11025,pw:7,rk:1511,n:1,wb:{}},
-  {c:"ALTO BIOBIO",r:"VIII",rn:"VIII - Región del Biobío",z:"Z3",b:80648,pw:65,rk:1236,n:1,wb:{}},
-  {c:"LEBU",r:"VIII",rn:"VIII - Región del Biobío",z:"Z3",b:31254,pw:20,rk:1645,n:2,wb:{}},
-  {c:"CHIGUAYANTE",r:"VIII",rn:"VIII - Región del Biobío",z:"Z1",b:114662,pw:323,rk:355,n:1,wb:{}},
-  {c:"SANTA JUANA",r:"VIII",rn:"VIII - Región del Biobío",z:"Z2",b:169646,pw:304,rk:559,n:1,wb:{}},
-  {c:"TRAIGUEN",r:"IX",rn:"IX - Región de La Araucanía",z:"Z2",b:85844,pw:133,rk:645,n:2,wb:{"100+":645}},
-  {c:"NANCAGUA",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z2",b:43248,pw:59,rk:724,n:1,wb:{}},
-  {c:"CHIMBARONGO",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z2",b:45491,pw:61,rk:765,n:2,wb:{}},
-  {c:"MALLOA",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z2",b:66720,pw:103,rk:704,n:2,wb:{}},
-  {c:"GRANEROS",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z1",b:17979,pw:24,rk:3066,n:2,wb:{}},
-  {c:"SAN FRANCISCO MOSTAZAL",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z1",b:39647,pw:91,rk:431,n:1,wb:{}},
-  {c:"QUINTA DE TILCOCO",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z2",b:61198,pw:103,rk:593,n:1,wb:{}},
-  {c:"LAS CABRAS",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z2",b:27556,pw:33,rk:836,n:1,wb:{}},
-  {c:"PICHIDEGUA",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z2",b:58579,pw:92,rk:651,n:2,wb:{}},
-  {c:"SAN VICENTE",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z2",b:130037,pw:274,rk:637,n:2,wb:{}},
-  {c:"NAVIDAD",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z3",b:78748,pw:68,rk:1159,n:1,wb:{}},
-  {c:"MARCHIHUE",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z3",b:39442,pw:30,rk:1281,n:1,wb:{}},
-  {c:"PERALILLO",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z3",b:92367,pw:73,rk:1251,n:1,wb:{}},
-  {c:"LA ESTRELLA",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z3",b:19727,pw:16,rk:1233,n:2,wb:{"15-30":1233}},
-  {c:"COLTAUCO",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z2",b:14461,pw:17,rk:845,n:1,wb:{}},
-  {c:"PICHILEMU",r:"VI",rn:"VI - Región del Libertador General Bernardo O'Higgins",z:"Z3",b:18827,pw:9,rk:1986,n:1,wb:{}},
-  {c:"CASABLANCA",r:"V",rn:"V - Región de Valparaíso",z:"Z2",b:45184,pw:72,rk:699,n:2,wb:{}},
-  {c:"HIJUELAS",r:"V",rn:"V - Región de Valparaíso",z:"Z2",b:44581,pw:59,rk:761,n:2,wb:{}},
-  {c:"LOS ANDES",r:"V",rn:"V - Región de Valparaíso",z:"Z2",b:19043,pw:25,rk:741,n:1,wb:{}},
-  {c:"LLAILLAY",r:"V",rn:"V - Región de Valparaíso",z:"Z2",b:11251,pw:10,rk:1098,n:1,wb:{}},
-  {c:"EL TABO",r:"V",rn:"V - Región de Valparaíso",z:"Z2",b:64392,pw:113,rk:643,n:4,wb:{"100+":530}},
-  {c:"EL QUISCO",r:"V",rn:"V - Región de Valparaíso",z:"Z3",b:27775,pw:23,rk:1189,n:1,wb:{}},
-  {c:"LA LIGUA",r:"V",rn:"V - Región de Valparaíso",z:"Z3",b:106974,pw:132,rk:5390,n:2,wb:{}},
-  {c:"PETORCA",r:"V",rn:"V - Región de Valparaíso",z:"Z3",b:64891,pw:66,rk:1069,n:2,wb:{}},
-  {c:"SANTA MARIA",r:"V",rn:"V - Región de Valparaíso",z:"Z3",b:33760,pw:24,rk:1481,n:2,wb:{}},
-  {c:"SAN FELIPE",r:"V",rn:"V - Región de Valparaíso",z:"Z2",b:21192,pw:24,rk:4216,n:2,wb:{}},
-  {c:"LA CRUZ",r:"V",rn:"V - Región de Valparaíso",z:"Z2",b:39716,pw:55,rk:713,n:1,wb:{}},
-  {c:"CALERA",r:"V",rn:"V - Región de Valparaíso",z:"Z2",b:91061,pw:157,rk:578,n:1,wb:{}},
-  {c:"PUCHUNCAVI",r:"V",rn:"V - Región de Valparaíso",z:"Z2",b:7419,pw:2,rk:2887,n:2,wb:{}},
-  {c:"VILLA ALEMANA",r:"V",rn:"V - Región de Valparaíso",z:"Z1",b:4269,pw:1,rk:4269,n:1,wb:{}},
-  {c:"VALDIVIA",r:"XIV",rn:"XIV - Región de Los Ríos",z:"Z1",b:43879,pw:93,rk:693,n:10,wb:{"15-30":764,"30-50":687,"100+":388}},
-  {c:"LANCO",r:"XIV",rn:"XIV - Región de Los Ríos",z:"Z2",b:58999,pw:71,rk:822,n:1,wb:{}},
-  {c:"RIO BUENO",r:"XIV",rn:"XIV - Región de Los Ríos",z:"Z2",b:26119,pw:26,rk:1001,n:1,wb:{}},
-  {c:"QUILLON",r:"XVI",rn:"XVI - Región de Ñuble",z:"Z2",b:39887,pw:47,rk:1368,n:2,wb:{}},
-  {c:"QUIRIHUE",r:"XVI",rn:"XVI - Región de Ñuble",z:"Z2",b:35011,pw:38,rk:911,n:2,wb:{"30-50":910}},
-  {c:"BULNES",r:"XVI",rn:"XVI - Región de Ñuble",z:"Z1",b:15691,pw:23,rk:670,n:1,wb:{}},
-  {c:"PORTEZUELO",r:"XVI",rn:"XVI - Región de Ñuble",z:"Z3",b:35068,pw:25,rk:1387,n:1,wb:{}},
-  {c:"EL CARMEN",r:"XVI",rn:"XVI - Región de Ñuble",z:"Z1",b:46070,pw:33,rk:1381,n:1,wb:{}},
-  {c:"ÑIQUEN",r:"XVI",rn:"XVI - Región de Ñuble",z:"Z3",b:63365,pw:50,rk:1252,n:1,wb:{}},
-  {c:"COELEMU",r:"XVI",rn:"XVI - Región de Ñuble",z:"Z3",b:17155,pw:4,rk:4066,n:1,wb:{}},
-  {c:"PINTO",r:"XVI",rn:"XVI - Región de Ñuble",z:"Z1",b:5687,pw:2,rk:2114,n:1,wb:{}},
+{c:"ANTOFAGASTA",r:"ANTOFAGASTA",z:"Z1",ag:"ANTOFAGASTA",sla:2},
+{c:"MEJILLONES",r:"ANTOFAGASTA",z:"Z2",ag:"ANTOFAGASTA",sla:3},
+{c:"TALTAL",r:"ANTOFAGASTA",z:"Z3",ag:"ANTOFAGASTA",sla:4},
+{c:"MARIA ELENA",r:"ANTOFAGASTA",z:"Z3",ag:"ANTOFAGASTA",sla:4},
+{c:"TOCOPILLA",r:"ANTOFAGASTA",z:"Z3",ag:"ANTOFAGASTA",sla:4},
+{c:"ARICA",r:"ARICA Y PARINACOTA",z:"Z1",ag:"ARICA",sla:4},
+{c:"CAMARONES",r:"ARICA Y PARINACOTA",z:"Z3",ag:"ARICA",sla:6},
+{c:"GENERAL LAGOS",r:"ARICA Y PARINACOTA",z:"Z3",ag:"ARICA",sla:6},
+{c:"PUTRE",r:"ARICA Y PARINACOTA",z:"Z3",ag:"ARICA",sla:6},
+{c:"CALAMA",r:"ANTOFAGASTA",z:"Z1",ag:"CALAMA",sla:3},
+{c:"CABRERO",r:"BIOBIO",z:"Z2",ag:"CHILLAN",sla:2},
+{c:"TUCAPEL",r:"BIOBIO",z:"Z2",ag:"CHILLAN",sla:2},
+{c:"BULNES",r:"NUBLE",z:"Z1",ag:"CHILLAN",sla:1},
+{c:"CHILLAN",r:"NUBLE",z:"Z1",ag:"CHILLAN",sla:1},
+{c:"CHILLAN VIEJO",r:"NUBLE",z:"Z1",ag:"CHILLAN",sla:1},
+{c:"COELEMU",r:"NUBLE",z:"Z3",ag:"CHILLAN",sla:3},
+{c:"COIHUECO",r:"NUBLE",z:"Z1",ag:"CHILLAN",sla:1},
+{c:"PEMUCO",r:"NUBLE",z:"Z2",ag:"CHILLAN",sla:2},
+{c:"PINTO",r:"NUBLE",z:"Z1",ag:"CHILLAN",sla:1},
+{c:"QUILLON",r:"NUBLE",z:"Z2",ag:"CHILLAN",sla:2},
+{c:"QUIRIHUE",r:"NUBLE",z:"Z2",ag:"CHILLAN",sla:2},
+{c:"SAN CARLOS",r:"NUBLE",z:"Z1",ag:"CHILLAN",sla:1},
+{c:"SAN IGNACIO",r:"NUBLE",z:"Z1",ag:"CHILLAN",sla:1},
+{c:"YUNGAY",r:"NUBLE",z:"Z2",ag:"CHILLAN",sla:2},
+{c:"ARAUCO",r:"BIOBIO",z:"Z2",ag:"CONCEPCION",sla:2},
+{c:"CANETE",r:"BIOBIO",z:"Z3",ag:"CONCEPCION",sla:3},
+{c:"CURANILAHUE",r:"BIOBIO",z:"Z3",ag:"CONCEPCION",sla:3},
+{c:"LEBU",r:"BIOBIO",z:"Z3",ag:"CONCEPCION",sla:3},
+{c:"LOS ALAMOS",r:"BIOBIO",z:"Z3",ag:"CONCEPCION",sla:3},
+{c:"TIRUA",r:"BIOBIO",z:"Z3",ag:"CONCEPCION",sla:3},
+{c:"YUMBEL",r:"BIOBIO",z:"Z2",ag:"CONCEPCION",sla:2},
+{c:"CHIGUAYANTE",r:"BIOBIO",z:"Z1",ag:"CONCEPCION",sla:1},
+{c:"CONCEPCION",r:"BIOBIO",z:"Z1",ag:"CONCEPCION",sla:1},
+{c:"CORONEL",r:"BIOBIO",z:"Z1",ag:"CONCEPCION",sla:1},
+{c:"FLORIDA",r:"BIOBIO",z:"Z2",ag:"CONCEPCION",sla:2},
+{c:"HUALPEN",r:"BIOBIO",z:"Z1",ag:"CONCEPCION",sla:1},
+{c:"HUALQUI",r:"BIOBIO",z:"Z1",ag:"CONCEPCION",sla:1},
+{c:"LOTA",r:"BIOBIO",z:"Z2",ag:"CONCEPCION",sla:2},
+{c:"PENCO",r:"BIOBIO",z:"Z1",ag:"CONCEPCION",sla:1},
+{c:"SAN PEDRO DE LA PAZ",r:"BIOBIO",z:"Z1",ag:"CONCEPCION",sla:1},
+{c:"SANTA JUANA",r:"BIOBIO",z:"Z2",ag:"CONCEPCION",sla:2},
+{c:"TALCAHUANO",r:"BIOBIO",z:"Z1",ag:"CONCEPCION",sla:1},
+{c:"TOME",r:"BIOBIO",z:"Z1",ag:"CONCEPCION",sla:1},
+{c:"SAN VICENTE",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z2",ag:"RANCAGUA",sla:2},
+{c:"VILLA ALEGRE",r:"MAULE",z:"Z2",ag:"TALCA",sla:2},
+{c:"CHANARAL",r:"ATACAMA",z:"Z3",ag:"COPIAPO",sla:3},
+{c:"DIEGO DE ALMAGRO",r:"ATACAMA",z:"Z3",ag:"COPIAPO",sla:3},
+{c:"CALDERA",r:"ATACAMA",z:"Z2",ag:"COPIAPO",sla:2},
+{c:"COPIAPO",r:"ATACAMA",z:"Z1",ag:"COPIAPO",sla:1},
+{c:"FREIRINA",r:"ATACAMA",z:"Z3",ag:"COPIAPO",sla:3},
+{c:"HUASCO",r:"ATACAMA",z:"Z3",ag:"COPIAPO",sla:3},
+{c:"VALLENAR",r:"ATACAMA",z:"Z3",ag:"COPIAPO",sla:3},
+{c:"AYSEN",r:"AYSEN DEL GRAL. CARLOS IBANEZ DEL CAMPO",z:"Z2",ag:"COYHAIQUE",sla:11},
+{c:"COCHRANE",r:"AYSEN DEL GRAL. CARLOS IBANEZ DEL CAMPO",z:"Z3",ag:"COYHAIQUE",sla:12},
+{c:"COYHAIQUE",r:"AYSEN DEL GRAL. CARLOS IBANEZ DEL CAMPO",z:"Z1",ag:"COYHAIQUE",sla:10},
+{c:"CHILE CHICO",r:"AYSEN DEL GRAL. CARLOS IBANEZ DEL CAMPO",z:"Z3",ag:"COYHAIQUE",sla:12},
+{c:"ALTO HOSPICIO",r:"TARAPACA",z:"Z1",ag:"IQUIQUE",sla:3},
+{c:"IQUIQUE",r:"TARAPACA",z:"Z1",ag:"IQUIQUE",sla:3},
+{c:"PICA",r:"TARAPACA",z:"Z3",ag:"IQUIQUE",sla:5},
+{c:"POZO ALMONTE",r:"TARAPACA",z:"Z2",ag:"IQUIQUE",sla:4},
+{c:"ILLAPEL",r:"COQUIMBO",z:"Z3",ag:"LA SERENA",sla:3},
+{c:"LOS VILOS",r:"COQUIMBO",z:"Z3",ag:"LA SERENA",sla:3},
+{c:"SALAMANCA",r:"COQUIMBO",z:"Z3",ag:"LA SERENA",sla:3},
+{c:"ANDACOLLO",r:"COQUIMBO",z:"Z2",ag:"LA SERENA",sla:2},
+{c:"COQUIMBO",r:"COQUIMBO",z:"Z1",ag:"LA SERENA",sla:1},
+{c:"LA SERENA",r:"COQUIMBO",z:"Z1",ag:"LA SERENA",sla:1},
+{c:"VICUNA",r:"COQUIMBO",z:"Z2",ag:"LA SERENA",sla:2},
+{c:"COMBARBALA",r:"COQUIMBO",z:"Z3",ag:"LA SERENA",sla:3},
+{c:"MONTE PATRIA",r:"COQUIMBO",z:"Z3",ag:"LA SERENA",sla:3},
+{c:"OVALLE",r:"COQUIMBO",z:"Z2",ag:"LA SERENA",sla:2},
+{c:"ANGOL",r:"ARAUCANIA",z:"Z2",ag:"LOS ANGELES",sla:2},
+{c:"COLLIPULLI",r:"ARAUCANIA",z:"Z2",ag:"LOS ANGELES",sla:2},
+{c:"PUREN",r:"ARAUCANIA",z:"Z3",ag:"TEMUCO",sla:3},
+{c:"RENAICO",r:"ARAUCANIA",z:"Z3",ag:"LOS ANGELES",sla:3},
+{c:"LAJA",r:"BIOBIO",z:"Z2",ag:"LOS ANGELES",sla:2},
+{c:"LOS ANGELES",r:"BIOBIO",z:"Z1",ag:"LOS ANGELES",sla:1},
+{c:"MULCHEN",r:"BIOBIO",z:"Z2",ag:"LOS ANGELES",sla:2},
+{c:"NACIMIENTO",r:"BIOBIO",z:"Z2",ag:"LOS ANGELES",sla:2},
+{c:"NEGRETE",r:"BIOBIO",z:"Z2",ag:"LOS ANGELES",sla:2},
+{c:"SAN ROSENDO",r:"BIOBIO",z:"Z3",ag:"LOS ANGELES",sla:3},
+{c:"SANTA BARBARA",r:"BIOBIO",z:"Z2",ag:"LOS ANGELES",sla:2},
+{c:"OSORNO",r:"LOS LAGOS",z:"Z1",ag:"OSORNO",sla:1},
+{c:"PUERTO OCTAY",r:"LOS LAGOS",z:"Z2",ag:"OSORNO",sla:2},
+{c:"PURRANQUE",r:"LOS LAGOS",z:"Z2",ag:"OSORNO",sla:2},
+{c:"PUYEHUE",r:"LOS LAGOS",z:"Z2",ag:"OSORNO",sla:2},
+{c:"RIO NEGRO",r:"LOS LAGOS",z:"Z2",ag:"OSORNO",sla:2},
+{c:"SAN PABLO",r:"LOS LAGOS",z:"Z1",ag:"OSORNO",sla:1},
+{c:"LA UNION",r:"LOS RIOS",z:"Z2",ag:"OSORNO",sla:2},
+{c:"RIO BUENO",r:"LOS RIOS",z:"Z2",ag:"OSORNO",sla:2},
+{c:"ANCUD",r:"LOS LAGOS",z:"Z3",ag:"PUERTO MONTT",sla:3},
+{c:"CASTRO",r:"LOS LAGOS",z:"Z3",ag:"PUERTO MONTT",sla:3},
+{c:"CHONCHI",r:"LOS LAGOS",z:"Z3",ag:"PUERTO MONTT",sla:3},
+{c:"DALCAHUE",r:"LOS LAGOS",z:"Z3",ag:"PUERTO MONTT",sla:3},
+{c:"QUELLON",r:"LOS LAGOS",z:"Z3",ag:"PUERTO MONTT",sla:3},
+{c:"QUEMCHI",r:"LOS LAGOS",z:"Z3",ag:"PUERTO MONTT",sla:3},
+{c:"QUINCHAO",r:"LOS LAGOS",z:"Z3",ag:"PUERTO MONTT",sla:3},
+{c:"CALBUCO",r:"LOS LAGOS",z:"Z2",ag:"PUERTO MONTT",sla:2},
+{c:"FRESIA",r:"LOS LAGOS",z:"Z2",ag:"PUERTO MONTT",sla:2},
+{c:"FRUTILLAR",r:"LOS LAGOS",z:"Z2",ag:"PUERTO MONTT",sla:2},
+{c:"LLANQUIHUE",r:"LOS LAGOS",z:"Z3",ag:"PUERTO MONTT",sla:3},
+{c:"LOS MUERMOS",r:"LOS LAGOS",z:"Z2",ag:"PUERTO MONTT",sla:2},
+{c:"MAULLIN",r:"LOS LAGOS",z:"Z2",ag:"PUERTO MONTT",sla:2},
+{c:"PUERTO MONTT",r:"LOS LAGOS",z:"Z1",ag:"PUERTO MONTT",sla:1},
+{c:"PUERTO VARAS",r:"LOS LAGOS",z:"Z1",ag:"PUERTO MONTT",sla:1},
+{c:"CHAITEN",r:"LOS LAGOS",z:"Z3",ag:"PUERTO MONTT",sla:3},
+{c:"PUNTA ARENAS",r:"MAGALLANES Y DE LA ANTARTICA CHILENA",z:"Z1",ag:"PUNTA ARENAS",sla:15},
+{c:"PORVENIR",r:"MAGALLANES Y DE LA ANTARTICA CHILENA",z:"Z3",ag:"PUNTA ARENAS",sla:17},
+{c:"NATALES",r:"MAGALLANES Y DE LA ANTARTICA CHILENA",z:"Z3",ag:"PUNTA ARENAS",sla:17},
+{c:"COLTAUCO",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z2",ag:"RANCAGUA",sla:2},
+{c:"DONIHUE",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z2",ag:"RANCAGUA",sla:2},
+{c:"DOÑIHUE",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z2",ag:"RANCAGUA",sla:2},
+{c:"GRANEROS",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z1",ag:"RANCAGUA",sla:1},
+{c:"LAS CABRAS",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z2",ag:"RANCAGUA",sla:2},
+{c:"PEUMO",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z2",ag:"RANCAGUA",sla:2},
+{c:"QUINTA DE TILCOCO",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z2",ag:"RANCAGUA",sla:2},
+{c:"RANCAGUA",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z1",ag:"RANCAGUA",sla:1},
+{c:"RENGO",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z2",ag:"RANCAGUA",sla:2},
+{c:"REQUINOA",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z1",ag:"RANCAGUA",sla:1},
+{c:"SAN FRANCISCO MOSTAZAL",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z1",ag:"RANCAGUA",sla:1},
+{c:"MARCHIHUE",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z3",ag:"RANCAGUA",sla:3},
+{c:"CHIMBARONGO",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z2",ag:"RANCAGUA",sla:2},
+{c:"NANCAGUA",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z2",ag:"RANCAGUA",sla:2},
+{c:"PALMILLA",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z3",ag:"RANCAGUA",sla:3},
+{c:"PERALILLO",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z3",ag:"RANCAGUA",sla:3},
+{c:"PLACILLA",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z2",ag:"RANCAGUA",sla:2},
+{c:"SAN FERNANDO",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z2",ag:"RANCAGUA",sla:2},
+{c:"SANTA CRUZ",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z3",ag:"RANCAGUA",sla:3},
+{c:"MALLOA",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z2",ag:"RANCAGUA",sla:2},
+{c:"PICHILEMU",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z3",ag:"RANCAGUA",sla:3},
+{c:"COINCO",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z2",ag:"RANCAGUA",sla:2},
+{c:"PICHIDEGUA",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z2",ag:"RANCAGUA",sla:2},
+{c:"LITUECHE",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z3",ag:"RANCAGUA",sla:3},
+{c:"COLINA",r:"METROPOLITANA DE SANTIAGO",z:"Z2",ag:"SANTIAGO",sla:2},
+{c:"LAMPA",r:"METROPOLITANA DE SANTIAGO",z:"Z2",ag:"SANTIAGO",sla:2},
+{c:"TILTIL",r:"METROPOLITANA DE SANTIAGO",z:"Z3",ag:"SANTIAGO",sla:3},
+{c:"PIRQUE",r:"METROPOLITANA DE SANTIAGO",z:"Z2",ag:"SANTIAGO",sla:2},
+{c:"PUENTE ALTO",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"SAN JOSE DE MAIPO",r:"METROPOLITANA DE SANTIAGO",z:"Z2",ag:"SANTIAGO",sla:2},
+{c:"BUIN",r:"METROPOLITANA DE SANTIAGO",z:"Z2",ag:"SANTIAGO",sla:2},
+{c:"CALERA DE TANGO",r:"METROPOLITANA DE SANTIAGO",z:"Z3",ag:"SANTIAGO",sla:3},
+{c:"PAINE",r:"METROPOLITANA DE SANTIAGO",z:"Z2",ag:"SANTIAGO",sla:2},
+{c:"SAN BERNARDO",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"CURACAVI",r:"METROPOLITANA DE SANTIAGO",z:"Z2",ag:"SANTIAGO",sla:2},
+{c:"MARIA PINTO",r:"METROPOLITANA DE SANTIAGO",z:"Z2",ag:"SANTIAGO",sla:2},
+{c:"MELIPILLA",r:"METROPOLITANA DE SANTIAGO",z:"Z2",ag:"SANTIAGO",sla:2},
+{c:"CERRILLOS",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"CERRO NAVIA",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"CONCHALI",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"EL BOSQUE",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"ESTACION CENTRAL",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"HUECHURABA",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"INDEPENDENCIA",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"LA CISTERNA",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"LA FLORIDA",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"LA GRANJA",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"LA PINTANA",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"LA REINA",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"LAS CONDES",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"LO BARNECHEA",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"LO ESPEJO",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"LO PRADO",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"MACUL",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"MAIPU",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"NUNOA",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"ÑUÑOA",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"PEDRO AGUIRRE CERDA",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"PENALOLEN",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"PEÑALOLEN",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"PROVIDENCIA",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"PUDAHUEL",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"QUILICURA",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"QUINTA NORMAL",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"RECOLETA",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"RENCA",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"SAN JOAQUIN",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"SAN MIGUEL",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"SAN RAMON",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"SANTIAGO",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"VITACURA",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"EL MONTE",r:"METROPOLITANA DE SANTIAGO",z:"Z2",ag:"SANTIAGO",sla:2},
+{c:"ISLA DE MAIPO",r:"METROPOLITANA DE SANTIAGO",z:"Z2",ag:"SANTIAGO",sla:2},
+{c:"PADRE HURTADO",r:"METROPOLITANA DE SANTIAGO",z:"Z1",ag:"SANTIAGO",sla:1},
+{c:"PENAFLOR",r:"METROPOLITANA DE SANTIAGO",z:"Z2",ag:"SANTIAGO",sla:2},
+{c:"PEÑAFLOR",r:"METROPOLITANA DE SANTIAGO",z:"Z2",ag:"SANTIAGO",sla:2},
+{c:"TALAGANTE",r:"METROPOLITANA DE SANTIAGO",z:"Z2",ag:"SANTIAGO",sla:2},
+{c:"ISLA DE PASCUA",r:"VALPARAISO",z:"Z3",ag:"SANTIAGO",sla:3},
+{c:"CALLE LARGA",r:"VALPARAISO",z:"Z3",ag:"SANTIAGO",sla:3},
+{c:"LOS ANDES",r:"VALPARAISO",z:"Z2",ag:"SANTIAGO",sla:2},
+{c:"RINCONADA",r:"VALPARAISO",z:"Z3",ag:"SANTIAGO",sla:3},
+{c:"SAN ESTEBAN",r:"VALPARAISO",z:"Z3",ag:"SANTIAGO",sla:3},
+{c:"ALGARROBO",r:"VALPARAISO",z:"Z3",ag:"SANTIAGO",sla:3},
+{c:"CARTAGENA",r:"VALPARAISO",z:"Z3",ag:"SANTIAGO",sla:3},
+{c:"EL QUISCO",r:"VALPARAISO",z:"Z3",ag:"SANTIAGO",sla:3},
+{c:"EL TABO",r:"VALPARAISO",z:"Z2",ag:"SANTIAGO",sla:2},
+{c:"SAN ANTONIO",r:"VALPARAISO",z:"Z3",ag:"SANTIAGO",sla:3},
+{c:"SANTO DOMINGO",r:"VALPARAISO",z:"Z3",ag:"SANTIAGO",sla:3},
+{c:"CATEMU",r:"VALPARAISO",z:"Z3",ag:"SANTIAGO",sla:3},
+{c:"LLAILLAY",r:"VALPARAISO",z:"Z2",ag:"SANTIAGO",sla:2},
+{c:"PANQUEHUE",r:"VALPARAISO",z:"Z3",ag:"SANTIAGO",sla:3},
+{c:"PUTAENDO",r:"VALPARAISO",z:"Z3",ag:"SANTIAGO",sla:3},
+{c:"SAN FELIPE",r:"VALPARAISO",z:"Z2",ag:"SANTIAGO",sla:2},
+{c:"SANTA MARIA",r:"VALPARAISO",z:"Z3",ag:"SANTIAGO",sla:3},
+{c:"CAUQUENES",r:"MAULE",z:"Z3",ag:"TALCA",sla:3},
+{c:"CHANCO",r:"MAULE",z:"Z3",ag:"TALCA",sla:3},
+{c:"PELLUHUE",r:"MAULE",z:"Z3",ag:"TALCA",sla:3},
+{c:"CURICO",r:"MAULE",z:"Z1",ag:"CURICO",sla:1},
+{c:"HUALANE",r:"MAULE",z:"Z2",ag:"CURICO",sla:2},
+{c:"HUALAÑE",r:"MAULE",z:"Z2",ag:"CURICO",sla:2},
+{c:"LICANTEN",r:"MAULE",z:"Z2",ag:"CURICO",sla:2},
+{c:"MOLINA",r:"MAULE",z:"Z1",ag:"CURICO",sla:1},
+{c:"RAUCO",r:"MAULE",z:"Z1",ag:"CURICO",sla:1},
+{c:"ROMERAL",r:"MAULE",z:"Z1",ag:"CURICO",sla:1},
+{c:"SAGRADA FAMILIA",r:"MAULE",z:"Z1",ag:"CURICO",sla:1},
+{c:"TENO",r:"MAULE",z:"Z1",ag:"CURICO",sla:1},
+{c:"VICHUQUEN",r:"MAULE",z:"Z3",ag:"TALCA",sla:3},
+{c:"COLBUN",r:"MAULE",z:"Z2",ag:"TALCA",sla:2},
+{c:"LINARES",r:"MAULE",z:"Z2",ag:"TALCA",sla:2},
+{c:"LONGAVI",r:"MAULE",z:"Z2",ag:"TALCA",sla:2},
+{c:"PARRAL",r:"MAULE",z:"Z3",ag:"TALCA",sla:3},
+{c:"RETIRO",r:"MAULE",z:"Z2",ag:"TALCA",sla:2},
+{c:"SAN JAVIER",r:"MAULE",z:"Z1",ag:"TALCA",sla:1},
+{c:"CONSTITUCION",r:"MAULE",z:"Z3",ag:"TALCA",sla:3},
+{c:"CUREPTO",r:"MAULE",z:"Z2",ag:"CURICO",sla:2},
+{c:"MAULE",r:"MAULE",z:"Z1",ag:"TALCA",sla:1},
+{c:"PENCAHUE",r:"MAULE",z:"Z1",ag:"TALCA",sla:1},
+{c:"RIO CLARO",r:"MAULE",z:"Z2",ag:"TALCA",sla:2},
+{c:"SAN CLEMENTE",r:"MAULE",z:"Z1",ag:"TALCA",sla:1},
+{c:"SAN RAFAEL",r:"MAULE",z:"Z1",ag:"TALCA",sla:1},
+{c:"TALCA",r:"MAULE",z:"Z1",ag:"TALCA",sla:1},
+{c:"CARAHUE",r:"ARAUCANIA",z:"Z2",ag:"TEMUCO",sla:2},
+{c:"CHOLCHOL",r:"ARAUCANIA",z:"Z1",ag:"TEMUCO",sla:1},
+{c:"CUNCO",r:"ARAUCANIA",z:"Z2",ag:"TEMUCO",sla:2},
+{c:"CURARREHUE",r:"ARAUCANIA",z:"Z3",ag:"TEMUCO",sla:3},
+{c:"FREIRE",r:"ARAUCANIA",z:"Z1",ag:"TEMUCO",sla:1},
+{c:"GALVARINO",r:"ARAUCANIA",z:"Z2",ag:"TEMUCO",sla:2},
+{c:"GORBEA",r:"ARAUCANIA",z:"Z2",ag:"TEMUCO",sla:2},
+{c:"LAUTARO",r:"ARAUCANIA",z:"Z2",ag:"TEMUCO",sla:2},
+{c:"NUEVA IMPERIAL",r:"ARAUCANIA",z:"Z2",ag:"TEMUCO",sla:2},
+{c:"PADRE LAS CASAS",r:"ARAUCANIA",z:"Z1",ag:"TEMUCO",sla:1},
+{c:"PERQUENCO",r:"ARAUCANIA",z:"Z2",ag:"TEMUCO",sla:2},
+{c:"PITRUFQUEN",r:"ARAUCANIA",z:"Z2",ag:"TEMUCO",sla:2},
+{c:"PUCON",r:"ARAUCANIA",z:"Z3",ag:"TEMUCO",sla:3},
+{c:"TEMUCO",r:"ARAUCANIA",z:"Z1",ag:"TEMUCO",sla:1},
+{c:"TOLTEN",r:"ARAUCANIA",z:"Z3",ag:"TEMUCO",sla:3},
+{c:"VILLARRICA",r:"ARAUCANIA",z:"Z2",ag:"TEMUCO",sla:2},
+{c:"CURACAUTIN",r:"ARAUCANIA",z:"Z3",ag:"TEMUCO",sla:3},
+{c:"LONQUIMAY",r:"ARAUCANIA",z:"Z3",ag:"TEMUCO",sla:3},
+{c:"TRAIGUEN",r:"ARAUCANIA",z:"Z2",ag:"TEMUCO",sla:2},
+{c:"VICTORIA",r:"ARAUCANIA",z:"Z2",ag:"TEMUCO",sla:2},
+{c:"LONCOCHE",r:"ARAUCANIA",z:"Z2",ag:"TEMUCO",sla:2},
+{c:"LANCO",r:"LOS RIOS",z:"Z2",ag:"VALDIVIA",sla:2},
+{c:"LOS LAGOS",r:"LOS RIOS",z:"Z2",ag:"VALDIVIA",sla:2},
+{c:"MAFIL",r:"LOS RIOS",z:"Z2",ag:"VALDIVIA",sla:2},
+{c:"MARIQUINA",r:"LOS RIOS",z:"Z2",ag:"VALDIVIA",sla:2},
+{c:"PAILLACO",r:"LOS RIOS",z:"Z2",ag:"VALDIVIA",sla:2},
+{c:"PANGUIPULLI",r:"LOS RIOS",z:"Z3",ag:"VALDIVIA",sla:3},
+{c:"VALDIVIA",r:"LOS RIOS",z:"Z1",ag:"VALDIVIA",sla:1},
+{c:"LIMACHE",r:"VALPARAISO",z:"Z2",ag:"VALPARAISO",sla:2},
+{c:"OLMUE",r:"VALPARAISO",z:"Z2",ag:"VALPARAISO",sla:2},
+{c:"QUILPUE",r:"VALPARAISO",z:"Z1",ag:"VALPARAISO",sla:1},
+{c:"VILLA ALEMANA",r:"VALPARAISO",z:"Z1",ag:"VALPARAISO",sla:1},
+{c:"CABILDO",r:"VALPARAISO",z:"Z3",ag:"VALPARAISO",sla:3},
+{c:"LA LIGUA",r:"VALPARAISO",z:"Z3",ag:"VALPARAISO",sla:3},
+{c:"PETORCA",r:"VALPARAISO",z:"Z3",ag:"VALPARAISO",sla:3},
+{c:"ZAPALLAR",r:"VALPARAISO",z:"Z2",ag:"VALPARAISO",sla:2},
+{c:"CALERA",r:"VALPARAISO",z:"Z2",ag:"VALPARAISO",sla:2},
+{c:"HIJUELAS",r:"VALPARAISO",z:"Z2",ag:"VALPARAISO",sla:2},
+{c:"LA CRUZ",r:"VALPARAISO",z:"Z2",ag:"VALPARAISO",sla:2},
+{c:"NOGALES",r:"VALPARAISO",z:"Z2",ag:"VALPARAISO",sla:2},
+{c:"QUILLOTA",r:"VALPARAISO",z:"Z2",ag:"VALPARAISO",sla:2},
+{c:"CASABLANCA",r:"VALPARAISO",z:"Z2",ag:"VALPARAISO",sla:2},
+{c:"CONCON",r:"VALPARAISO",z:"Z1",ag:"VALPARAISO",sla:1},
+{c:"QUINTERO",r:"VALPARAISO",z:"Z2",ag:"VALPARAISO",sla:2},
+{c:"VALPARAISO",r:"VALPARAISO",z:"Z1",ag:"VALPARAISO",sla:1},
+{c:"VINA DEL MAR",r:"VALPARAISO",z:"Z1",ag:"VALPARAISO",sla:1},
+{c:"VIÑA DEL MAR",r:"VALPARAISO",z:"Z1",ag:"VALPARAISO",sla:1},
+{c:"PAPUDO",r:"VALPARAISO",z:"Z2",ag:"VALPARAISO",sla:2},
+{c:"PUCHUNCAVI",r:"VALPARAISO",z:"Z2",ag:"VALPARAISO",sla:2},
+{c:"SAN PEDRO DE ATACAMA",r:"ANTOFAGASTA",z:"Z3",ag:"CALAMA",sla:5},
+{c:"RANQUIL",r:"NUBLE",z:"Z2",ag:"CHILLAN",sla:3},
+{c:"SAN NICOLAS",r:"NUBLE",z:"Z1",ag:"CHILLAN",sla:3},
+{c:"TREGUACO",r:"NUBLE",z:"Z2",ag:"CHILLAN",sla:3},
+{c:"NIQUEN",r:"NUBLE",z:"Z3",ag:"CHILLAN",sla:5},
+{c:"PORTEZUELO",r:"NUBLE",z:"Z3",ag:"CHILLAN",sla:5},
+{c:"SAN GREGORIO",r:"MAGALLANES Y DE LA ANTARTICA CHILENA",z:"Z3",ag:"PUNTA ARENAS",sla:17},
+{c:"COBQUECURA",r:"NUBLE",z:"Z3",ag:"CHILLAN",sla:5},
+{c:"NINHUE",r:"NUBLE",z:"Z3",ag:"CHILLAN",sla:5},
+{c:"SAN FABIAN DE ALICO",r:"NUBLE",z:"Z3",ag:"CHILLAN",sla:5},
+{c:"CONTULMO",r:"BIOBIO",z:"Z3",ag:"CONCEPCION",sla:5},
+{c:"TIERRA AMARILLA",r:"ATACAMA",z:"Z1",ag:"COPIAPO",sla:3},
+{c:"YERBAS BUENAS",r:"MAULE",z:"Z3",ag:"TALCA",sla:5},
+{c:"HUARA",r:"TARAPACA",z:"Z3",ag:"IQUIQUE",sla:5},
+{c:"HUALAIHUE",r:"LOS LAGOS",z:"Z3",ag:"PUERTO MONTT",sla:5},
+{c:"FUTALEUFU",r:"LOS LAGOS",z:"Z3",ag:"PUERTO MONTT",sla:5},
+{c:"PALENA",r:"LOS LAGOS",z:"Z3",ag:"PUERTO MONTT",sla:5},
+{c:"CODEGUA",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z1",ag:"RANCAGUA",sla:2},
+{c:"MACHALI",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z1",ag:"RANCAGUA",sla:2},
+{c:"OLIVAR",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z1",ag:"RANCAGUA",sla:2},
+{c:"EL CARMEN",r:"NUBLE",z:"Z3",ag:"CHILLAN",sla:5},
+{c:"CHEPICA",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z3",ag:"RANCAGUA",sla:5},
+{c:"LOLOL",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z3",ag:"RANCAGUA",sla:5},
+{c:"PELARCO",r:"MAULE",z:"Z3",ag:"TALCA",sla:5},
+{c:"MELIPEUCO",r:"ARAUCANIA",z:"Z3",ag:"TEMUCO",sla:5},
+{c:"PUERTO SAAVEDRA",r:"ARAUCANIA",z:"Z2",ag:"TEMUCO",sla:3},
+{c:"TEODORO SCHMIDT",r:"ARAUCANIA",z:"Z2",ag:"TEMUCO",sla:3},
+{c:"VILCUN",r:"ARAUCANIA",z:"Z2",ag:"TEMUCO",sla:3},
+{c:"ERCILLA",r:"ARAUCANIA",z:"Z3",ag:"TEMUCO",sla:5},
+{c:"FUTRONO",r:"LOS RIOS",z:"Z3",ag:"VALDIVIA",sla:5},
+{c:"CORRAL",r:"LOS RIOS",z:"Z3",ag:"VALDIVIA",sla:5},
+{c:"SIERRA GORDA",r:"ANTOFAGASTA",z:"Z3",ag:"CALAMA",sla:7},
+{c:"OLLAGUE",r:"ANTOFAGASTA",z:"Z3",ag:"CALAMA",sla:7},
+{c:"LOS SAUCES",r:"ARAUCANIA",z:"Z3",ag:"LOS ANGELES",sla:5},
+{c:"LUMACO",r:"ARAUCANIA",z:"Z3",ag:"LOS ANGELES",sla:5},
+{c:"ALTO DEL CARMEN",r:"ATACAMA",z:"Z3",ag:"COPIAPO",sla:5},
+{c:"CISNES",r:"AYSEN DEL GRAL. CARLOS IBANEZ DEL CAMPO",z:"Z3",ag:"COYHAIQUE",sla:14},
+{c:"GUAITECAS",r:"AYSEN DEL GRAL. CARLOS IBANEZ DEL CAMPO",z:"Z3",ag:"COYHAIQUE",sla:14},
+{c:"O'HIGGINS",r:"AYSEN DEL GRAL. CARLOS IBANEZ DEL CAMPO",z:"Z3",ag:"COYHAIQUE",sla:14},
+{c:"TORTEL",r:"AYSEN DEL GRAL. CARLOS IBANEZ DEL CAMPO",z:"Z3",ag:"COYHAIQUE",sla:14},
+{c:"LAGO VERDE",r:"AYSEN DEL GRAL. CARLOS IBANEZ DEL CAMPO",z:"Z3",ag:"COYHAIQUE",sla:14},
+{c:"RIO IBANEZ",r:"AYSEN DEL GRAL. CARLOS IBANEZ DEL CAMPO",z:"Z3",ag:"COYHAIQUE",sla:14},
+{c:"RIO IBAÑEZ",r:"AYSEN DEL GRAL. CARLOS IBANEZ DEL CAMPO",z:"Z3",ag:"COYHAIQUE",sla:14},
+{c:"ALTO BIOBIO",r:"BIOBIO",z:"Z3",ag:"LOS ANGELES",sla:5},
+{c:"ANTUCO",r:"BIOBIO",z:"Z3",ag:"LOS ANGELES",sla:5},
+{c:"HUEPIL",r:"BIOBIO",z:"Z3",ag:"CHILLAN",sla:5},
+{c:"QUILACO",r:"BIOBIO",z:"Z3",ag:"LOS ANGELES",sla:5},
+{c:"QUILLECO",r:"BIOBIO",z:"Z3",ag:"LOS ANGELES",sla:5},
+{c:"CANELA",r:"COQUIMBO",z:"Z3",ag:"LA SERENA",sla:5},
+{c:"LA HIGUERA",r:"COQUIMBO",z:"Z3",ag:"LA SERENA",sla:5},
+{c:"PAIGUANO",r:"COQUIMBO",z:"Z3",ag:"LA SERENA",sla:5},
+{c:"PUNITAQUI",r:"COQUIMBO",z:"Z3",ag:"LA SERENA",sla:5},
+{c:"RIO HURTADO",r:"COQUIMBO",z:"Z3",ag:"LA SERENA",sla:5},
+{c:"LA ESTRELLA",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z3",ag:"RANCAGUA",sla:5},
+{c:"NAVIDAD",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z3",ag:"RANCAGUA",sla:5},
+{c:"PAREDONES",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z3",ag:"RANCAGUA",sla:5},
+{c:"PUMANQUE",r:"LIBERTADOR GRAL. BERNARDO O HIGGINS",z:"Z3",ag:"RANCAGUA",sla:5},
+{c:"CURACO DE VELEZ",r:"LOS LAGOS",z:"Z3",ag:"PUERTO MONTT",sla:5},
+{c:"PUQUELDON",r:"LOS LAGOS",z:"Z3",ag:"PUERTO MONTT",sla:5},
+{c:"QUEILEN",r:"LOS LAGOS",z:"Z3",ag:"PUERTO MONTT",sla:5},
+{c:"COCHAMO",r:"LOS LAGOS",z:"Z3",ag:"PUERTO MONTT",sla:5},
+{c:"SAN JUAN DE LA COSTA",r:"LOS LAGOS",z:"Z3",ag:"OSORNO",sla:2},
+{c:"LAGO RANCO",r:"LOS RIOS",z:"Z3",ag:"OSORNO",sla:2},
+{c:"ANTARTICA",r:"MAGALLANES Y DE LA ANTARTICA CHILENA",z:"FC",ag:"FUERA DE COBERTURA",sla:3},
+{c:"CABO DE HORNOS (EX   NAVARINO)",r:"MAGALLANES Y DE LA ANTARTICA CHILENA",z:"FC",ag:"FUERA DE COBERTURA",sla:3},
+{c:"LAGUNA BLANCA",r:"MAGALLANES Y DE LA ANTARTICA CHILENA",z:"Z3",ag:"PUNTA ARENAS",sla:19},
+{c:"RIO VERDE",r:"MAGALLANES Y DE LA ANTARTICA CHILENA",z:"Z3",ag:"PUNTA ARENAS",sla:19},
+{c:"PRIMAVERA",r:"MAGALLANES Y DE LA ANTARTICA CHILENA",z:"Z3",ag:"PUNTA ARENAS",sla:19},
+{c:"TIMAUKEL",r:"MAGALLANES Y DE LA ANTARTICA CHILENA",z:"Z3",ag:"PUNTA ARENAS",sla:19},
+{c:"TORRES DEL PAINE",r:"MAGALLANES Y DE LA ANTARTICA CHILENA",z:"Z3",ag:"PUNTA ARENAS",sla:19},
+{c:"LONTUE",r:"MAULE",z:"Z3",ag:"CURICO",sla:3},
+{c:"CHOLGUAN",r:"MAULE",z:"Z3",ag:"CHILLAN",sla:5},
+{c:"CUMPEO",r:"MAULE",z:"Z3",ag:"TALCA",sla:5},
+{c:"EMPEDRADO",r:"MAULE",z:"Z3",ag:"TALCA",sla:5},
+{c:"ALHUE",r:"METROPOLITANA DE SANTIAGO",z:"Z3",ag:"SANTIAGO",sla:5},
+{c:"SAN PEDRO",r:"METROPOLITANA DE SANTIAGO",z:"Z3",ag:"SANTIAGO",sla:5},
+{c:"CAMINA",r:"TARAPACA",z:"Z3",ag:"IQUIQUE",sla:7},
+{c:"COLCHANE",r:"TARAPACA",z:"Z3",ag:"IQUIQUE",sla:7},
+{c:"JUAN FERNANDEZ",r:"VALPARAISO",z:"FC",ag:"FUERA DE COBERTURA",sla:3}
 ];
 
-const fmt = n => '$' + Math.round(n).toLocaleString('es-CL');
-const fmtKg = n => n.toFixed(1) + ' kg';
-
-function getBand(peso){
-  if(peso<=3) return '<3';
-  if(peso<=6) return '3-6';
-  if(peso<=10) return '6-10';
-  if(peso<=15) return '10-15';
-  if(peso<=30) return '15-30';
-  if(peso<=50) return '30-50';
-  if(peso<=100) return '50-100';
-  return '100+';
-}
-
-function calcFlete(d, peso){
-  const band = getBand(peso);
-  let rate = d.wb[band] || d.rk;
-  // If no band data, use global rate per kg
-  const base = rate * peso;
-  return Math.round(base);
-}
-
-// Search
-const inp = document.getElementById('communeInput');
-const dd = document.getElementById('dropdown');
-const clearBtn = document.getElementById('clearBtn');
-let selected = null;
+const inp=document.getElementById('communeInput');
+const dd=document.getElementById('dropdown');
+const clearBtn=document.getElementById('clearBtn');
+let selected=null;
 
 function filterData(q){
-  if(!q) return [];
-  const qs = q.toUpperCase().trim();
-  return DATA.filter(d => d.c.includes(qs) || d.rn.toUpperCase().includes(qs))
-             .sort((a,b) => b.n - a.n).slice(0,12);
+  if(!q)return[];
+  const qs=q.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  return DATA.filter(d=>{
+    const cn=d.c.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    return cn.includes(qs);
+  }).sort((a,b)=>{const az=a.z==='Z1'?0:a.z==='Z2'?1:2,bz=b.z==='Z1'?0:b.z==='Z2'?1:2;return az-bz;}).slice(0,14);
 }
 
-function showDropdown(items){
-  if(!items.length){ dd.innerHTML='<div class="dropdown-item no-result">Sin resultados</div>'; dd.style.display='block'; return; }
-  dd.innerHTML = items.map(d =>
-    `<div class="dropdown-item" data-c="${d.c}">
-      <div class="comm-name">${d.c} <span class="zone-pill ${d.z.toLowerCase()}">${d.z}</span></div>
-      <div class="comm-meta">${d.rn} · ${d.n} envío${d.n!==1?'s':''} histórico${d.n!==1?'s':''}</div>
-    </div>`
-  ).join('');
+function showDD(items){
+  if(!items.length){dd.innerHTML='<div class="dd-item no-res">Sin resultados</div>';dd.style.display='block';return;}
+  dd.innerHTML=items.map(d=>`<div class="dd-item" data-c="${d.c}"><div class="cn">${d.c} <span class="zone-pill ${d.z.toLowerCase()}">${d.z}</span></div><div class="cm">${d.r} &middot; SLA ${d.sla} dia${d.sla!==1?'s':''}</div></div>`).join('');
   dd.style.display='block';
-  dd.querySelectorAll('.dropdown-item[data-c]').forEach(el=>{
-    el.addEventListener('click',()=>{ selectCommune(el.dataset.c); });
-  });
+  dd.querySelectorAll('.dd-item[data-c]').forEach(el=>el.addEventListener('click',()=>selectCommune(el.dataset.c)));
 }
 
-function selectCommune(name){
-  selected = DATA.find(d=>d.c===name);
-  inp.value = name;
-  dd.style.display='none';
-  calculate();
-}
+function selectCommune(name){selected=DATA.find(d=>d.c===name);inp.value=name;dd.style.display='none';calculate();}
 
-inp.addEventListener('input',()=>{
-  selected=null;
-  const q=inp.value.trim();
-  if(!q){dd.style.display='none';return;}
-  showDropdown(filterData(q));
-});
-inp.addEventListener('focus',()=>{ if(inp.value.trim()) showDropdown(filterData(inp.value.trim())); });
-document.addEventListener('click',e=>{ if(!e.target.closest('.search-wrap')) dd.style.display='none'; });
-clearBtn.addEventListener('click',()=>{ inp.value=''; selected=null; dd.style.display='none'; calculate(); });
+inp.addEventListener('input',()=>{selected=null;const q=inp.value.trim();if(!q){dd.style.display='none';return;}showDD(filterData(q));});
+inp.addEventListener('focus',()=>{if(inp.value.trim())showDD(filterData(inp.value.trim()));});
+document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))dd.style.display='none';});
+clearBtn.addEventListener('click',()=>{inp.value='';selected=null;dd.style.display='none';calculate();});
 
-// Buffer slider
-const slider = document.getElementById('bufferSlider');
-const bufDisp = document.getElementById('bufferDisplay');
-slider.addEventListener('input',()=>{ bufDisp.textContent='+'+slider.value+'%'; calculate(); });
-
-// Weight input
-document.getElementById('weightInput').addEventListener('input', calculate);
+const slider=document.getElementById('bufferSlider');
+const bufDisp=document.getElementById('bufferDisplay');
+slider.addEventListener('input',()=>{bufDisp.textContent='+'+slider.value+'%';calculate();});
+document.getElementById('weightInput').addEventListener('input',calculate);
 
 function calculate(){
-  const peso = parseFloat(document.getElementById('weightInput').value);
-  const buf = parseInt(slider.value)/100;
-  const sec = document.getElementById('resultSection');
-  const detSec = document.getElementById('communeDetailSection');
-
+  const peso=parseFloat(document.getElementById('weightInput').value);
+  const buf=parseInt(slider.value)/100;
+  const sec=document.getElementById('resultSection');
+  const simSec=document.getElementById('simSection');
   if(!selected){
-    sec.innerHTML=`<div class="result-box result-empty"><div style="font-size:28px;margin-bottom:8px">📦</div><div style="font-size:14px;font-weight:600;color:#888">Ingresa la comuna de destino y el peso para calcular el flete estimado</div></div>`;
-    detSec.style.display='none'; return;
+    sec.innerHTML='<div class="result-box result-empty"><div style="font-size:28px;margin-bottom:8px">&#128230;</div><div style="font-size:14px;font-weight:600;color:#888">Ingresa la comuna de destino y el peso para calcular el flete estimado</div></div>';
+    simSec.innerHTML='<p style="font-size:12px;color:#aaa;font-style:italic">Selecciona una comuna para ver la proyeccion completa</p>';
+    return;
   }
-
-  const d = selected;
-  const isAysenMag = d.r==='XI'||d.r==='XII';
-  const isZ3 = d.z==='Z3';
-  const isHeavy = !isNaN(peso) && peso>200;
-
-  let fleBase, fleWithBuf, explanation;
-  if(!isNaN(peso)&&peso>0){
-    fleBase = calcFlete(d, peso);
-    fleWithBuf = Math.round(fleBase*(1+buf));
-    const band = getBand(peso);
-    const rateUsed = d.wb[band]||d.rk;
-    explanation = `Peso: ${fmtKg(peso)} · Banda: ${band} kg · Tasa: ${fmt(rateUsed)}/kg`;
-  } else {
-    fleBase = d.b;
-    fleWithBuf = Math.round(d.b*(1+buf));
-    explanation = `Peso promedio histórico de referencia: ${fmtKg(d.pw)} kg`;
+  const d=selected;
+  if(d.z==='FC'){
+    sec.innerHTML='<div class="result-box result-danger"><div class="rt">Destino Fuera de Cobertura (FC)</div><p style="font-size:13px;color:#842029">Esta comuna requiere cotizacion especial directa con U Send. Contacta a Juan Pablo en logistica.</p></div>';
+    simSec.innerHTML='<p style="font-size:12px;color:#aaa;font-style:italic">No disponible para destinos FC</p>';
+    return;
   }
-
-  let boxClass = 'result-ok';
-  let title = 'Estimación de flete — resultado normal';
-  if(isAysenMag) { boxClass='result-alert'; title='Alerta: destino con tiempo de tránsito crítico'; }
-  else if(isZ3||isHeavy) { boxClass='result-warn'; title='Precaución: verificar con logística antes de cotizar'; }
-
+  const hasPeso=!isNaN(peso)&&peso>0;
+  const pesoCalc=hasPeso?peso:50;
+  const fleBase=calcFlete(d.ag,d.z,pesoCalc);
+  if(!fleBase){sec.innerHTML='<div class="result-box result-warn"><div class="rt">Sin tarifa disponible</div></div>';return;}
+  const fleWithBuf=Math.ceil(fleBase*(1+buf));
+  const expl=hasPeso?'Peso ingresado: '+peso+' kg':'Peso de referencia: 50 kg (ingresa el peso real)';
+  const isZ3=d.z==='Z3',isExtreme=d.sla>=8,isHeavy=hasPeso&&peso>500;
+  let boxClass='result-ok',title='Estimacion de flete';
+  if(isExtreme){boxClass='result-danger';title='Destino con transito extendido';}
+  else if(isZ3){boxClass='result-warn';title='Zona Z3 - Verificar con logistica';}
   let alerts='';
-  if(isAysenMag) alerts+=`<div class="alert-row"><span class="icon">⚠️</span>Aysén y Magallanes: tiempo de tránsito promedio 14–15 días. Coordinar con cliente antes de comprometer plazo.</div>`;
-  if(isZ3) alerts+=`<div class="alert-row"><span class="icon">⚠️</span>Zona Z3: acceso difícil o interior. Confirmar tarifa con U Send antes de cotizar en Mercado Público.</div>`;
-  if(isHeavy) alerts+=`<div class="alert-row"><span class="icon">⚠️</span>Envío sobre 200 kg: solicitar cotización directa a U Send para mayor precisión.</div>`;
-  if(!isNaN(peso)&&peso>0&&d.n<=2) alerts+=`<div class="info-row"><span class="icon">ℹ️</span>Solo ${d.n} envío${d.n!==1?'s':''} histórico${d.n!==1?'s':''} para esta comuna — dato referencial, mayor margen de error.</div>`;
-
-  sec.innerHTML=`
-  <div class="result-box ${boxClass}">
-    <div class="result-title">${title}</div>
-    <div class="commune-info-header">
-      <span class="commune-name-big">${d.c}</span>
-      <span class="zone-pill ${d.z.toLowerCase()}">${d.z}</span>
-      <span class="comm-region-text">Región ${d.r} — ${d.rn}</span>
-    </div>
-    <div class="amounts-grid">
-      <div class="amount-card">
-        <div class="amount-label">Flete estimado base</div>
-        <div class="amount-value">${fmt(fleBase)}</div>
-        <div class="amount-sub">${explanation}</div>
-      </div>
-      <div class="amount-card">
-        <div class="amount-label">Valor para cotizar (+${(buf*100).toFixed(0)}% buffer)</div>
-        <div class="amount-value">${fmt(fleWithBuf)}</div>
-        <div class="amount-sub">Usar este monto en la propuesta de Mercado Público</div>
-      </div>
-    </div>
-    <div class="detail-row"><span class="detail-label">Zona U Send</span><span class="detail-value">${d.z}</span></div>
-    <div class="detail-row"><span class="detail-label">Región</span><span class="detail-value">${d.rn}</span></div>
-    <div class="detail-row"><span class="detail-label">Envíos históricos</span><span class="detail-value">${d.n}</span></div>
-    <div class="detail-row"><span class="detail-label">Peso prom. histórico</span><span class="detail-value">${fmtKg(d.pw)}</span></div>
-    <div class="detail-row"><span class="detail-label">Tasa por kg (mediana)</span><span class="detail-value">${fmt(d.rk)}/kg</span></div>
-    ${alerts}
-  </div>`;
-
-  // Weight band chips
-  const bands = Object.entries(d.wb);
-  let bandHtml='';
-  if(bands.length){
-    const activeBand = !isNaN(peso)&&peso>0 ? getBand(peso) : null;
-    bandHtml=`<div class="weight-bands"><div class="weight-bands-title">Tasas históricas por banda de peso ($/kg):</div><div class="bands-grid">${
-      bands.map(([k,v])=>`<span class="band-chip${activeBand===k?' active':''}">${k} kg: ${fmt(v)}/kg</span>`).join('')
-    }</div></div>`;
-  }
-
-  detSec.style.display='block';
-  document.getElementById('communeDetailContent').innerHTML=`
-    <p style="font-size:12px;color:#555;margin-bottom:10px">Detalle de tarifas históricas U Send para <strong>${d.c}</strong></p>
-    ${bandHtml||'<p style="font-size:12px;color:#999">Sin suficientes datos por banda de peso para esta comuna.</p>'}
-  `;
+  if(isExtreme)alerts+='<div class="alert-row"><span>&#9888;</span>SLA '+d.sla+' dias. Confirma plazo con Juan Pablo antes de comprometer la licitacion.</div>';
+  if(isZ3)alerts+='<div class="alert-row"><span>&#9888;</span>Zona Z3: acceso dificil. Confirma disponibilidad con logistica.</div>';
+  if(isHeavy)alerts+='<div class="alert-row"><span>&#9888;</span>Envio sobre 500 kg: solicita cotizacion directa a U Send.</div>';
+  if(!hasPeso)alerts+='<div class="info-row"><span>&#8505;</span>Sin peso ingresado - calculando con 50 kg de referencia.</div>';
+  sec.innerHTML='<div class="result-box '+boxClass+'"><div class="rt">'+title+'</div><div style="margin-bottom:10px"><span class="comm-name-big">'+d.c+'</span><span class="zone-pill '+d.z.toLowerCase()+'">'+d.z+'</span><div class="comm-meta">Region '+d.r+' &middot; Agencia '+d.ag+' &middot; SLA '+d.sla+' dia'+(d.sla!==1?'s':'')+'</div></div><div class="amounts-grid"><div class="amt-card"><div class="amt-label">Flete base (sin buffer)</div><div class="amt-val">'+fmt(fleBase)+'</div><div class="amt-sub">'+expl+'</div></div><div class="amt-card"><div class="amt-label">Valor para cotizar (+'+Math.round(buf*100)+'%)</div><div class="amt-val">'+fmt(fleWithBuf)+'</div><div class="amt-sub" style="font-weight:600">Usar este monto en la propuesta</div></div></div><div class="det-row"><span class="det-label">Zona U Send</span><span class="det-value">'+d.z+'</span></div><div class="det-row"><span class="det-label">Agencia de cobertura</span><span class="det-value">'+d.ag+'</span></div><div class="det-row"><span class="det-label">Tiempo de transito (SLA)</span><span class="det-value">'+d.sla+' dia'+(d.sla!==1?'s':'')+'</span></div><div class="det-row"><span class="det-label">Region</span><span class="det-value">'+d.r+'</span></div>'+alerts+'</div>';
+  const weights=[5,10,15,30,50,100,200,500];
+  const rows=weights.map(w=>{
+    const f=calcFlete(d.ag,d.z,w);
+    const fb=Math.ceil(f*(1+buf));
+    const hl=hasPeso&&Math.abs(w-peso)<(w*0.3)?' style="background:#EBF3FD;font-weight:700"':'';
+    return '<tr'+hl+'><td>'+w+' kg</td><td class="num">'+fmt(f)+'</td><td class="num">'+fmt(fb)+'</td><td class="num" style="color:#555">'+fmt(Math.round(f/w))+'/kg</td></tr>';
+  });
+  simSec.innerHTML='<p style="font-size:12px;color:#555;margin-bottom:8px">Proyeccion para <strong>'+d.c+'</strong> ('+d.z+'):</p><table class="sim-table"><thead><tr><th>Peso</th><th style="text-align:right">Flete base</th><th style="text-align:right">Con buffer '+Math.round(buf*100)+'%</th><th style="text-align:right">Tasa $/kg</th></tr></thead><tbody>'+rows.join('')+'</tbody></table>';
 }
 
-// Reference table (top 20 by frequency)
-const tbody = document.getElementById('refTableBody');
-DATA.sort((a,b)=>b.n-a.n).slice(0,20).forEach(d=>{
+const TOP=['PROVIDENCIA','VALPARAISO','COPIAPO','PUERTO MONTT','ARICA','TALCA','CONCEPCION','ANTOFAGASTA','IQUIQUE','RANCAGUA','LA SERENA','OSORNO','COYHAIQUE','TEMUCO','VALDIVIA','CHILLAN','PUNTA ARENAS','CALAMA','SANTIAGO','ANCUD'];
+const tbody=document.getElementById('refTableBody');
+TOP.forEach(name=>{
+  const d=DATA.find(x=>x.c===name);
+  if(!d)return;
+  const f30=calcFlete(d.ag,d.z,30),f100=calcFlete(d.ag,d.z,100),f200=calcFlete(d.ag,d.z,200);
+  const ztag=d.z==='Z1'?'tg':d.z==='Z2'?'ta':'tr';
   const tr=document.createElement('tr');
-  const tag = d.z==='Z1'?'tag-green':d.z==='Z2'?'tag-amber':'tag-red';
-  tr.innerHTML=`
-    <td style="cursor:pointer;color:#2E5FA3;font-weight:700" onclick="selectCommune('${d.c}')">${d.c}</td>
-    <td>Región ${d.r}</td>
-    <td><span class="mini-tag ${tag}">${d.z}</span></td>
-    <td class="num">${fmt(d.b)}</td>
-    <td class="num">${fmtKg(d.pw)}</td>
-    <td class="num">${fmt(d.rk)}/kg</td>
-    <td>${d.n}</td>
-  `;
+  tr.innerHTML='<td style="cursor:pointer;color:#2E5FA3;font-weight:700" onclick="selectCommune(\''+d.c+'\')">'+d.c+'</td><td>'+d.r+'</td><td><span class="mtag '+ztag+'">'+d.z+'</span></td><td style="text-align:center">'+d.sla+'d</td><td class="num">'+fmt(f30)+'</td><td class="num">'+fmt(f100)+'</td><td class="num">'+fmt(f200)+'</td>';
   tbody.appendChild(tr);
 });
 </script>
