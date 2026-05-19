@@ -317,7 +317,10 @@ function cardAdq(o, tipo) {
   const badgeT = o.adqMuyAtrasada ? badge("🔴 "+o.horasHabiles+"h","b-red")
     : o.adqAtrasada ? badge("🟡 "+o.horasHabiles+"h","b-amber")
     : o.esExpress ? badge("⚡ Express","b-teal") : badge(o.horasHabiles+"h","b-blue");
-  const badgeE = o.sinEncargado ? badge("Sin asignar","b-red") : badge(o.encargado,"b-gray");
+  const badgeE = badge(o.ejecutivo||"—","b-gray");
+  const encargadoTxt = o.sinEncargado
+    ? `<span style="font-size:11px;color:var(--red-txt);margin-left:2px">⚠ Sin encargado</span>`
+    : `<span style="font-size:11px;color:var(--txt-3);margin-left:2px">· ${o.encargado}</span>`;
 
   // ── Semáforo morosidad — usa campo "morosidad" del backend ──
   let badgeMora = "";
@@ -369,7 +372,7 @@ function cardAdq(o, tipo) {
       <span class="oc-id">${o.idOC}</span>
       <button class="copy-oc-btn" onclick="copiarOC(event,'${o.idOC}')" title="Copiar OC">⧉</button>
       <span class="oc-cliente">${o.cliente}</span>
-      <div class="oc-meta">${badgeT}${badgeE}${badgeA}${badgeMora}${progreso}</div>
+      <div class="oc-meta">${badgeT}${badgeE}${encargadoTxt}${badgeA}${badgeMora}${progreso}</div>
       <span class="chevron">▶</span>
     </div>
     <div class="oc-lines">
