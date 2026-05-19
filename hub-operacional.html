@@ -494,10 +494,12 @@ function renderizarAlertas() {
 function cardAlerta(o, tipo) {
   const badges = [];
   if(o.diasAtrasoEntrega>0) badges.push(badge(o.diasAtrasoEntrega+"d vencida",o.critico?"b-red":"b-amber"));
-  if(o.sinEncargado)        badges.push(badge("Sin asignar","b-red"));
   if(o.horasHabiles>48)     badges.push(badge("Adq. "+o.horasHabiles+"h","b-amber"));
   if(o.alertaAnuladoRecepcionado) badges.push(badge("⛔ Dev. pendiente","b-red"));
   badges.push(badge(o.ejecutivo||"—","b-gray"));
+  const encargadoTxt = o.sinEncargado
+    ? `<span style="font-size:11px;color:var(--red-txt);margin-left:2px">⚠ Sin encargado</span>`
+    : `<span style="font-size:11px;color:var(--txt-3);margin-left:2px">· ${o.encargado}</span>`;
 
   let filas = o.lineas.map(l=>`<tr>
     <td>${l.producto||"—"}</td>
@@ -511,7 +513,7 @@ function cardAlerta(o, tipo) {
       <span class="oc-id">${o.idOC}</span>
       <button class="copy-oc-btn" onclick="copiarOC(event,'${o.idOC}')" title="Copiar OC">⧉</button>
       <span class="oc-cliente">${o.cliente}</span>
-      <div class="oc-meta">${badges.join("")}</div>
+      <div class="oc-meta">${badges.join("")}${encargadoTxt}</div>
       <span class="chevron">▶</span>
     </div>
     <div class="oc-lines"><table class="lines-table">
