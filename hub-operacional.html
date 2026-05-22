@@ -163,7 +163,19 @@ let datos = null;
 let datosFiltrados = null;
 let tabActiva = "adq";
 let filtroEjecutivo = "";
+// Suma el montoVenta de un array de OCs
+function sumaMonto(arr) {
+  return arr.reduce((s, o) => s + (o.montoVenta || 0), 0);
+}
 
+// Formatea un monto en CLP abreviado: 1500000 → "$1.5M", 850000 → "$850K"
+function fmtMonto(n) {
+  if (!n || n === 0) return "$0";
+  if (n >= 1000000) return "$" + (n / 1000000).toFixed(1).replace(/\.0$/, '') + "M";
+  if (n >= 1000) return "$" + Math.round(n / 1000) + "K";
+  return "$" + n;
+}
+  
 function aplicarFiltro() {
   filtroEjecutivo = document.getElementById("filtro-ejecutivo").value;
   if (!datos) return;
@@ -291,17 +303,16 @@ function renderizarAdq() {
   if (filtroAdq === "express")     { mostrar = {sinAsignar:[], muyAtrasadas:[], atrasadas:[], express, normales:[]}; }
   if (filtroAdq === "normales")    { mostrar = {sinAsignar:[], muyAtrasadas:[], atrasadas:[], express:[], normales}; }
 
-  if(mostrar.sinAsignar.length>0){html+='<div class="section-label">Sin encargado asignado</div>';
+  if(mostrar.sinAsignar.length>0){html+=`<div class="section-label">Sin encargado asignado <span style="opacity:.6;font-weight:400">· ${fmtMonto(sumaMonto(mostrar.sinAsignar))}</span></div>`;
     mostrar.sinAsignar.forEach(o=>{html+=cardAdq(o,"urgent");});}
-  if(mostrar.muyAtrasadas.length>0){html+='<div class="section-label">🔴 Alerta máxima — más de 48h sin comprar</div>';
+  if(mostrar.muyAtrasadas.length>0){html+=`<div class="section-label">🔴 Alerta máxima – más de 48h sin comprar <span style="opacity:.6;font-weight:400">· ${fmtMonto(sumaMonto(mostrar.muyAtrasadas))}</span></div>`;
     mostrar.muyAtrasadas.forEach(o=>{html+=cardAdq(o,"urgent");});}
-  if(mostrar.atrasadas.length>0){html+='<div class="section-label">🟡 Atrasadas — más de 24h sin comprar</div>';
+  if(mostrar.atrasadas.length>0){html+=`<div class="section-label">🟡 Atrasadas – más de 24h sin comprar <span style="opacity:.6;font-weight:400">· ${fmtMonto(sumaMonto(mostrar.atrasadas))}</span></div>`;
     mostrar.atrasadas.forEach(o=>{html+=cardAdq(o,"warn");});}
-  if(mostrar.express.length>0){html+='<div class="section-label">⚡ Express — cotización lista</div>';
+  if(mostrar.express.length>0){html+=`<div class="section-label">⚡ Express – cotización lista <span style="opacity:.6;font-weight:400">· ${fmtMonto(sumaMonto(mostrar.express))}</span></div>`;
     mostrar.express.forEach(o=>{html+=cardAdq(o,"express");});}
-  if(mostrar.normales.length>0){html+='<div class="section-label">En gestión normal</div>';
+  if(mostrar.normales.length>0){html+=`<div class="section-label">En gestión normal <span style="opacity:.6;font-weight:400">· ${fmtMonto(sumaMonto(mostrar.normales))}</span></div>`;
     mostrar.normales.forEach(o=>{html+=cardAdq(o,"normal");});}
-
   const totalMostradas = Object.values(mostrar).flat().length;
   if(totalMostradas===0){html+='<div class="empty">Sin órdenes en esta categoría</div>';}
 
