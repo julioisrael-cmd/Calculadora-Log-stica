@@ -423,7 +423,9 @@ function renderizarBodega() {
     const badgeP = o.tienePartiales?badge("Parcial","b-amber"):"";
     const badgeA = o.alertaAnuladoRecepcionado?badge("⛔ Dev. pendiente","b-red"):"";
     const progreso = `<span class="oc-progress">${o.lineasRecepcionadas}/${o.totalLineas} recep.</span>`;
-
+    const encargadoTxt = !o.encargado
+  ? `<span style="font-size:11px;color:var(--red-txt);margin-left:2px">⚠ Sin encargado</span>`
+  : `<span style="font-size:11px;color:var(--txt-3);margin-left:2px">· ${o.encargado}</span>`;
     let filas = o.lineas.map(l=>`<tr>
       <td>${l.producto||"—"}</td>
       <td class="muted" style="text-align:center">${l.cantidad||"—"}</td>
@@ -438,7 +440,7 @@ function renderizarBodega() {
         <span class="oc-id">${o.idOC}</span>
         <button class="copy-oc-btn" onclick="copiarOC(event,'${o.idOC}')" title="Copiar OC">⧉</button>
         <span class="oc-cliente">${o.cliente}</span>
-        <div class="oc-meta">${badgeD}${badgeP}${badgeA}${badge(o.ejecutivo,"b-gray")}${progreso}</div>
+        <div class="oc-meta">${badgeD}${badgeP}${badgeA}${badge(o.ejecutivo||"—","b-gray")}${encargadoTxt}${progreso}</div>
         <span class="chevron">▶</span>
       </div>
       <div class="oc-lines"><table class="lines-table">
