@@ -426,7 +426,7 @@ function renderizarBodega() {
   if(ocs.length===0){html+='<div class="empty">Sin pedidos pendientes en bodega</div>';
     document.getElementById("view-bodega").innerHTML=html;return;}
 
-  html+='<div class="section-label">Ordenado de más antiguo a más reciente</div>';
+  html+=`<div class="section-label">Ordenado de más antiguo a más reciente <span style="opacity:.6;font-weight:400">· ${fmtMonto(sumaMonto(ocs))}</span></div>`;
   ocs.forEach(o=>{
     const d    = o.diasComprado||0;
     const tipo = d>=3?"urgent":d>=1?"warn":"normal";
