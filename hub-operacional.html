@@ -330,6 +330,7 @@ let badgeT;
     // Express debe comprarse en <24h; pasadas 24h → rojo automático
     badgeT = badge("⚡ Express","b-teal");
     if (o.horasHabiles > 24) badgeT += " " + badge("🔴 "+o.horasHabiles+"h","b-red");
+    else if (o.horasHabiles > 12) badgeT += " " + badge("🟡 "+o.horasHabiles+"h","b-amber");
   } else {
     badgeT = o.adqMuyAtrasada ? badge("🔴 "+o.horasHabiles+"h","b-red")
       : o.adqAtrasada ? badge("🟡 "+o.horasHabiles+"h","b-amber")
