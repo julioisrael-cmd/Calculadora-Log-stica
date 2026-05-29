@@ -331,6 +331,7 @@ let badgeT;
     badgeT = badge("⚡ Express","b-teal");
     if (o.horasHabiles > 24) badgeT += " " + badge("🔴 "+o.horasHabiles+"h","b-red");
     else if (o.horasHabiles > 12) badgeT += " " + badge("🟡 "+o.horasHabiles+"h","b-amber");
+    else badgeT += " " + badge(o.horasHabiles+"h","b-blue");
   } else {
     badgeT = o.adqMuyAtrasada ? badge("🔴 "+o.horasHabiles+"h","b-red")
       : o.adqAtrasada ? badge("🟡 "+o.horasHabiles+"h","b-amber")
