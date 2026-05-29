@@ -325,9 +325,16 @@ function setFiltroAdq(key) {
 }
 
 function cardAdq(o, tipo) {
-  const badgeT = o.adqMuyAtrasada ? badge("🔴 "+o.horasHabiles+"h","b-red")
-    : o.adqAtrasada ? badge("🟡 "+o.horasHabiles+"h","b-amber")
-    : o.esExpress ? badge("⚡ Express","b-teal") : badge(o.horasHabiles+"h","b-blue");
+let badgeT;
+  if (o.esExpress) {
+    // Express debe comprarse en <24h; pasadas 24h → rojo automático
+    badgeT = badge("⚡ Express","b-teal");
+    if (o.horasHabiles > 24) badgeT += " " + badge("🔴 "+o.horasHabiles+"h","b-red");
+  } else {
+    badgeT = o.adqMuyAtrasada ? badge("🔴 "+o.horasHabiles+"h","b-red")
+      : o.adqAtrasada ? badge("🟡 "+o.horasHabiles+"h","b-amber")
+      : badge(o.horasHabiles+"h","b-blue");
+  }
   const badgeE = badge(o.ejecutivo||"—","b-gray");
   const encargadoTxt = o.sinEncargado
     ? `<span style="font-size:11px;color:var(--red-txt);margin-left:2px">⚠ Sin encargado</span>`
