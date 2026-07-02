@@ -378,8 +378,8 @@ let badgeT;
     const colorBorde = o.mora.nivel === "rojo" ? "var(--red)" : "var(--amber)";
     const colorTxt  = o.mora.nivel === "rojo" ? "var(--red-txt)" : "var(--amber-txt)";
     const accion = o.mora.nivel === "rojo"
-      ? "Cliente con mora grave (+60 días). El ejecutivo debe iniciar gestión de denuncia en Mercado Público o Contraloría."
-      : "Cliente con mora activa (30-60 días). Avisar al ejecutivo para seguimiento.";
+      ? "Cliente con mora grave (+30 días). Bloquear nuevas OC. La denuncia formal (Contraloría) se evalúa sobre 90 días."
+      : "Cliente con mora activa (1-30 días). Avisar al ejecutivo para seguimiento de cobranza.";
     bloquesMora = `<div style="padding:10px 14px;background:${colorMora};border-top:1px solid ${colorBorde};display:flex;align-items:flex-start;gap:8px;">
       <span style="font-size:16px">${o.mora.nivel==="rojo"?"🔴":"🟡"}</span>
       <div>
@@ -573,17 +573,17 @@ function renderizarCobranza() {
       <div class="cob-kpi-sub">${filas.length} documentos</div>
     </div>
     <div class="cob-kpi">
-      <div class="cob-kpi-label">🔴 En rojo (+60d)</div>
+      <div class="cob-kpi-label">🔴 En rojo (+30d)</div>
       <div class="cob-kpi-value rojo">${fmt(totalRojo)}</div>
       <div class="cob-kpi-sub">${cntRojo} documentos</div>
     </div>
     <div class="cob-kpi">
-      <div class="cob-kpi-label">🟡 En amarillo (30-60d)</div>
+      <div class="cob-kpi-label">🟡 En amarillo (1-30d)</div>
       <div class="cob-kpi-value amarillo">${fmt(totalAmarillo)}</div>
       <div class="cob-kpi-sub">${cntAmarillo} documentos</div>
     </div>
     <div class="cob-kpi">
-      <div class="cob-kpi-label">🟢 Al día (&lt;30d)</div>
+      <div class="cob-kpi-label">🟢 Al día (sin mora)</div>
       <div class="cob-kpi-value verde">${fmt(totalVerde)}</div>
       <div class="cob-kpi-sub">${filas.filter(f=>f.nivel==="verde").length} documentos</div>
     </div>
@@ -598,8 +598,8 @@ function renderizarCobranza() {
     </select>
     <select class="cob-select" onchange="setCobFiltroNivel(this.value)">
       <option value="">Todos los niveles</option>
-      <option value="rojo" ${cobFiltroNivel==="rojo"?"selected":""}>🔴 Rojo (+60d)</option>
-      <option value="amarillo" ${cobFiltroNivel==="amarillo"?"selected":""}>🟡 Amarillo (30-60d)</option>
+      <option value="rojo" ${cobFiltroNivel==="rojo"?"selected":""}>🔴 Rojo (+30d)</option>
+      <option value="amarillo" ${cobFiltroNivel==="amarillo"?"selected":""}>🟡 Amarillo (1-30d)</option>
       <option value="verde" ${cobFiltroNivel==="verde"?"selected":""}>🟢 Verde (al día)</option>
     </select>
     <input class="cob-search" type="text" placeholder="Buscar cliente o RUT…"
@@ -652,9 +652,9 @@ function renderizarCobranza() {
       : "—";
     const iconNivel = f.nivel==="rojo"?"🔴":f.nivel==="amarillo"?"🟡":"🟢";
     const labelNivel = f.nivel==="rojo"
-      ? `+60d — Denunciar`
+      ? `+30d — Bloquear`
       : f.nivel==="amarillo"
-      ? `30-60d — Seguimiento`
+      ? `1-30d — Seguimiento`
       : `Al día`;
 
     html += `<tr>
