@@ -269,6 +269,7 @@ function renderizarAdq() {
     {label:"Atrasadas",     value:m.atrasadas,    cls:m.atrasadas>0?"red":""},
     {label:"Express",       value:m.express,      cls:m.express>0?"amber":""},
     {label:"Sin encargado", value:m.sinEncargado, cls:m.sinEncargado>0?"red":""},
+    {label:"⚠️ En mora", value: ocs.filter(o=>o.mora).length, cls: ocs.filter(o=>o.mora).length>0?"red":""},
   ]);
 
   const sinAsignar   = ocs.filter(o=>o.sinEncargado);
@@ -325,6 +326,7 @@ function setFiltroAdq(key) {
 }
 
 function cardAdq(o, tipo) {
+  if (o.mora && o.mora.nivel === "rojo") tipo = "urgent";
 let badgeT;
   if (o.esExpress) {
     // Express debe comprarse en <24h; pasadas 24h → rojo automático
