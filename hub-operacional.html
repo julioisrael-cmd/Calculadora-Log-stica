@@ -120,6 +120,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .cob-kpi-value.amarillo{color:var(--amber);}
 .cob-kpi-value.verde{color:var(--teal);}
 .cob-kpi-sub{font-size:11px;color:var(--txt-3);margin-top:2px;}
+
+/* ── RECEPCIÓN ────────────────────────────────────────────── */
+/* Mobile-first: JP usa esto en bodega, de pie, con el proveedor
+   esperando. Targets de 44px+ y una sola columna. */
+.rec-search-wrap{position:sticky;top:52px;z-index:5;background:var(--bg);padding:6px 0 10px;}
+.rec-search{width:100%;font-size:16px;border:1px solid var(--border-md);border-radius:var(--r-md);padding:12px 14px;background:var(--surface);color:var(--txt);font-family:inherit;min-height:48px;}
+.rec-search:focus{outline:none;border-color:var(--blue);}
+.rec-count{font-size:12px;color:var(--txt-3);margin-bottom:10px;}
+.rec-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);margin-bottom:10px;overflow:hidden;border-left:3px solid var(--teal);}
+.rec-head{padding:12px 14px;}
+.rec-head-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.rec-oc{font-size:14px;font-weight:600;}
+.rec-cliente{font-size:12px;color:var(--txt-2);margin-top:4px;line-height:1.35;}
+.rec-linea{padding:12px 14px;border-top:1px solid var(--border);}
+.rec-prod{font-size:14px;font-weight:500;line-height:1.35;}
+.rec-desc{font-size:12px;color:var(--txt-2);line-height:1.4;white-space:pre-wrap;margin-top:4px;}
+.rec-desc.corta{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.rec-mas{font-size:12px;color:var(--blue);background:none;border:none;padding:8px 0;cursor:pointer;font-family:inherit;min-height:36px;text-align:left;}
+.rec-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 0;font-size:12px;color:var(--txt-3);}
+.rec-form{display:flex;gap:8px;align-items:stretch;margin-top:10px;}
+.rec-qty{flex:0 0 96px;font-size:18px;font-weight:600;text-align:center;border:1px solid var(--border-md);border-radius:var(--r-md);background:var(--surface);color:var(--txt);font-family:inherit;min-height:52px;}
+.rec-qty:focus{outline:none;border-color:var(--blue);}
+.rec-qty.parcial{border-color:var(--amber);background:var(--amber-bg);color:var(--amber-txt);}
+.rec-btn{flex:1;min-height:52px;font-size:15px;font-weight:600;border:none;border-radius:var(--r-md);background:var(--teal);color:#fff;cursor:pointer;font-family:inherit;}
+.rec-btn:disabled{opacity:.55;cursor:default;}
+.rec-aviso{font-size:12px;color:var(--amber-txt);margin-top:6px;}
+.rec-err{font-size:12px;color:var(--red-txt);background:var(--red-bg);border-radius:var(--r-sm);padding:8px 10px;margin-top:8px;}
+.rec-toggle{width:100%;text-align:left;background:var(--bg);border:none;border-top:1px solid var(--border);padding:14px;font-size:13px;color:var(--txt-2);cursor:pointer;font-family:inherit;min-height:48px;display:flex;align-items:center;gap:8px;}
+.rec-done{padding:10px 14px;border-top:1px solid var(--border);font-size:13px;color:var(--txt-2);display:flex;gap:8px;align-items:flex-start;line-height:1.35;}
+.rec-listo{padding:12px 14px;border-top:1px solid var(--border);font-size:13px;color:var(--teal-txt);background:var(--teal-bg);}
 </style>
 </head>
 <body>
@@ -148,6 +178,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
   <button class="tab" onclick="switchTab('retiros')" id="tab-retiros">Ruta Logística <span class="tab-count red" id="cnt-retiros">—</span></button>
   <button class="tab" onclick="switchTab('despacho')" id="tab-despacho">Despacho <span class="tab-count red" id="cnt-despacho">—</span></button>
   <button class="tab" onclick="switchTab('cobranza')" id="tab-cobranza">Cobranza <span class="tab-count red" id="cnt-cobranza">—</span></button>
+  <button class="tab" onclick="switchTab('recepcion')" id="tab-recepcion">Recepción <span class="tab-count" id="cnt-recepcion">—</span></button>
 </div>
 <div class="main">
   <div id="view-adq" class="view active"></div>
@@ -156,6 +187,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
   <div id="view-retiros" class="view"></div>
   <div id="view-despacho" class="view"></div>
   <div id="view-cobranza" class="view"></div>
+  <div id="view-recepcion" class="view"></div>
 </div>
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzwgkQUoJtc4Kw-LB2NS2FjL_WvOjLkkv0DgI_iLr78fG8jVbyV2JpAsuAgKfoFk4jTVA/exec";
@@ -725,10 +757,14 @@ function escapeHtml(str) {
 // ── UTILS ─────────────────────────────────────────────────────
 function estadoCls(e) {
   if(!e) return "e-cotizado";
-  if(e==="Comprado") return "e-comprado";
-  if(e==="Recepcionado") return "e-recepcionado";
-  if(e==="Recepcion parcial") return "e-parcial";
-  if(e==="Anulado") return "e-anulado";
+  // Comparación normalizada: el backend escribe "Recepcion Parcial" con P
+  // mayúscula y antes acá se comparaba con p minúscula, así que el badge
+  // caía al gris en vez del ámbar.
+  const n = String(e).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+  if(n==="comprado") return "e-comprado";
+  if(n==="recepcionado") return "e-recepcionado";
+  if(n==="recepcion parcial") return "e-parcial";
+  if(n==="anulado") return "e-anulado";
   return "e-cotizado";
 }
 function metricas(items) {
@@ -745,7 +781,7 @@ function kpiPromedio(ocs, campo) {
   return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
 }
 function switchTab(name) {
-  ["adq","bodega","alertas","retiros","despacho","cobranza"].forEach(n=>{
+  ["adq","bodega","alertas","retiros","despacho","cobranza","recepcion"].forEach(n=>{
     document.getElementById("tab-"+n).classList.toggle("active",n===name);
     document.getElementById("view-"+n).classList.toggle("active",n===name);
   });
@@ -993,6 +1029,267 @@ function generarRuta() {
   window.open(url, "_blank");
 }
 
+// ── RECEPCIÓN ─────────────────────────────────────────────────
+// Pestaña de recepción en bodega (JP). Deliberadamente NO entra en
+// renderizarTodo() ni en mostrarLoading(): cargarDatos() corre cada 10
+// min por setInterval y le borraría a JP los resultados de búsqueda
+// mientras atiende al proveedor.
+let recepResultados = [];
+let recepEstado     = "inicial";   // inicial | cargando | ok | error
+let recepError      = "";
+let recepTimer      = null;
+let recepToken      = 0;           // descarta respuestas fuera de orden
+let recepAbiertas   = {};          // idOC → "ya recibidas" desplegado
+let recepDescAbierta= {};          // filaSheet → descripción desplegada
+
+// El input vive fuera del re-render para no perder el foco al tipear.
+function initRecepcion() {
+  const v = document.getElementById("view-recepcion");
+  if (!v || v.dataset.init) return;
+  v.dataset.init = "1";
+  v.innerHTML =
+    '<div class="rec-search-wrap">' +
+      '<input id="rec-input" class="rec-search" type="search" autocomplete="off" ' +
+             'placeholder="Buscar por proveedor" oninput="buscarRecepcion(this.value)">' +
+    '</div>' +
+    '<div class="rec-count" id="rec-count"></div>' +
+    '<div id="rec-resultados"></div>';
+  renderizarRecepcion();
+}
+
+function buscarRecepcion(texto) {
+  clearTimeout(recepTimer);
+  const q = (texto || "").trim();
+  if (!q) { recepEstado = "inicial"; recepResultados = []; renderizarRecepcion(); return; }
+  recepTimer = setTimeout(function(){ ejecutarBusquedaRecepcion(q); }, 400);
+}
+
+function reintentarRecepcion() {
+  const inp = document.getElementById("rec-input");
+  const q = inp ? inp.value.trim() : "";
+  if (q) ejecutarBusquedaRecepcion(q);
+}
+
+async function ejecutarBusquedaRecepcion(q) {
+  const token = ++recepToken;
+  recepEstado = "cargando";
+  renderizarRecepcion();
+  try {
+    const res  = await fetch(API_URL + "?accion=buscarProveedor&texto=" + encodeURIComponent(q));
+    const json = await res.json();
+    if (token !== recepToken) return;          // llegó tarde, ya hay otra búsqueda
+    if (!json.ok) throw new Error(json.error || "Error desconocido");
+    recepResultados = (json.data || {}).resultados || [];
+    recepEstado = "ok";
+  } catch (err) {
+    if (token !== recepToken) return;
+    recepError  = err.message;
+    recepEstado = "error";
+  }
+  renderizarRecepcion();
+}
+
+function renderizarRecepcion() {
+  const cont = document.getElementById("rec-resultados");
+  const cnt  = document.getElementById("rec-count");
+  const tab  = document.getElementById("cnt-recepcion");
+  if (!cont) return;
+
+  if (recepEstado === "inicial") {
+    cnt.textContent = ""; if (tab) tab.textContent = "—";
+    cont.innerHTML = '<div class="empty">Busca por nombre de proveedor para ver sus OCs pendientes</div>';
+    return;
+  }
+  if (recepEstado === "cargando") {
+    cnt.textContent = "";
+    cont.innerHTML = '<div class="loading"><div class="spinner"></div><br>Buscando…</div>';
+    return;
+  }
+  if (recepEstado === "error") {
+    cnt.textContent = ""; if (tab) tab.textContent = "—";
+    cont.innerHTML = '<div class="error-box">No se pudo buscar: ' + escapeHtml(recepError) +
+      '<br><button class="rec-mas" onclick="reintentarRecepcion()">Reintentar</button></div>';
+    return;
+  }
+  if (recepResultados.length === 0) {
+    cnt.textContent = ""; if (tab) tab.textContent = "0";
+    cont.innerHTML = '<div class="empty">Sin OCs pendientes para ese proveedor.<br>Revisa el nombre e intenta de nuevo.</div>';
+    return;
+  }
+  cnt.textContent = recepResultados.length +
+    (recepResultados.length === 1 ? " OC encontrada" : " OCs encontradas");
+  if (tab) tab.textContent = recepResultados.length;
+  cont.innerHTML = recepResultados.map(cardRecepcion).join("");
+}
+
+// Separa "Nombre — ficha técnica larga" en nombre + descripción.
+// Corta en el primer " — " o en el primer salto de línea, lo que venga antes.
+function partirProducto(txt) {
+  const s = String(txt || "").trim();
+  if (!s) return { nombre: "—", desc: "" };
+  const iG = s.indexOf(" — ");
+  const iS = s.indexOf("\n");
+  let corte = -1, salto = 0;
+  if (iG !== -1 && (iS === -1 || iG < iS)) { corte = iG; salto = 3; }
+  else if (iS !== -1) { corte = iS; salto = 1; }
+  if (corte === -1) return { nombre: s, desc: "" };
+  return { nombre: s.slice(0, corte).trim(), desc: s.slice(corte + salto).trim() };
+}
+
+function cardRecepcion(oc, i) {
+  const pendientes = oc.lineas.filter(function(l){ return !l.completa && l.saldo > 0; });
+  const recibidas  = oc.lineas.filter(function(l){ return l.completa || l.saldo <= 0; });
+  const abierta    = !!recepAbiertas[oc.idOC];
+
+  let cuerpo = pendientes.map(lineaRecepcion).join("");
+  if (pendientes.length === 0) {
+    cuerpo = '<div class="rec-listo">✓ Todo lo de este proveedor quedó recibido en esta OC.</div>';
+  }
+
+  let bloqueRecibidas = "";
+  if (recibidas.length > 0) {
+    bloqueRecibidas =
+      '<button class="rec-toggle" onclick="toggleRecibidas(' + i + ')">' +
+        '<span class="chevron"' + (abierta ? ' style="transform:rotate(90deg)"' : '') + '>▶</span>' +
+        (abierta ? "Ocultar " : "Ver ") + recibidas.length +
+        " ya recibida" + (recibidas.length === 1 ? "" : "s") +
+      '</button>';
+    if (abierta) {
+      bloqueRecibidas += recibidas.map(function(l){
+        return '<div class="rec-done"><span style="color:var(--teal)">✓</span>' +
+               '<span>' + escapeHtml(partirProducto(l.producto).nombre) + '</span></div>';
+      }).join("");
+    }
+  }
+
+  const badgePend = pendientes.length > 0
+    ? badge(pendientes.length + " pend.", "b-amber")
+    : badge("Completa", "b-teal");
+
+  return '<div class="rec-card">' +
+    '<div class="rec-head">' +
+      '<div class="rec-head-top">' +
+        '<span class="rec-oc">' + escapeHtml(oc.idOC) + '</span>' + badgePend +
+      '</div>' +
+      '<div class="rec-cliente">' + escapeHtml(oc.cliente || "—") + '</div>' +
+    '</div>' + cuerpo + bloqueRecibidas +
+  '</div>';
+}
+
+function lineaRecepcion(l) {
+  const f    = l.filaSheet;
+  const p    = partirProducto(l.producto);
+  const obs  = String(l.rack || "").trim();
+  const abre = !!recepDescAbierta[f];
+
+  let desc = "";
+  if (p.desc) {
+    desc = '<div class="rec-desc' + (abre ? '' : ' corta') + '" id="rec-desc-' + f + '">' +
+             escapeHtml(p.desc) +
+           '</div>' +
+           '<button class="rec-mas" onclick="toggleDesc(' + f + ')">' +
+             (abre ? "ver menos" : "ver más") +
+           '</button>';
+  }
+
+  return '<div class="rec-linea">' +
+    '<div class="rec-prod">' + escapeHtml(p.nombre) + '</div>' + desc +
+    '<div class="rec-meta">' +
+      '<span>📍 ' + (obs ? escapeHtml(obs) : "—") + '</span><span>·</span>' +
+      '<span>Pendiente <strong style="color:var(--txt)">' + l.saldo + '</strong> de ' + l.esperada + '</span>' +
+      '<span class="estado ' + estadoCls(l.estado) + '">' + escapeHtml(l.estado || "") + '</span>' +
+    '</div>' +
+    '<div class="rec-form">' +
+      '<input class="rec-qty" id="rec-qty-' + f + '" type="number" inputmode="numeric" ' +
+             'min="1" max="' + l.saldo + '" value="' + l.saldo + '" ' +
+             'oninput="avisoParcial(' + f + ',' + l.saldo + ')">' +
+      '<button class="rec-btn" id="rec-btn-' + f + '" onclick="confirmarRecepcion(' + f + ')">Confirmar</button>' +
+    '</div>' +
+    '<div class="rec-aviso" id="rec-aviso-' + f + '"></div>' +
+    '<div id="rec-err-' + f + '"></div>' +
+  '</div>';
+}
+
+function toggleRecibidas(i) {
+  const oc = recepResultados[i];
+  if (!oc) return;
+  recepAbiertas[oc.idOC] = !recepAbiertas[oc.idOC];
+  renderizarRecepcion();
+}
+
+function toggleDesc(fila) {
+  recepDescAbierta[fila] = !recepDescAbierta[fila];
+  renderizarRecepcion();
+}
+
+function avisoParcial(fila, saldo) {
+  const inp = document.getElementById("rec-qty-" + fila);
+  const av  = document.getElementById("rec-aviso-" + fila);
+  if (!inp || !av) return;
+  const v = parseInt(inp.value, 10);
+  if (!v || v <= 0) { inp.classList.remove("parcial"); av.textContent = ""; return; }
+  if (v < saldo) {
+    inp.classList.add("parcial");
+    av.textContent = "Parcial: quedan " + (saldo - v) + " pendientes";
+  } else {
+    inp.classList.remove("parcial");
+    av.textContent = v > saldo ? "Máximo " + saldo : "";
+  }
+}
+
+async function confirmarRecepcion(fila) {
+  const inp = document.getElementById("rec-qty-" + fila);
+  const btn = document.getElementById("rec-btn-" + fila);
+  const box = document.getElementById("rec-err-" + fila);
+  if (!inp || !btn || !box) return;
+
+  const cant = parseInt(inp.value, 10);
+  box.innerHTML = "";
+  if (!cant || cant <= 0) {
+    box.innerHTML = '<div class="rec-err">Ingresa una cantidad mayor que 0.</div>';
+    return;
+  }
+
+  const rotulo = btn.textContent;
+  btn.disabled = true; inp.disabled = true; btn.textContent = "Guardando…";
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      // text/plain a propósito, NO application/json: evita el preflight
+      // CORS que Apps Script no responde. El backend hace
+      // JSON.parse(e.postData.contents) igual, no cambia nada del lado servidor.
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ accion: "registrarRecepcion", filaSheet: fila, cantidad: cant }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || "Error al registrar");
+    aplicarRecepcion(fila, json);
+  } catch (err) {
+    // Revertir: se conserva el valor que JP había ingresado.
+    btn.disabled = false; inp.disabled = false; btn.textContent = rotulo;
+    box.innerHTML = '<div class="rec-err">' + escapeHtml(err.message) +
+      ' · <button class="rec-mas" style="color:var(--red-txt)" onclick="confirmarRecepcion(' + fila + ')">Reintentar</button></div>';
+  }
+}
+
+// Aplica en memoria lo que CONFIRMÓ el backend, no lo que se pidió.
+function aplicarRecepcion(fila, resp) {
+  for (let i = 0; i < recepResultados.length; i++) {
+    const oc = recepResultados[i];
+    const l  = oc.lineas.find(function(x){ return x.filaSheet === fila; });
+    if (!l) continue;
+    l.recepcionada = resp.recepcionada;
+    l.saldo        = resp.saldo;
+    l.estado       = resp.estadoLinea || l.estado;
+    l.completa     = resp.saldo <= 0;
+    oc.saldoTotal  = oc.lineas.reduce(function(s,x){ return s + (x.saldo || 0); }, 0);
+    if (resp.estadoOC) oc.estadoOC = resp.estadoOC;
+    break;
+  }
+  renderizarRecepcion();
+}
+
 function copiarOC(e, idOC) {
   e.stopPropagation();
   const btn = e.currentTarget;
@@ -1023,6 +1320,7 @@ function copiarOC(e, idOC) {
   }
 }
 
+initRecepcion();
 cargarDatos();
 setInterval(cargarDatos, 10*60*1000);
 </script>
