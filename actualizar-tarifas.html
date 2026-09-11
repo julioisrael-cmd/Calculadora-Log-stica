@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Actualizar tarifarios — Calculadora de Flete</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#F0F4FA;color:#1a1a1a;min-height:100vh}
+header{background:#1F3864;color:#fff;padding:14px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:17px;font-weight:700}
+header p{font-size:11px;color:#A8C4E5;margin-top:2px}
+.container{max-width:900px;margin:0 auto;padding:18px 16px}
+.card{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.08);padding:18px 20px;margin-bottom:14px}
+.card-title{font-size:12px;font-weight:700;color:#2E5FA3;margin-bottom:14px;text-transform:uppercase;letter-spacing:.04em}
+.paso{display:flex;gap:12px;margin-bottom:12px;align-items:flex-start}
+.paso-n{background:#2E5FA3;color:#fff;width:22px;height:22px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.paso-t{font-size:13px;line-height:1.6;color:#333}
+.drop{border:2px dashed #C3D0E4;border-radius:10px;padding:22px;text-align:center;background:#FAFCFF;cursor:pointer;transition:.15s}
+.drop:hover,.drop.over{border-color:#2E5FA3;background:#EBF3FD}
+.drop.ok{border-color:#28a745;background:#F2FBF4;border-style:solid}
+.drop.err{border-color:#dc3545;background:#FDF3F4;border-style:solid}
+.drop-t{font-size:14px;font-weight:700;color:#1F3864}
+.drop-s{font-size:12px;color:#777;margin-top:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+label{display:block;font-size:12px;color:#555;margin-bottom:5px;font-weight:600;margin-top:10px}
+input{width:100%;padding:9px 11px;border:1.5px solid #D0D8E8;border-radius:7px;font-size:14px;font-family:Arial,sans-serif;outline:none}
+input:focus{border-color:#2E5FA3}
+.btn{display:inline-block;background:#2E5FA3;color:#fff;border:none;border-radius:7px;padding:11px 18px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;font-family:Arial,sans-serif}
+.btn:hover{background:#1F3864}
+.btn:disabled{background:#C3D0E4;cursor:not-allowed}
+.btn-sec{background:#fff;color:#2E5FA3;border:1.5px solid #2E5FA3}
+.btn-sec:hover{background:#EBF3FD;color:#1F3864}
+.acciones{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.msg{border-radius:7px;padding:10px 13px;font-size:12px;line-height:1.6;margin-top:10px}
+.msg.ok{background:#D4EDDA;color:#145217}
+.msg.warn{background:#FFF3CD;color:#856404}
+.msg.err{background:#F8D7DA;color:#842029}
+.msg.info{background:#EBF3FD;color:#14315e}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+th{background:#2E5FA3;color:#fff;padding:7px 10px;text-align:left;font-weight:600}
+th.num,td.num{text-align:right}
+td{padding:6px 10px;border-bottom:1px solid #f0f0f0}
+tr:nth-child(even) td{background:#F8FAFD}
+.sube{color:#b02a2a;font-weight:700}
+.baja{color:#145217;font-weight:700}
+.hint{font-size:11px;color:#999;margin-top:8px;line-height:1.6}
+.link{color:#2E5FA3;font-weight:700;text-decoration:none}
+.link:hover{text-decoration:underline}
+footer{text-align:center;font-size:11px;color:#aaa;padding:16px}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div style="flex:1;min-width:220px">
+    <h1>Actualizar tarifarios</h1>
+    <p>Convierte los Excel de U Send y Starken en los archivos de datos de la calculadora</p>
+  </div>
+  <a href="index.html" class="btn btn-sec" style="padding:8px 14px">Volver a la calculadora</a>
+</header>
+<div class="container">
+
+<div class="card">
+  <div class="card-title">Como funciona</div>
+  <div class="paso"><div class="paso-n">1</div><div class="paso-t">Carga el Excel que envio el courier, tal cual lo recibiste. Esta pagina lee el archivo en tu navegador, no lo sube a ningun servidor.</div></div>
+  <div class="paso"><div class="paso-n">2</div><div class="paso-t">Revisa el resumen y la comparacion contra las tarifas que la calculadora usa hoy. Si algo no cuadra, detente y avisa a logistica.</div></div>
+  <div class="paso"><div class="paso-n">3</div><div class="paso-t">Descarga los archivos generados y subelos a la carpeta <b>data</b> del repositorio en GitHub, reemplazando los actuales. La calculadora queda actualizada para todo el equipo.</div></div>
+  <div class="msg info">Si el courier cambia el formato de su Excel, esta pagina te va a avisar que no reconoce las columnas. En ese caso usa el script <b>herramientas/generar_tarifas.py</b> o pide ayuda para ajustar el lector.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">1. Tarifario U Send</div>
+  <div class="drop" id="dropU">
+    <div class="drop-t">Arrastra el Excel de U Send aqui</div>
+    <div class="drop-s">o haz clic para buscarlo. Necesita las hojas TARIFARIO y MT.</div>
+    <input type="file" id="fileU" accept=".xlsx,.xls" hidden>
+  </div>
+  <div class="grid2">
+    <div><label>Vigente desde</label><input type="date" id="vigDesde"></div>
+    <div><label>Vigente hasta</label><input type="date" id="vigHasta"></div>
+  </div>
+  <div id="msgU"></div>
+  <div id="resU"></div>
+</div>
+
+<div class="card">
+  <div class="card-title">2. Tarifario Starken</div>
+  <div class="drop" id="dropS">
+    <div class="drop-t">Arrastra el Excel de Starken aqui</div>
+    <div class="drop-s">o haz clic para buscarlo. Necesita la hoja con los destinos y sus precios por kilo.</div>
+    <input type="file" id="fileS" accept=".xlsx,.xls" hidden>
+  </div>
+  <div><label>Etiqueta de vigencia</label><input type="text" id="vigStarken" placeholder="Ej: Tarifario 2026"></div>
+  <div id="msgS"></div>
+  <div id="resS"></div>
+</div>
+
+<div class="card">
+  <div class="card-title">3. Descargar y publicar</div>
+  <div id="msgFinal" class="msg info">Carga al menos uno de los dos tarifarios para generar los archivos.</div>
+  <div class="acciones">
+    <button class="btn" id="btnU" disabled>Descargar tarifas-usend.js</button>
+    <button class="btn" id="btnS" disabled>Descargar tarifas-starken.js</button>
+    <button class="btn" id="btnD" disabled>Descargar destinos.js</button>
+  </div>
+  <div class="hint">El archivo <b>destinos.js</b> cruza los dos tarifarios, asi que se genera completo solo cuando cargas los dos Excel. Si actualizas uno solo, la calculadora sigue usando el maestro de destinos anterior, que es lo correcto mientras el otro courier no cambie su cobertura.</div>
+  <div class="hint">Para publicar: entra al repositorio en GitHub, abre la carpeta <b>data</b>, usa Add file y luego Upload files, arrastra los archivos descargados y confirma el commit.</div>
+</div>
+
+</div>
+<footer>Corp Premier - Uso interno | Lector de tarifarios de la Calculadora de Flete</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="data/tarifas-usend.js"></script>
+<script src="data/tarifas-starken.js"></script>
+<script src="data/destinos.js"></script>
+<script>
+(function(){
+"use strict";
+var ACTUAL_U=window.TARIFAS_USEND, ACTUAL_S=window.TARIFAS_STARKEN, ACTUAL_D=window.DESTINOS;
+var $=function(id){return document.getElementById(id);};
+
+// Mantener alineado con herramientas/generar_tarifas.py
+var ALIAS={'AYSEN':'PUERTO AYSEN','NATALES':'PUERTO NATALES','CISNES':'PUERTO CISNES',
+'SAN FRANCISCO MOSTAZAL':'SAN FRANCISCO DE MOSTAZAL','SAN VICENTE':'SAN VICENTE DE TAGUATAGUA',
+'MARIQUINA':'SAN JOSE DE LA MARIQUINA','PALMILLA':'PALMILLA SAN FERNANDO','PLACILLA':'PLACILLA (SAN FERNANDO)',
+'EL CARMEN':'EL CARMEN CHILLAN','OLIVAR':'OLIVAR BAJO','CALERA':'LA CALERA',
+'SANTO DOMINGO':'ROCAS DE SANTO DOMINGO',"O'HIGGINS":'VILLA OHIGGINS','ALTO BIOBIO':'ALTO BIO BIO',
+'PAIGUANO':'PAIHUANO','TREGUACO':'TREHUACO','SAN PEDRO':'SAN PEDRO DE MELIPILLA'};
+var ALIAS_APROX={'CHILLAN VIEJO':'CHILLAN','HUALPEN':'HUALPENCILLO'};
+var DESTINO_RM='SANTIAGO';
+var REGIONES={15:'Arica y Parinacota',1:'Tarapaca',2:'Antofagasta',3:'Atacama',4:'Coquimbo',5:'Valparaiso',
+13:'Metropolitana de Santiago',6:"Libertador General Bernardo O'Higgins",7:'Maule',16:'Nuble',8:'Biobio',
+9:'La Araucania',14:'Los Rios',10:'Los Lagos',11:'Aysen',12:'Magallanes y la Antartica Chilena'};
+var TRAMOS_FIJOS=[{hasta:1,etiqueta:'0 a 1 kg'},{hasta:2,etiqueta:'1 a 2 kg'},{hasta:3,etiqueta:'2 a 3 kg'},
+{hasta:4,etiqueta:'3 a 4 kg'},{hasta:9,etiqueta:'4 a 9 kg'},{hasta:15,etiqueta:'9 a 15 kg'}];
+var TRAMOS_ADIC=[{hasta:50,etiqueta:'15 a 50 kg'},{hasta:100,etiqueta:'50 a 100 kg'},{hasta:200,etiqueta:'100 a 200 kg'},
+{hasta:500,etiqueta:'200 a 500 kg'},{hasta:1000,etiqueta:'500 a 1000 kg'},{hasta:null,etiqueta:'sobre 1000 kg'}];
+
+function norm(t){
+  if(t===null||t===undefined) return '';
+  return t.toString().trim().toUpperCase().replace(/\./g,' ')
+    .normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();
+}
+function titulo(t){
+  var menores={DE:1,DEL:1,LA:1,LAS:1,LOS:1,EL:1,Y:1};
+  return norm(t).split(' ').map(function(p,i){
+    return (i===0||!menores[p])?p.charAt(0)+p.slice(1).toLowerCase():p.toLowerCase();
+  }).join(' ');
+}
+function num(v){
+  if(typeof v==='number'&&isFinite(v)) return Math.round(v*10000)/10000;
+  return null;
+}
+function pct(a,b){ if(!a||!b) return null; return (b-a)/a*100; }
+function fmtPct(p){ if(p===null) return '—'; var s=(p>=0?'+':'')+p.toFixed(1).replace('.',','); return '<span class="'+(p>=0?'sube':'baja')+'">'+s+'%</span>'; }
+function mensaje(id,clase,texto){ $(id).innerHTML='<div class="msg '+clase+'">'+texto+'</div>'; }
+
+// ---------- lectura de U Send ----------
+function candidatas(wb,firma){
+  var out=[];
+  for(var i=0;i<wb.SheetNames.length;i++){
+    var filas=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[i]],{header:1,raw:true,blankrows:true});
+    if(firma(filas)) out.push({nombre:wb.SheetNames[i],filas:filas});
+  }
+  return out;
+}
+function elegida(lista,nombre,puntaje){
+  if(nombre){
+    for(var i=0;i<lista.length;i++) if(lista[i].nombre===nombre) return lista[i];
+  }
+  // Por defecto, la hoja mas completa. Desempata la que tiene mas filas.
+  return lista.slice().sort(function(a,b){
+    var pa=(puntaje?puntaje(a):0)+a.filas.length/100000;
+    var pb=(puntaje?puntaje(b):0)+b.filas.length/100000;
+    return pb-pa;
+  })[0];
+}
+// La hoja util de Starken es la que ademas de precios trae la zona y la agencia
+// de cobertura, que son las columnas con las que se cruza contra U Send.
+function puntajeStarken(hoja){
+  var p=0;
+  for(var i=0;i<Math.min(12,hoja.filas.length);i++){
+    var f=(hoja.filas[i]||[]).map(norm);
+    if(f.indexOf('AGENCIA DE COBERTURA')>-1) p+=10;
+    if(f.indexOf('ZONA')>-1) p+=5;
+    if(f.indexOf('PROVINCIA')>-1) p+=2;
+  }
+  return p;
+}
+function selectorHoja(etiqueta,lista,actual,idSel){
+  if(lista.length<2) return '';
+  return '<div class="msg warn"><b>'+etiqueta+':</b> el archivo trae '+lista.length+
+    ' hojas que calzan con el formato. Estoy usando <b>'+actual+'</b>. '+
+    'Si no es la vigente, elige la correcta: <select id="'+idSel+'" style="width:auto;padding:4px 8px;margin-left:6px">'+
+    lista.map(function(h){return '<option'+(h.nombre===actual?' selected':'')+'>'+h.nombre+'</option>';}).join('')+
+    '</select></div>';
+}
+function esTarifarioUsend(filas){
+  for(var i=0;i<Math.min(12,filas.length);i++){
+    var f=(filas[i]||[]).map(norm).join('|');
+    if(f.indexOf('ZONA')>-1&&f.indexOf('SUCURSAL')>-1&&f.indexOf('GRUPO COBRO')>-1) return true;
+  }
+  return false;
+}
+function esComunasUsend(filas){
+  var f=(filas[0]||[]).map(norm).join('|');
+  return f.indexOf('DESTINO')>-1&&f.indexOf('AGENCIA DE COBERTURA')>-1&&f.indexOf('ZONA')>-1;
+}
+function leerUsend(wb,pref){
+  pref=pref||{};
+  var listaT=candidatas(wb,esTarifarioUsend), listaC=candidatas(wb,esComunasUsend);
+  if(!listaT.length) throw new Error('No encuentro la hoja de tarifas. Deberia tener las columnas ZONA, SUCURSAL y GRUPO COBRO.');
+  if(!listaC.length) throw new Error('No encuentro la hoja de comunas. Deberia tener las columnas DESTINO, AGENCIA DE COBERTURA y ZONA.');
+  var hojaT=elegida(listaT,pref.tarifas), hojaC=elegida(listaC,pref.comunas);
+  var grupos={}, sucursales={}, aereo={}, zona=null, zonaAerea=null, bloques=0, modoAereo=false, avisos=[];
+  hojaT.filas.forEach(function(f){
+    f=f||[];
+    var b=norm(f[1]), suc=norm(f[2]);
+    if(b.indexOf('TARIFARIO AEREO')===0){ modoAereo=true; return; }
+    if(!modoAereo){
+      var m=/^(Z[123])\s*:/.exec(b);
+      if(m) zona=m[1];
+      if(!suc||!zona) return;
+      var grupo=num(f[3]);
+      if(grupo===null) return;
+      var v=[],i;
+      for(i=4;i<=16;i++) v.push(num(f[i]));
+      if(v.some(function(x){return x===null;})) return;
+      grupo=String(Math.round(grupo));
+      if(!sucursales[suc]) sucursales[suc]=grupo;
+      else if(sucursales[suc]!==grupo) avisos.push(suc+' aparece con grupos de cobro distintos');
+      grupos[grupo]=grupos[grupo]||{};
+      grupos[grupo][zona]={sobre:v[0],fijos:v.slice(1,7),adicionales:v.slice(7,13)};
+    }else{
+      if(b.indexOf('ZONA URBANA')===0){ bloques++; zonaAerea=['Z1','Z2','Z3'][Math.min(bloques-1,2)]; }
+      if(!suc||!zonaAerea) return;
+      var w=[];
+      for(var j=3;j<=9;j++){ var n=num(f[j]); if(n!==null) w.push(n); }
+      if(w.length<3) return;
+      aereo[zonaAerea]=aereo[zonaAerea]||{};
+      aereo[zonaAerea][suc]={sobre:w[0],fijo:w[1],adicional:w[2]};
+    }
+  });
+  if(!Object.keys(grupos).length) throw new Error('Lei la hoja de tarifas pero no encontre filas de precios.');
+
+  var comunas={};
+  var enc=(hojaC.filas[0]||[]).map(norm);
+  var col={destino:enc.indexOf('DESTINO'),provincia:enc.indexOf('PROVINCIA'),agencia:enc.indexOf('AGENCIA DE COBERTURA'),zona:enc.indexOf('ZONA')};
+  col.region=enc.findIndex(function(h){return h.indexOf('REGION')===0;});
+  col.sla=enc.findIndex(function(h){return h.indexOf('SLA TERRESTRE')===0;});
+  col.slaA=enc.findIndex(function(h){return h.indexOf('SLA AEREO')===0;});
+  if(col.destino<0||col.agencia<0||col.zona<0) throw new Error('La hoja de comunas no trae las columnas esperadas.');
+  hojaC.filas.slice(1).forEach(function(f){
+    f=f||[];
+    var c=norm(f[col.destino]);
+    if(!c) return;
+    comunas[c]={agencia:norm(f[col.agencia]),zona:norm(f[col.zona]),
+      provincia:col.provincia>=0?titulo(f[col.provincia]):'',region:col.region>=0?titulo(f[col.region]):'',
+      sla:col.sla>=0?num(f[col.sla]):null, slaAereo:col.slaA>=0?num(f[col.slaA]):null};
+  });
+  return {grupos:grupos,sucursales:sucursales,aereo:aereo,comunas:comunas,avisos:avisos,
+          hojaTarifas:hojaT.nombre, hojaComunas:hojaC.nombre, listaT:listaT, listaC:listaC,
+          hojas:hojaT.nombre+' y '+hojaC.nombre};
+}
+
+// ---------- lectura de Starken ----------
+function esTarifarioStarken(filas){
+  for(var i=0;i<Math.min(12,filas.length);i++){
+    var f=(filas[i]||[]).map(norm);
+    if(f.indexOf('DESTINO')>-1&&f.some(function(h){return h==='16';})) return true;
+  }
+  return false;
+}
+function leerStarken(wb,pref){
+  var lista=candidatas(wb,esTarifarioStarken);
+  if(!lista.length) throw new Error('No encuentro la hoja de precios de Starken. Deberia tener una columna DESTINO y columnas por kilo desde 16.');
+  var hoja=elegida(lista,pref,puntajeStarken), encFila=-1;
+  for(var j=0;j<Math.min(12,hoja.filas.length);j++){
+    var f=(hoja.filas[j]||[]).map(norm);
+    if(f.indexOf('DESTINO')>-1&&f.some(function(h){return h==='16';})){ encFila=j; break; }
+  }
+  if(encFila<0) throw new Error('No encuentro la fila de encabezados en la hoja '+hoja.nombre+'.');
+  var enc=hoja.filas[encFila];
+  var colKg={}, colDestino=-1, colCerrados=[], colAdic=-1, colProv=-1, colAg=-1, colZona=-1, colReg=-1;
+  enc.forEach(function(v,i){
+    var n=norm(v);
+    if(n==='DESTINO') colDestino=i;
+    else if(/^\d+$/.test(n)&&+n>=16&&+n<=100) colKg[+n]=i;
+    else if(n.indexOf('100 +')>-1||n==='100 - +') colAdic=i;
+    else if(n==='PROVINCIA') colProv=i;
+    else if(n==='AGENCIA DE COBERTURA') colAg=i;
+    else if(n==='ZONA') colZona=i;
+    else if(n.indexOf('NUMERO REGION')>-1) colReg=i;
+    else if(/^\d+([,.]\d+)?\s*-\s*\d+([,.]\d+)?$/.test(n)) colCerrados.push(i);
+  });
+  if(colDestino<0||colAdic<0) throw new Error('Faltan columnas en la hoja de Starken: destino o kilo adicional.');
+  var faltan=[];
+  for(var k=16;k<=100;k++) if(colKg[k]===undefined) faltan.push(k);
+  if(faltan.length) throw new Error('Faltan columnas de kilos en el tarifario Starken: '+faltan.slice(0,8).join(', ')+(faltan.length>8?'...':''));
+  if(colCerrados.length<5) throw new Error('No reconozco los tramos cerrados hasta 15 kg. Encontre '+colCerrados.length+' de 5.');
+  colCerrados=colCerrados.slice(0,5);
+
+  var perfiles=[], indice={}, destinos={}, descartes=0;
+  hoja.filas.slice(encFila+1).forEach(function(f){
+    f=f||[];
+    var n=norm(f[colDestino]);
+    if(!n||n==='.') return;
+    var cerrados=colCerrados.map(function(c){return num(f[c]);});
+    var porKilo=[]; for(var k=16;k<=100;k++) porKilo.push(num(f[colKg[k]]));
+    var adic=num(f[colAdic]);
+    if(cerrados.concat(porKilo).some(function(x){return x===null;})||adic===null){ descartes++; return; }
+    var clave=cerrados.concat(porKilo,[adic]).join('|');
+    if(indice[clave]===undefined){
+      indice[clave]=perfiles.length;
+      perfiles.push({cerrados:cerrados.map(Math.round),porKilo:porKilo.map(Math.round),adicional:Math.round(adic)});
+    }
+    var reg=colReg>=0?num(f[colReg]):null;
+    destinos[n]={perfil:indice[clave],provincia:colProv>=0?titulo(f[colProv]):'',
+      region:reg?REGIONES[Math.round(reg)]:null,
+      agenciaUsend:colAg>=0?norm(f[colAg]):'', zonaUsend:colZona>=0?norm(f[colZona]):''};
+  });
+  if(!perfiles.length) throw new Error('Lei la hoja de Starken pero no encontre destinos con precios completos.');
+  return {perfiles:perfiles,destinos:destinos,descartes:descartes,hoja:hoja.nombre,lista:lista};
+}
+
+// ---------- maestro de destinos ----------
+function construirDestinos(comunas,starken,sucursales){
+  var maestro={}, sinStarken=[];
+  Object.keys(starken).forEach(function(n){
+    var d=starken[n];
+    var e={n:titulo(n),prov:d.provincia,reg:d.region,s:{p:d.perfil},u:null};
+    if(sucursales[d.agenciaUsend]&&/^Z[123]$/.test(d.zonaUsend)) e.u={ag:d.agenciaUsend,z:d.zonaUsend};
+    maestro[n]=e;
+  });
+  function aplicarUsend(e,d){
+    if(sucursales[d.agencia]&&/^Z[123]$/.test(d.zona)){
+      e.u={ag:d.agencia,z:d.zona};
+      if(d.sla) e.u.sla=Math.round(d.sla);
+      if(d.slaAereo) e.u.slaA=Math.round(d.slaAereo);
+    }else{ e.u=null; e.fc=true; }
+  }
+  Object.keys(comunas).forEach(function(c){
+    var d=comunas[c], via=null, nota=null;
+    if(starken[c]) via=c;
+    else if(ALIAS[c]&&starken[norm(ALIAS[c])]){ via=norm(ALIAS[c]); nota='alias'; }
+    else if(ALIAS_APROX[c]&&starken[norm(ALIAS_APROX[c])]){ via=norm(ALIAS_APROX[c]); nota='aprox'; }
+    else if(norm(d.region)==='METROPOLITANA DE SANTIAGO'&&starken[DESTINO_RM]){ via=DESTINO_RM; nota='ref'; }
+    // Mismo lugar con dos nombres: un solo destino, consultable por cualquiera
+    // de los dos. No aplica al Gran Santiago, donde cada comuna tiene su zona.
+    if(nota==='alias'&&maestro[via]){
+      var m=maestro[via];
+      m.alt=m.alt||[];
+      if(m.alt.indexOf(titulo(c))<0) m.alt.push(titulo(c));
+      m.prov=d.provincia||m.prov; m.reg=d.region||m.reg;
+      aplicarUsend(m,d);
+      return;
+    }
+    var e=maestro[c];
+    if(!e){ e={n:titulo(c),prov:d.provincia,reg:d.region,s:null,u:null}; maestro[c]=e; }
+    e.prov=e.prov||d.provincia; e.reg=e.reg||d.region;
+    aplicarUsend(e,d);
+    if(!e.s&&via&&starken[via]){
+      e.s={p:starken[via].perfil};
+      if(nota){ e.s.via=titulo(via); e.s.nota=nota; }
+    }
+    if(!e.s) sinStarken.push(c);
+  });
+  var refSla={};
+  Object.keys(comunas).forEach(function(c){
+    var d=comunas[c];
+    if(!d.sla||!d.agencia||!d.zona) return;
+    var k=d.agencia+'|'+d.zona;
+    refSla[k]=refSla[k]||{};
+    refSla[k][d.sla]=(refSla[k][d.sla]||0)+1;
+  });
+  Object.keys(maestro).forEach(function(c){
+    var u=maestro[c].u;
+    if(!u||u.sla) return;
+    var conteo=refSla[u.ag+'|'+u.z];
+    if(!conteo) return;
+    var mejor=null;
+    Object.keys(conteo).forEach(function(s){ if(!mejor||conteo[s]>conteo[mejor]) mejor=s; });
+    if(mejor){ u.sla=Math.round(+mejor); u.slaRef=true; }
+  });
+  var lista=Object.keys(maestro).map(function(c){return maestro[c];})
+    .sort(function(a,b){return a.n<b.n?-1:a.n>b.n?1:0;});
+  return {lista:lista,sinStarken:sinStarken};
+}
+
+// ---------- salida ----------
+var salida={usend:null,starken:null,destinos:null};
+function archivoJs(variable,datos,encabezado){
+  return '// '+encabezado+'\n'+
+    '// Archivo generado por actualizar-tarifas.html — no editar a mano.\n'+
+    'window.'+variable+' = '+JSON.stringify(datos)+';\n';
+}
+function descargar(nombre,contenido){
+  var blob=new Blob([contenido],{type:'application/javascript;charset=utf-8'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=nombre;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },0);
+}
+
+var leidoU=null, leidoS=null;
+
+function refrescarEstadoFinal(){
+  $('btnU').disabled=!salida.usend;
+  $('btnS').disabled=!salida.starken;
+  $('btnD').disabled=!salida.destinos;
+  if(salida.destinos) mensaje('msgFinal','ok','Listo. Descarga los tres archivos y subelos a la carpeta <b>data</b> del repositorio.');
+  else if(salida.usend||salida.starken) mensaje('msgFinal','warn','Falta el otro tarifario para regenerar <b>destinos.js</b>. Puedes descargar igual el archivo de precios que ya cargaste.');
+  else mensaje('msgFinal','info','Carga al menos uno de los dos tarifarios para generar los archivos.');
+}
+
+function compararUsend(nuevo){
+  var filas='', suc=Object.keys(nuevo.sucursales).sort();
+  suc.forEach(function(s){
+    var gN=nuevo.grupos[nuevo.sucursales[s]], gA=ACTUAL_U.grupos[ACTUAL_U.sucursales[s]];
+    if(!gN||!gN.Z1) return;
+    var f=['Z1','Z2','Z3'].map(function(z){
+      if(!gN[z]) return '<td class="num">—</td>';
+      var a=gA&&gA[z]?gA[z].fijos[5]:null;
+      return '<td class="num">'+Math.round(gN[z].fijos[5]).toLocaleString('es-CL')+'<br><span style="font-size:10px">'+fmtPct(pct(a,gN[z].fijos[5]))+'</span></td>';
+    }).join('');
+    filas+='<tr><td>'+s+'</td>'+f+'</tr>';
+  });
+  return '<table><thead><tr><th>Sucursal</th><th class="num">Z1 hasta 15 kg</th><th class="num">Z2 hasta 15 kg</th><th class="num">Z3 hasta 15 kg</th></tr></thead><tbody>'+filas+'</tbody></table>';
+}
+
+function compararStarken(nuevo){
+  var muestra=['SANTIAGO','VALPARAISO','CONCEPCION','TEMUCO','PUERTO MONTT','ANTOFAGASTA','ARICA','PUNTA ARENAS'];
+  var actualPorNombre={};
+  ACTUAL_D.forEach(function(d){ if(d.s) actualPorNombre[norm(d.n)]=d.s.p; });
+  var filas='';
+  muestra.forEach(function(n){
+    var dN=nuevo.destinos[n];
+    if(!dN) return;
+    var pN=nuevo.perfiles[dN.perfil];
+    var pA=actualPorNombre[n]!==undefined?ACTUAL_S.perfiles[actualPorNombre[n]]:null;
+    function celda(vN,vA){ return '<td class="num">'+vN.toLocaleString('es-CL')+'<br><span style="font-size:10px">'+fmtPct(pct(vA,vN))+'</span></td>'; }
+    filas+='<tr><td>'+titulo(n)+'</td>'+
+      celda(pN.cerrados[4],pA?pA.cerrados[4]:null)+
+      celda(pN.porKilo[30-16],pA?pA.porKilo[30-16]:null)+
+      celda(pN.porKilo[100-16],pA?pA.porKilo[100-16]:null)+'</tr>';
+  });
+  return '<table><thead><tr><th>Destino</th><th class="num">15 kg</th><th class="num">30 kg</th><th class="num">100 kg</th></tr></thead><tbody>'+filas+'</tbody></table>';
+}
+
+function rehacerDestinos(){
+  if(!leidoU||!leidoS){ salida.destinos=null; return; }
+  var r=construirDestinos(leidoU.comunas,leidoS.destinos,leidoU.sucursales);
+  salida.destinos=archivoJs('DESTINOS',r.lista,'Maestro de destinos: zona y SLA U Send + perfil tarifario Starken');
+  var conAmbos=r.lista.filter(function(d){return d.u&&d.s;}).length;
+  var aviso=r.sinStarken.length?'<div class="msg warn">'+r.sinStarken.length+' comunas de U Send no tienen destino en el tarifario Starken: '+r.sinStarken.map(titulo).join(', ')+'. La calculadora las va a mostrar solo con U Send.</div>':'';
+  $('msgFinal').insertAdjacentHTML('afterend','');
+  return {texto:'<div class="msg ok">Maestro regenerado: <b>'+r.lista.length+' destinos</b>, '+conAmbos+' con tarifa de los dos couriers. Antes eran '+ACTUAL_D.length+' destinos.</div>'+aviso};
+}
+
+var libroU=null, libroS=null, prefU={}, prefS=null;
+
+function analizar(cual){
+  var idMsg=cual==='U'?'msgU':'msgS', idRes=cual==='U'?'resU':'resS';
+  var drop=cual==='U'?$('dropU'):$('dropS');
+  try{
+    if(cual==='U'){
+      var u=leerUsend(libroU,prefU);
+      leidoU=u;
+      var desde=$('vigDesde').value, hasta=$('vigHasta').value;
+      salida.usend=archivoJs('TARIFAS_USEND',{
+        courier:'U Send',
+        vigencia:{desde:desde||null,hasta:hasta||null,
+          etiqueta:(desde&&hasta)?(fechaTexto(desde)+' al '+fechaTexto(hasta)):'sin vigencia declarada'},
+        incluyeIva:false, factorVolumetrico:ACTUAL_U.factorVolumetrico,
+        tramosFijos:TRAMOS_FIJOS, tramosAdicionales:TRAMOS_ADIC,
+        grupos:u.grupos, sucursales:u.sucursales, aereo:u.aereo, notas:ACTUAL_U.notas
+      },'Tarifario U Send');
+      drop.className='drop ok';
+      mensaje(idMsg,'ok','Lei las hojas <b>'+u.hojas+'</b>: '+Object.keys(u.grupos).length+' grupos de cobro, '+
+        Object.keys(u.sucursales).length+' sucursales y '+Object.keys(u.comunas).length+' comunas.'+
+        (u.avisos.length?'<br>Avisos: '+u.avisos.join('; '):''));
+      var aviso='';
+      if(!desde||!hasta) aviso+='<div class="msg warn">Completa las fechas de vigencia antes de descargar. Sin ellas la calculadora no puede avisar cuando el tarifario venza.</div>';
+      aviso+=selectorHoja('Hoja de precios',u.listaT,u.hojaTarifas,'selHojaU');
+      aviso+=selectorHoja('Hoja de comunas',u.listaC,u.hojaComunas,'selHojaUC');
+      $(idRes).innerHTML=aviso+'<div class="hint">Valor fijo hasta 15 kg por sucursal, comparado con el tarifario que la calculadora usa hoy.</div>'+compararUsend(u);
+      if($('selHojaU')) $('selHojaU').addEventListener('change',function(){ prefU.tarifas=this.value; analizar('U'); });
+      if($('selHojaUC')) $('selHojaUC').addEventListener('change',function(){ prefU.comunas=this.value; analizar('U'); });
+    }else{
+      var st=leerStarken(libroS,prefS);
+      leidoS=st;
+      salida.starken=archivoJs('TARIFAS_STARKEN',{
+        courier:'Starken', servicio:ACTUAL_S.servicio,
+        vigencia:{desde:null,hasta:null,etiqueta:$('vigStarken').value.trim()||'Tarifario sin fecha'},
+        incluyeIva:false, factorVolumetrico:ACTUAL_S.factorVolumetrico,
+        tramosCerrados:ACTUAL_S.tramosCerrados, perfiles:st.perfiles, notas:ACTUAL_S.notas
+      },'Tarifario Starken');
+      drop.className='drop ok';
+      mensaje(idMsg,'ok','Lei la hoja <b>'+st.hoja+'</b>: '+Object.keys(st.destinos).length+' destinos y '+
+        st.perfiles.length+' listas de precio distintas.'+(st.descartes?' Salte '+st.descartes+' filas sin precios completos.':''));
+      var av='';
+      if(!$('vigStarken').value.trim()) av+='<div class="msg warn">Escribe la etiqueta de vigencia antes de descargar, para que el equipo sepa que tarifario esta viendo.</div>';
+      av+=selectorHoja('Hoja de precios',st.lista,st.hoja,'selHojaS');
+      $(idRes).innerHTML=av+'<div class="hint">Muestra de destinos, comparada con el tarifario que la calculadora usa hoy.</div>'+compararStarken(st);
+      if($('selHojaS')) $('selHojaS').addEventListener('change',function(){ prefS=this.value; analizar('S'); });
+    }
+    var maestro=rehacerDestinos();
+    if(maestro) $(idRes).insertAdjacentHTML('beforeend',maestro.texto);
+    refrescarEstadoFinal();
+  }catch(err){
+    drop.className='drop err';
+    if(cual==='U'){ leidoU=null; salida.usend=null; } else { leidoS=null; salida.starken=null; }
+    salida.destinos=null;
+    mensaje(idMsg,'err','<b>No pude leer el archivo.</b> '+err.message);
+    $(idRes).innerHTML='';
+    refrescarEstadoFinal();
+  }
+}
+
+function procesar(archivo,cual){
+  var idMsg=cual==='U'?'msgU':'msgS';
+  mensaje(idMsg,'info','Leyendo '+archivo.name+'...');
+  var lector=new FileReader();
+  lector.onload=function(e){
+    try{
+      var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      if(cual==='U'){ libroU=wb; prefU={}; } else { libroS=wb; prefS=null; }
+    }catch(err){
+      mensaje(idMsg,'err','<b>No pude abrir el archivo.</b> Revisa que sea un Excel valido.');
+      return;
+    }
+    analizar(cual);
+  };
+  lector.onerror=function(){ mensaje(idMsg,'err','No pude abrir el archivo.'); };
+  lector.readAsArrayBuffer(archivo);
+}
+
+function fechaTexto(iso){
+  var meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  var p=iso.split('-');
+  return parseInt(p[2],10)+' '+meses[parseInt(p[1],10)-1]+' '+p[0];
+}
+
+function conectarDrop(idDrop,idFile,cual){
+  var drop=$(idDrop), file=$(idFile);
+  drop.addEventListener('click',function(){ file.click(); });
+  file.addEventListener('change',function(){ if(file.files[0]) procesar(file.files[0],cual); });
+  ['dragenter','dragover'].forEach(function(ev){
+    drop.addEventListener(ev,function(e){ e.preventDefault(); drop.classList.add('over'); });
+  });
+  ['dragleave','drop'].forEach(function(ev){
+    drop.addEventListener(ev,function(e){ e.preventDefault(); drop.classList.remove('over'); });
+  });
+  drop.addEventListener('drop',function(e){
+    var f=e.dataTransfer.files[0];
+    if(f) procesar(f,cual);
+  });
+}
+conectarDrop('dropU','fileU','U');
+conectarDrop('dropS','fileS','S');
+
+['vigDesde','vigHasta'].forEach(function(id){
+  $(id).addEventListener('change',function(){ if(libroU) analizar('U'); });
+});
+$('vigStarken').addEventListener('change',function(){ if(libroS) analizar('S'); });
+
+$('btnU').addEventListener('click',function(){ descargar('tarifas-usend.js',salida.usend); });
+$('btnS').addEventListener('click',function(){ descargar('tarifas-starken.js',salida.starken); });
+$('btnD').addEventListener('click',function(){ descargar('destinos.js',salida.destinos); });
+
+if(ACTUAL_U.vigencia.desde) $('vigDesde').value=ACTUAL_U.vigencia.desde;
+if(ACTUAL_U.vigencia.hasta) $('vigHasta').value=ACTUAL_U.vigencia.hasta;
+$('vigStarken').value=ACTUAL_S.vigencia.etiqueta||'';
+refrescarEstadoFinal();
+})();
+</script>
+</body>
+</html>

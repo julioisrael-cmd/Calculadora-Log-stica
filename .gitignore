@@ -1,0 +1,6 @@
+.DS_Store
+
+# Excel originales de los couriers. Se mantienen solo en local: los precios que
+# la calculadora necesita ya estan en data/. Si quieres versionarlos para que
+# cualquiera pueda regenerar los datos, borra estas dos lineas.
+tarifarios/
