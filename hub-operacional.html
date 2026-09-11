@@ -14,6 +14,7 @@
   --red:#A32D2D; --red-bg:#FCEBEB; --red-txt:#791F1F;
   --green:#3B6D11; --green-bg:#EAF3DE; --green-txt:#27500A;
   --gray-bg:#f1efe8; --gray-txt:#5f5e5a;
+  --purple-bg:#EDE9F5; --purple-txt:#4A3288;
   --r-sm:6px; --r-md:10px; --r-lg:14px;
 }
 @media(prefers-color-scheme:dark){:root{
@@ -22,6 +23,7 @@
   --blue-bg:#0c3a6b;--blue-txt:#85b7eb;--teal-bg:#073d2f;--teal-txt:#5dcaa5;
   --amber-bg:#4a2800;--amber-txt:#fac775;--red-bg:#4a1515;--red-txt:#f09595;
   --green-bg:#1a3308;--green-txt:#97c459;--gray-bg:#2c2c2a;--gray-txt:#a8a79f;
+  --purple-bg:#2e2450;--purple-txt:#bda9f0;
 }}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--txt);font-size:14px;min-height:100vh;}
@@ -71,6 +73,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .b-teal{background:var(--teal-bg);color:var(--teal-txt);}
 .b-green{background:var(--green-bg);color:var(--green-txt);}
 .b-gray{background:var(--gray-bg);color:var(--gray-txt);}
+.b-purple{background:var(--purple-bg);color:var(--purple-txt);}
 .oc-lines{display:none;border-top:1px solid var(--border);}
 .oc-card.open .oc-lines{display:block;}
 .lines-table{width:100%;border-collapse:collapse;font-size:12px;}
@@ -84,6 +87,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .e-recepcionado{background:var(--teal-bg);color:var(--teal-txt);}
 .e-parcial{background:var(--amber-bg);color:var(--amber-txt);}
 .e-anulado{background:var(--red-bg);color:var(--red-txt);}
+.e-retiro{background:var(--purple-bg);color:var(--purple-txt);}
 .loading{text-align:center;padding:3rem;color:var(--txt-3);}
 .spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:8px;}
 @keyframes spin{to{transform:rotate(360deg);}}
@@ -147,6 +151,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .rec-btn:disabled{opacity:.55;cursor:default;}
 .rec-aviso{font-size:12px;color:var(--amber-txt);margin-top:6px;}
 .rec-err{font-size:12px;color:var(--red-txt);background:var(--red-bg);border-radius:var(--r-sm);padding:8px 10px;margin-top:8px;}
+.rec-coment-btn{font-size:12px;color:var(--blue);background:none;border:none;padding:10px 0 2px;cursor:pointer;font-family:inherit;min-height:40px;text-align:left;display:flex;align-items:center;gap:6px;}
+.rec-coment-btn .marca{color:var(--amber-txt);}
+.rec-coment{margin-top:6px;display:flex;flex-direction:column;gap:4px;}
+.rec-coment-lbl{font-size:11px;color:var(--txt-3);text-transform:uppercase;letter-spacing:.04em;}
+.rec-coment-lbl:not(:first-child){margin-top:6px;}
+.rec-coment-in{width:100%;font-size:14px;border:1px solid var(--border-md);border-radius:var(--r-md);padding:10px 12px;background:var(--surface);color:var(--txt);font-family:inherit;resize:vertical;min-height:44px;}
+.rec-coment-in:focus{outline:none;border-color:var(--blue);}
+.rec-coment-in:disabled{opacity:.55;}
 .rec-toggle{width:100%;text-align:left;background:var(--bg);border:none;border-top:1px solid var(--border);padding:14px;font-size:13px;color:var(--txt-2);cursor:pointer;font-family:inherit;min-height:48px;display:flex;align-items:center;gap:8px;}
 .rec-done{padding:10px 14px;border-top:1px solid var(--border);font-size:13px;color:var(--txt-2);display:flex;gap:8px;align-items:flex-start;line-height:1.35;}
 .rec-listo{padding:12px 14px;border-top:1px solid var(--border);font-size:13px;color:var(--teal-txt);background:var(--teal-bg);}
@@ -765,7 +777,14 @@ function estadoCls(e) {
   if(n==="recepcionado") return "e-recepcionado";
   if(n==="recepcion parcial") return "e-parcial";
   if(n==="anulado") return "e-anulado";
+  if(esEstadoRetiro(n)) return "e-retiro";
   return "e-cotizado";
+}
+// Estados que Daniel deja en la columna S mientras la mercaderia no pasa por
+// bodega. Acepta el texto crudo o ya normalizado.
+function esEstadoRetiro(e) {
+  const n = String(e||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+  return n==="retiro" || n==="retiro pte" || n==="retiro pte.";
 }
 function metricas(items) {
   return '<div class="metrics">'+items.map(i=>
@@ -1041,6 +1060,10 @@ let recepTimer      = null;
 let recepToken      = 0;           // descarta respuestas fuera de orden
 let recepAbiertas   = {};          // idOC → "ya recibidas" desplegado
 let recepDescAbierta= {};          // filaSheet → descripción desplegada
+let recepComentarios= {};          // filaSheet → {obs, folio} tipeados, sin guardar aún
+// filaSheet → false cuando JP plegó los comentarios de esa línea. Abiertos
+// por defecto: AB y AD son parte del flujo de recepción, no un extra.
+let recepComentAbierto = {};
 
 // El input vive fuera del re-render para no perder el foco al tipear.
 function initRecepcion() {
@@ -1166,10 +1189,17 @@ function cardRecepcion(oc, i) {
     ? badge(pendientes.length + " pend.", "b-amber")
     : badge("Completa", "b-teal");
 
+  // Las líneas que Daniel dejó en retiro llegan a la oficina y JP las cierra
+  // acá mismo, así que se cuentan aparte de las compradas.
+  const enRetiro = pendientes.filter(function(l){ return esEstadoRetiro(l.estado); }).length;
+  const badgeRetiro = enRetiro > 0
+    ? badge("🚚 " + enRetiro + " de retiro", "b-purple")
+    : "";
+
   return '<div class="rec-card">' +
     '<div class="rec-head">' +
       '<div class="rec-head-top">' +
-        '<span class="rec-oc">' + escapeHtml(oc.idOC) + '</span>' + badgePend +
+        '<span class="rec-oc">' + escapeHtml(oc.idOC) + '</span>' + badgePend + badgeRetiro +
       '</div>' +
       '<div class="rec-cliente">' + escapeHtml(oc.cliente || "—") + '</div>' +
     '</div>' + cuerpo + bloqueRecibidas +
@@ -1181,6 +1211,48 @@ function lineaRecepcion(l) {
   const p    = partirProducto(l.producto);
   const obs  = String(l.rack || "").trim();
   const abre = !!recepDescAbierta[f];
+
+  // La columna AB ya viene con la ubicación de bodega ("PISO", "R502") o la
+  // dirección del proveedor en los retiros, así que el campo se precarga con
+  // lo que hay: JP edita, no reemplaza a ciegas. En buscarProveedor esa celda
+  // llega como "rack"; en el resto del hub, como "obsLogistica".
+  const abActual = l.obsLogistica !== undefined ? l.obsLogistica : (l.rack || "");
+  // Lo tipeado y todavía sin guardar gana sobre lo guardado: un re-render por
+  // "ver más" o "ver ya recibidas" no debe borrar el texto.
+  const brr      = recepComentarios[f] || {};
+  const valObs   = brr.obs   !== undefined ? brr.obs   : String(abActual);
+  const valFolio = brr.folio !== undefined ? brr.folio : String(l.folioFactura || "");
+
+  // Abiertos salvo que JP los haya plegado a mano en esta línea.
+  const abreCom = recepComentAbierto[f] !== false;
+  const folioGuardado = String(valFolio).trim();
+  const rotuloCom = abreCom
+    ? "Ocultar comentarios"
+    : folioGuardado
+      ? "Comentarios · Factura " + escapeHtml(folioGuardado)
+      : "Comentarios de recepción";
+  const marcaCom = (!abreCom && recepComentarios[f] !== undefined)
+    ? '<span class="marca">sin guardar</span>'
+    : "";
+  let comentarios =
+    '<button class="rec-coment-btn" onclick="toggleComentarios(' + f + ')">' +
+      '<span class="chevron"' + (abreCom ? ' style="transform:rotate(90deg)"' : '') + '>▶</span>' +
+      rotuloCom + marcaCom +
+    '</button>';
+  if (abreCom) {
+    comentarios +=
+      '<div class="rec-coment">' +
+        '<label class="rec-coment-lbl" for="rec-obs-' + f + '">Observación logística · col. AB</label>' +
+        '<textarea class="rec-coment-in" id="rec-obs-' + f + '" rows="2" ' +
+                  'placeholder="Ej: R502 · retirado por Daniel, 1 caja abierta" ' +
+                  'oninput="anotarComentario(' + f + ')">' + escapeHtml(valObs) + '</textarea>' +
+        '<label class="rec-coment-lbl" for="rec-folio-' + f + '">Factura recibida folio · col. AD</label>' +
+        '<input class="rec-coment-in" id="rec-folio-' + f + '" type="text" inputmode="numeric" ' +
+               'autocomplete="off" placeholder="Ej: 48122" ' +
+               'value="' + escapeHtml(valFolio) + '" ' +
+               'oninput="anotarComentario(' + f + ')">' +
+      '</div>';
+  }
 
   let desc = "";
   if (p.desc) {
@@ -1205,6 +1277,7 @@ function lineaRecepcion(l) {
              'oninput="avisoParcial(' + f + ',' + l.saldo + ')">' +
       '<button class="rec-btn" id="rec-btn-' + f + '" onclick="confirmarRecepcion(' + f + ')">Confirmar</button>' +
     '</div>' +
+    comentarios +
     '<div class="rec-aviso" id="rec-aviso-' + f + '"></div>' +
     '<div id="rec-err-' + f + '"></div>' +
   '</div>';
@@ -1214,6 +1287,21 @@ function toggleRecibidas(i) {
   const oc = recepResultados[i];
   if (!oc) return;
   recepAbiertas[oc.idOC] = !recepAbiertas[oc.idOC];
+  renderizarRecepcion();
+}
+
+// Los comentarios viajan dentro del POST de Confirmar, así que mientras JP
+// tipea solo se guardan acá para sobrevivir un re-render.
+function anotarComentario(fila) {
+  const o = document.getElementById("rec-obs-" + fila);
+  const g = document.getElementById("rec-folio-" + fila);
+  recepComentarios[fila] = { obs: o ? o.value : "", folio: g ? g.value : "" };
+}
+
+function toggleComentarios(fila) {
+  const abierto = recepComentAbierto[fila] !== false;
+  if (abierto) anotarComentario(fila);   // no perder lo tipeado
+  recepComentAbierto[fila] = !abierto;
   renderizarRecepcion();
 }
 
@@ -1241,6 +1329,8 @@ async function confirmarRecepcion(fila) {
   const inp = document.getElementById("rec-qty-" + fila);
   const btn = document.getElementById("rec-btn-" + fila);
   const box = document.getElementById("rec-err-" + fila);
+  const cObs = document.getElementById("rec-obs-" + fila);
+  const cFol = document.getElementById("rec-folio-" + fila);
   if (!inp || !btn || !box) return;
 
   const cant = parseInt(inp.value, 10);
@@ -1250,8 +1340,21 @@ async function confirmarRecepcion(fila) {
     return;
   }
 
+  // Los dos comentarios van en el mismo POST. Se omite el campo vacío en vez
+  // de mandar "": así el backend no le borra a nadie lo que ya había escrito
+  // en la planilla.
+  // Si los campos están plegados no existen en el DOM: se usa el borrador.
+  const brr    = recepComentarios[fila] || {};
+  const obsLog = String(cObs ? cObs.value : (brr.obs   || "")).trim();
+  const folio  = String(cFol ? cFol.value : (brr.folio || "")).trim();
+  const cuerpo = { accion: "registrarRecepcion", filaSheet: fila, cantidad: cant };
+  if (obsLog) cuerpo.obsLogistica = obsLog;
+  if (folio)  cuerpo.folioFactura = folio;
+
   const rotulo = btn.textContent;
   btn.disabled = true; inp.disabled = true; btn.textContent = "Guardando…";
+  if (cObs) cObs.disabled = true;
+  if (cFol) cFol.disabled = true;
 
   try {
     const res = await fetch(API_URL, {
@@ -1260,21 +1363,24 @@ async function confirmarRecepcion(fila) {
       // CORS que Apps Script no responde. El backend hace
       // JSON.parse(e.postData.contents) igual, no cambia nada del lado servidor.
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ accion: "registrarRecepcion", filaSheet: fila, cantidad: cant }),
+      body: JSON.stringify(cuerpo),
     });
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || "Error al registrar");
-    aplicarRecepcion(fila, json);
+    aplicarRecepcion(fila, json, { obs: obsLog, folio: folio });
   } catch (err) {
     // Revertir: se conserva el valor que JP había ingresado.
     btn.disabled = false; inp.disabled = false; btn.textContent = rotulo;
+    if (cObs) cObs.disabled = false;
+    if (cFol) cFol.disabled = false;
     box.innerHTML = '<div class="rec-err">' + escapeHtml(err.message) +
       ' · <button class="rec-mas" style="color:var(--red-txt)" onclick="confirmarRecepcion(' + fila + ')">Reintentar</button></div>';
   }
 }
 
 // Aplica en memoria lo que CONFIRMÓ el backend, no lo que se pidió.
-function aplicarRecepcion(fila, resp) {
+function aplicarRecepcion(fila, resp, enviados) {
+  const env = enviados || {};
   for (let i = 0; i < recepResultados.length; i++) {
     const oc = recepResultados[i];
     const l  = oc.lineas.find(function(x){ return x.filaSheet === fila; });
@@ -1283,6 +1389,14 @@ function aplicarRecepcion(fila, resp) {
     l.saldo        = resp.saldo;
     l.estado       = resp.estadoLinea || l.estado;
     l.completa     = resp.saldo <= 0;
+    // Se prefiere lo que el backend confirma; si no lo devuelve, lo enviado.
+    if (resp.obsLogistica !== undefined) l.obsLogistica = resp.obsLogistica;
+    else if (env.obs)                    l.obsLogistica = env.obs;
+    if (l.obsLogistica !== undefined)    l.rack = l.obsLogistica;
+    if (resp.folioFactura !== undefined) l.folioFactura = resp.folioFactura;
+    else if (env.folio)                  l.folioFactura = env.folio;
+    delete recepComentarios[fila];   // ya está guardado, el borrador sobra
+    delete recepComentAbierto[fila];
     oc.saldoTotal  = oc.lineas.reduce(function(s,x){ return s + (x.saldo || 0); }, 0);
     if (resp.estadoOC) oc.estadoOC = resp.estadoOC;
     break;
